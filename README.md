@@ -85,9 +85,13 @@ docker run -d \
    - `DB_PATH` = `/data/myprovenance.sqlite`
    - `PORT` = `3000` (opcional, já é o padrão)
 7. **Apply.** O UNRAID baixa a imagem e inicia o container.
-8. Acesse via `http://<ip-do-unraid>:3000` (ou a porta escolhida no passo 4).
+8. Acesse via `http://<ip-do-unraid>:<porta-escolhida-no-passo-4>` — confirme a porta real com `docker port MyProvenance` se tiver dúvida (o UNRAID não obriga a manter `3000`, e recriar o container manualmente sem repetir o mesmo mapeamento troca a porta sem avisar).
 
 Backup: basta copiar o arquivo `myprovenance.sqlite` da pasta mapeada (`/mnt/user/appdata/myprovenance`), ou usar a função **Exportar JSON** de cada Registro pela própria interface.
+
+### Atualizando para uma imagem nova
+
+Pela interface do UNRAID (**Docker → clique no container → Force Update** ou **Update All**), os mapeamentos de porta e volume são preservados automaticamente. Se atualizar via linha de comando (`docker stop && docker rm && docker run ...`), repita **exatamente** as mesmas flags `-p`/`-v` do container atual — confirme antes com `docker port <nome>` e `docker inspect <nome> --format '{{json .Mounts}}'`, para não perder a porta ou o caminho dos dados.
 
 ### Build local da imagem
 
