@@ -22,7 +22,13 @@ Documentar proveniência não é burocracia — é o que transforma um arquivo s
 - **Gera um relatório `.md` portátil** com o diagrama e todas as tabelas, pronto para anexar a um artigo, repositório ou submissão.
 - **Exporta um JSON completo** do registro para backup, compartilhamento entre colegas ou migração para outra instância.
 - **Não guarda o dado em si** — só a documentação sobre ele. Seus arquivos de pesquisa continuam onde estão.
-- É **grátis, self-hosted e instalável como app (PWA)** — você mantém o controle total sobre onde a informação fica.
+- É **grátis, self-hosted, instalável como app (PWA) e não exige cadastro** — use direto no navegador, sem criar conta.
+
+## Modo anônimo por padrão, conta opcional
+
+Por padrão, o MyProvenance **não salva nada no servidor**: todo o trabalho fica só na memória do seu navegador, e a única forma de retomar depois é exportando o JSON e importando de volta quando precisar continuar (ou compartilhar com um colega). Isso significa privacidade total — nenhum dado seu passa pela rede enquanto você não decidir salvar.
+
+Se quiser continuidade automática entre visitas, **crie uma conta** (usuário + PIN de 6 dígitos, sem e-mail) — o botão aparece depois que você já tem o primeiro Registro ou Agente na sessão. Ao criar a conta, tudo que você já tinha feito é migrado automaticamente; a partir daí seus Registros e Agentes ficam salvos no servidor, isolados de qualquer outra conta na mesma instância. Perdeu o PIN? Sem recuperação — self-hosted sem e-mail — basta criar outra conta.
 
 Comece registrando a primeira Criação do seu conjunto de dados e deixe a linhagem crescer com o seu projeto.
 
@@ -30,7 +36,7 @@ Ver `CONTEXT.md`, `docs/especificacao.md` e `docs/adr/` para o modelo de domíni
 
 ## Stack
 
-SvelteKit + shadcn-svelte + Boxicons + TipTap, SQLite (`better-sqlite3`), sem autenticação (instância single-user), PWA.
+SvelteKit + shadcn-svelte + Boxicons + TipTap, SQLite (`better-sqlite3`), conta opcional (username + PIN), PWA.
 
 ## Desenvolvimento
 
@@ -94,7 +100,7 @@ Multi-stage (`node:22-alpine`), roda como usuário não-root, sem segredos embut
 ## Segurança
 
 - Container roda como usuário não-root (`myprovenance`).
-- Sem autenticação — instância single-user, self-hosted (ADR-0002); não exponha a porta diretamente à internet sem um proxy reverso com autenticação/TLS.
+- Conta opcional (username + PIN de 6 dígitos, hash `scrypt` nativo do Node) — sem conta, nada persiste no servidor (ADR-0009, revisa ADR-0002). Sessão via cookie `httpOnly`/`secure`, rate limit de 5 tentativas por 15 min. Não exponha a porta diretamente à internet sem um proxy reverso com TLS.
 - Headers HTTP: `Content-Security-Policy` (nonce por request via SvelteKit), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` (ver `src/hooks.server.ts` e `vite.config.ts`).
 - Toda entrada do usuário é validada (Zod) e a descrição rica do Registro é sanitizada (`sanitize-html`) antes de persistir.
 - CI roda scan de vulnerabilidades (Trivy) a cada build da imagem; atualizações de dependências via Dependabot (npm, Docker, GitHub Actions).

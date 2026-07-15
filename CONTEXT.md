@@ -22,12 +22,16 @@ Atividade que usa 1 ou mais Entidades existentes e gera 1 ou mais Entidades nova
 Atividade que usa 1 ou mais Entidades existentes e gera 0 ou mais Entidades novas. A saída (ex.: relatório, figura, resultado estatístico) é opcional e pode ser mais de um artefato.
 
 **Agente**:
-Registro cadastrado e reutilizável que identifica quem ou o que é responsável por uma Atividade: Pessoa, Instituição ou Software. Selecionado via autocomplete a partir de um cadastro, nunca redigitado — evita duplicidade e inconsistência de nomes entre Atividades.
-_Avoid_: Usuário (não há contas/login nesta ferramenta), Autor
+Registro cadastrado e reutilizável (por conta, quando há conta — ver abaixo) que identifica quem ou o que é responsável por uma Atividade: Pessoa, Instituição ou Software. Selecionado via autocomplete a partir de um cadastro, nunca redigitado — evita duplicidade e inconsistência de nomes entre Atividades.
+_Avoid_: Autor
 
 **Registro de Proveniência**:
-Container de nível mais alto: um grafo de Entidades e Atividades, com título (obrigatório) e descrição (opcional) próprios. É a unidade persistida no SQLite, exportada como JSON e renderizada como diagrama Mermaid + relatório. Pode ter mais de uma Entidade-raiz (Criação) quando Transformações combinam dados de origens diferentes.
+Container de nível mais alto: um grafo de Entidades e Atividades, com título (obrigatório) e descrição (opcional) próprios. Anônimo (sem conta): vive só na memória do navegador, exportado/importado como JSON. Com conta: persistido no SQLite, escopado à conta. Sempre exportável como JSON e renderizado como diagrama Mermaid + relatório. Pode ter mais de uma Entidade-raiz (Criação) quando Transformações combinam dados de origens diferentes.
 _Avoid_: Projeto (reservado ao projeto de pesquisa externo, maior que a ferramenta), Sessão
+
+**Conta**:
+Cadastro opcional de acesso (username + PIN numérico de 6 dígitos) que faz os Registros e Agentes de um usuário persistirem automaticamente entre visitas, isolados de outras contas na mesma instância. Sem conta (modo padrão, "anônimo"), nada é salvo no servidor — o usuário exporta/importa JSON manualmente para continuar depois.
+_Avoid_: Usuário (usar "Conta" para o cadastro de acesso; "Agente" continua sendo quem realizou a Atividade, mesmo com Conta ativa), Login
 
 **Rascunho / Finalizado**:
 Os dois estados de um Registro de Proveniência. Rascunho: edição livre de Entidades e Atividades. Finalizado: atingido na primeira exportação do JSON (ou ação explícita do usuário); a partir daí o histórico existente é imutável, só é possível adicionar novas Entidades/Atividades.
