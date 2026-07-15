@@ -9,17 +9,19 @@ import { slugify } from '$lib/server/slug';
 import type { RequestHandler } from './$types';
 
 /** Primeira exportacao do JSON finaliza o Registro (Rascunho -> Finalizado) — CONTEXT.md, ADR-0003. */
-export const GET: RequestHandler = ({ params }) => {
-	let detalhe = obterRegistroDetalhado(params.id);
+export const GET: RequestHandler = ({ params, locals }) => {
+	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	const usuarioId = locals.usuario.id;
+	let detalhe = obterRegistroDetalhado(params.id, usuarioId);
 	if (!detalhe) error(404, 'Registro nao encontrado.');
 
 	if (detalhe.registro.status === 'rascunho') {
 		try {
-			finalizarRegistro(params.id);
+			finalizarRegistro(params.id, usuarioId);
 		} catch (err) {
 			if (!(err instanceof RegistroJaFinalizadoError)) throw err;
 		}
-		detalhe = obterRegistroDetalhado(params.id)!;
+		detalhe = obterRegistroDetalhado(params.id, usuarioId)!;
 	}
 
 	const corpo = JSON.stringify(gerarJsonExportado(detalhe), null, 2);

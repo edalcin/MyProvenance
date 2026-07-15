@@ -2,16 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { criarAgente } from './agentes';
 import { criarAtividade, RegraCardinalidadeError } from './atividades';
 import { criarRegistro, finalizarRegistro, RegistroJaFinalizadoError } from './registros';
+import { criarUsuario } from './usuarios';
 
 // ponytail: DB_PATH=':memory:' injetado por vite.config.ts (test.env) — sem framework extra,
 // checa so a regra de negocio que realmente ramifica (cardinalidade de Atividade).
+// usuario real (nao string arbitraria) — usuario_id tem FK para usuarios(id).
+const usuarioId = criarUsuario({ username: 'teste_atividades', pin: '123456' }).id;
 
 describe('regra de cardinalidade de Atividade', () => {
-	const agente = criarAgente({ nome: 'Fulana', tipo: 'pessoa' });
+	const agente = criarAgente(usuarioId, { nome: 'Fulana', tipo: 'pessoa' });
 
 	it('Criacao gera 1 Entidade sem usar nenhuma', () => {
-		const registro = criarRegistro({ titulo: 'Registro criacao' });
-		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro criacao' });
+		const { atividade, entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -23,8 +26,8 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Criacao pode gerar mais de uma Entidade', () => {
-		const registro = criarRegistro({ titulo: 'Registro criacao multipla' });
-		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro criacao multipla' });
+		const { atividade, entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -36,9 +39,9 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Criacao sem gerar nenhuma Entidade e rejeitada', () => {
-		const registro = criarRegistro({ titulo: 'Registro sem saida' });
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro sem saida' });
 		expect(() =>
-			criarAtividade(registro.id, {
+			criarAtividade(usuarioId, registro.id, {
 				tipo: 'criacao',
 				agenteId: agente.id,
 				dataHora: new Date().toISOString(),
@@ -49,9 +52,9 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Criacao com Entidade de entrada e rejeitada', () => {
-		const registro = criarRegistro({ titulo: 'Registro invalido' });
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro invalido' });
 		expect(() =>
-			criarAtividade(registro.id, {
+			criarAtividade(usuarioId, registro.id, {
 				tipo: 'criacao',
 				agenteId: agente.id,
 				dataHora: new Date().toISOString(),
@@ -62,15 +65,15 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Transformacao usa 1+ Entidades do mesmo Registro e gera 1', () => {
-		const registro = criarRegistro({ titulo: 'Registro transformacao' });
-		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro transformacao' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
 			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
-		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
+		const { atividade, entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'transformacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -82,15 +85,15 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Transformacao pode gerar mais de uma Entidade', () => {
-		const registro = criarRegistro({ titulo: 'Registro transformacao multipla' });
-		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro transformacao multipla' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
 			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
-		const { entidadesGeradas } = criarAtividade(registro.id, {
+		const { entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'transformacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -101,8 +104,8 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Transformacao sem Entidade gerada e rejeitada', () => {
-		const registro = criarRegistro({ titulo: 'Registro transformacao invalida' });
-		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro transformacao invalida' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -110,7 +113,7 @@ describe('regra de cardinalidade de Atividade', () => {
 			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
 		expect(() =>
-			criarAtividade(registro.id, {
+			criarAtividade(usuarioId, registro.id, {
 				tipo: 'transformacao',
 				agenteId: agente.id,
 				dataHora: new Date().toISOString(),
@@ -120,15 +123,15 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Analise aceita gerar 0 Entidades (relatorio sem saida)', () => {
-		const registro = criarRegistro({ titulo: 'Registro analise' });
-		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro analise' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
 			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
-		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
+		const { atividade, entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'analise',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -139,15 +142,15 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Analise pode gerar mais de uma Entidade (varios artefatos de saida)', () => {
-		const registro = criarRegistro({ titulo: 'Registro analise multipla' });
-		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro analise multipla' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
 			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
-		const { entidadesGeradas } = criarAtividade(registro.id, {
+		const { entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
 			tipo: 'analise',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -158,9 +161,9 @@ describe('regra de cardinalidade de Atividade', () => {
 	});
 
 	it('Entidade de outro Registro nao pode ser usada', () => {
-		const registroA = criarRegistro({ titulo: 'Registro A' });
-		const registroB = criarRegistro({ titulo: 'Registro B' });
-		const { entidadesGeradas: deA } = criarAtividade(registroA.id, {
+		const registroA = criarRegistro(usuarioId, { titulo: 'Registro A' });
+		const registroB = criarRegistro(usuarioId, { titulo: 'Registro B' });
+		const { entidadesGeradas: deA } = criarAtividade(usuarioId, registroA.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
@@ -168,7 +171,7 @@ describe('regra de cardinalidade de Atividade', () => {
 			entidadesGeradas: [{ nome: 'so_de_A.csv' }]
 		});
 		expect(() =>
-			criarAtividade(registroB.id, {
+			criarAtividade(usuarioId, registroB.id, {
 				tipo: 'transformacao',
 				agenteId: agente.id,
 				dataHora: new Date().toISOString(),
@@ -181,9 +184,9 @@ describe('regra de cardinalidade de Atividade', () => {
 
 describe('ciclo de vida do Registro', () => {
 	it('finalizar duas vezes e rejeitado (ADR-0003)', () => {
-		const registro = criarRegistro({ titulo: 'Registro finalizavel' });
-		const finalizado = finalizarRegistro(registro.id);
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro finalizavel' });
+		const finalizado = finalizarRegistro(registro.id, usuarioId);
 		expect(finalizado.status).toBe('finalizado');
-		expect(() => finalizarRegistro(registro.id)).toThrow(RegistroJaFinalizadoError);
+		expect(() => finalizarRegistro(registro.id, usuarioId)).toThrow(RegistroJaFinalizadoError);
 	});
 });

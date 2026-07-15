@@ -4,8 +4,9 @@ import { gerarRelatorioMarkdown } from '$lib/server/report';
 import { slugify } from '$lib/server/slug';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = ({ params }) => {
-	const detalhe = obterRegistroDetalhado(params.id);
+export const GET: RequestHandler = ({ params, locals }) => {
+	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	const detalhe = obterRegistroDetalhado(params.id, locals.usuario.id);
 	if (!detalhe) error(404, 'Registro nao encontrado.');
 
 	const conteudo = gerarRelatorioMarkdown(detalhe, new Date().toISOString());

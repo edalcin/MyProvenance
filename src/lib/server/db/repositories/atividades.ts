@@ -7,6 +7,7 @@ import type {
 	ParametroAtividade,
 	TipoAtividade
 } from '$lib/types';
+import { RegistroNaoEncontradoError } from './registros';
 import { inserirEntidade, listarEntidadesPorRegistro } from './entidades';
 
 interface AtividadeRow {
@@ -126,54 +127,63 @@ const inserirUsoStmt = db.prepare(
 	'INSERT INTO atividade_entidades_usadas (atividade_id, entidade_id) VALUES (@atividadeId, @entidadeId)'
 );
 
-const criarAtividadeTx = db.transaction((registroId: string, input: CriarAtividadeInput) => {
-	validarCardinalidade(input);
+const verificarRegistroDoUsuarioStmt = db.prepare(
+	'SELECT 1 FROM registros WHERE id = @registroId AND usuario_id = @usuarioId'
+);
 
-	const entidadesDoRegistro = new Set(listarEntidadesPorRegistro(registroId).map((e) => e.id));
-	for (const entidadeId of input.entidadesUsadas) {
-		if (!entidadesDoRegistro.has(entidadeId)) {
-			throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+const criarAtividadeTx = db.transaction(
+	(usuarioId: string, registroId: string, input: CriarAtividadeInput) => {
+		if (!verificarRegistroDoUsuarioStmt.get({ registroId, usuarioId })) {
+			throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
 		}
-	}
+		validarCardinalidade(input);
 
-	const atividadeId = uuidv7();
-	inserirAtividadeStmt.run({
-		id: atividadeId,
-		registroId,
-		tipo: input.tipo,
-		agenteId: input.agenteId,
-		dataHora: input.dataHora,
-		descricao: input.descricao ?? null,
-		local: input.local ?? null,
-		instrumento: input.instrumento ?? null,
-		processo: input.processo ?? null,
-		parametros: input.parametros ? JSON.stringify(input.parametros) : null,
-		ambienteExecucao: input.ambienteExecucao ? JSON.stringify(input.ambienteExecucao) : null
-	});
+		const entidadesDoRegistro = new Set(listarEntidadesPorRegistro(registroId).map((e) => e.id));
+		for (const entidadeId of input.entidadesUsadas) {
+			if (!entidadesDoRegistro.has(entidadeId)) {
+				throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+			}
+		}
 
-	for (const entidadeId of input.entidadesUsadas) {
-		inserirUsoStmt.run({ atividadeId, entidadeId });
-	}
-
-	const entidadesGeradas: Entidade[] = (input.entidadesGeradas ?? []).map((nova) => {
-		const entidade: Entidade = {
-			id: uuidv7(),
+		const atividadeId = uuidv7();
+		inserirAtividadeStmt.run({
+			id: atividadeId,
 			registroId,
-			nome: nova.nome,
-			descricao: nova.descricao ?? null,
-			formato: nova.formato ?? null,
-			localizacao: nova.localizacao ?? null,
-			licenca: nova.licenca ?? null,
-			geradaPorAtividadeId: atividadeId
-		};
-		inserirEntidade(entidade);
-		return entidade;
-	});
+			tipo: input.tipo,
+			agenteId: input.agenteId,
+			dataHora: input.dataHora,
+			descricao: input.descricao ?? null,
+			local: input.local ?? null,
+			instrumento: input.instrumento ?? null,
+			processo: input.processo ?? null,
+			parametros: input.parametros ? JSON.stringify(input.parametros) : null,
+			ambienteExecucao: input.ambienteExecucao ? JSON.stringify(input.ambienteExecucao) : null
+		});
 
-	return { atividade: obterAtividade(atividadeId)!, entidadesGeradas };
-});
+		for (const entidadeId of input.entidadesUsadas) {
+			inserirUsoStmt.run({ atividadeId, entidadeId });
+		}
+
+		const entidadesGeradas: Entidade[] = (input.entidadesGeradas ?? []).map((nova) => {
+			const entidade: Entidade = {
+				id: uuidv7(),
+				registroId,
+				nome: nova.nome,
+				descricao: nova.descricao ?? null,
+				formato: nova.formato ?? null,
+				localizacao: nova.localizacao ?? null,
+				licenca: nova.licenca ?? null,
+				geradaPorAtividadeId: atividadeId
+			};
+			inserirEntidade(entidade);
+			return entidade;
+		});
+
+		return { atividade: obterAtividade(atividadeId)!, entidadesGeradas };
+	}
+);
 
 /** Sempre permitido, mesmo em Registro finalizado — finalizado so bloqueia editar/excluir historico (ADR-0003). */
-export function criarAtividade(registroId: string, input: CriarAtividadeInput) {
-	return criarAtividadeTx(registroId, input);
+export function criarAtividade(usuarioId: string, registroId: string, input: CriarAtividadeInput) {
+	return criarAtividadeTx(usuarioId, registroId, input);
 }

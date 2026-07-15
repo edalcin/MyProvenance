@@ -9,19 +9,21 @@ import type { RegistroExportadoValidado } from '$lib/schemas';
  */
 
 const upsertAgenteStmt = db.prepare(`
-	INSERT INTO agentes (id, nome, tipo, afiliacao, identificador_externo)
-	VALUES (@id, @nome, @tipo, @afiliacao, @identificadorExterno)
+	INSERT INTO agentes (id, usuario_id, nome, tipo, afiliacao, identificador_externo)
+	VALUES (@id, @usuarioId, @nome, @tipo, @afiliacao, @identificadorExterno)
 	ON CONFLICT(id) DO UPDATE SET
 		nome = excluded.nome, tipo = excluded.tipo,
 		afiliacao = excluded.afiliacao, identificador_externo = excluded.identificador_externo
+	WHERE agentes.usuario_id = excluded.usuario_id
 `);
 
 const upsertRegistroStmt = db.prepare(`
-	INSERT INTO registros (id, titulo, descricao, status, criado_em, finalizado_em)
-	VALUES (@id, @titulo, @descricao, @status, @criadoEm, @finalizadoEm)
+	INSERT INTO registros (id, usuario_id, titulo, descricao, status, criado_em, finalizado_em)
+	VALUES (@id, @usuarioId, @titulo, @descricao, @status, @criadoEm, @finalizadoEm)
 	ON CONFLICT(id) DO UPDATE SET
 		titulo = excluded.titulo, descricao = excluded.descricao, status = excluded.status,
 		criado_em = excluded.criado_em, finalizado_em = excluded.finalizado_em
+	WHERE registros.usuario_id = excluded.usuario_id
 `);
 
 const upsertAtividadeStmt = db.prepare(`
@@ -50,48 +52,51 @@ const inserirUsoStmt = db.prepare(
 	'INSERT INTO atividade_entidades_usadas (atividade_id, entidade_id) VALUES (@atividadeId, @entidadeId)'
 );
 
-export const importarRegistro = db.transaction((dados: RegistroExportadoValidado) => {
-	for (const agente of dados.agentes) {
-		upsertAgenteStmt.run(agente);
-	}
+export const importarRegistro = db.transaction(
+	(usuarioId: string, dados: RegistroExportadoValidado) => {
+		for (const agente of dados.agentes) {
+			upsertAgenteStmt.run({ ...agente, usuarioId });
+		}
 
-	upsertRegistroStmt.run({
-		id: dados.registro.id,
-		titulo: dados.registro.titulo,
-		descricao: dados.registro.descricao
-			? sanitizarHtmlRico(dados.registro.descricao)
-			: dados.registro.descricao,
-		status: dados.registro.status,
-		criadoEm: dados.registro.criadoEm,
-		finalizadoEm: dados.registro.finalizadoEm
-	});
-
-	for (const atividade of dados.atividades) {
-		upsertAtividadeStmt.run({
-			id: atividade.id,
-			registroId: atividade.registroId,
-			tipo: atividade.tipo,
-			agenteId: atividade.agenteId,
-			dataHora: atividade.dataHora,
-			descricao: atividade.descricao,
-			local: atividade.local,
-			instrumento: atividade.instrumento,
-			processo: atividade.processo,
-			parametros: atividade.parametros ? JSON.stringify(atividade.parametros) : null,
-			ambienteExecucao: atividade.ambienteExecucao
-				? JSON.stringify(atividade.ambienteExecucao)
-				: null
+		upsertRegistroStmt.run({
+			id: dados.registro.id,
+			usuarioId,
+			titulo: dados.registro.titulo,
+			descricao: dados.registro.descricao
+				? sanitizarHtmlRico(dados.registro.descricao)
+				: dados.registro.descricao,
+			status: dados.registro.status,
+			criadoEm: dados.registro.criadoEm,
+			finalizadoEm: dados.registro.finalizadoEm
 		});
-	}
 
-	for (const entidade of dados.entidades) {
-		upsertEntidadeStmt.run(entidade);
-	}
+		for (const atividade of dados.atividades) {
+			upsertAtividadeStmt.run({
+				id: atividade.id,
+				registroId: atividade.registroId,
+				tipo: atividade.tipo,
+				agenteId: atividade.agenteId,
+				dataHora: atividade.dataHora,
+				descricao: atividade.descricao,
+				local: atividade.local,
+				instrumento: atividade.instrumento,
+				processo: atividade.processo,
+				parametros: atividade.parametros ? JSON.stringify(atividade.parametros) : null,
+				ambienteExecucao: atividade.ambienteExecucao
+					? JSON.stringify(atividade.ambienteExecucao)
+					: null
+			});
+		}
 
-	for (const atividade of dados.atividades) {
-		limparUsoStmt.run({ atividadeId: atividade.id });
-		for (const entidadeId of atividade.entidadesUsadas) {
-			inserirUsoStmt.run({ atividadeId: atividade.id, entidadeId });
+		for (const entidade of dados.entidades) {
+			upsertEntidadeStmt.run(entidade);
+		}
+
+		for (const atividade of dados.atividades) {
+			limparUsoStmt.run({ atividadeId: atividade.id });
+			for (const entidadeId of atividade.entidadesUsadas) {
+				inserirUsoStmt.run({ atividadeId: atividade.id, entidadeId });
+			}
 		}
 	}
-});
+);

@@ -12,11 +12,12 @@ import type { RequestHandler } from './$types';
  * parse Zod ja tolera campos de versoes anteriores ausentes (default). So versoes futuras
  * (geradas por uma instancia mais nova) sao rejeitadas, para nao importar um formato desconhecido.
  */
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
+	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
 	const dados = await parseBody(request, registroExportadoSchema);
 	if (dados.schemaVersion < 1 || dados.schemaVersion > SCHEMA_VERSION) {
 		error(400, `schemaVersion ${dados.schemaVersion} nao suportado (maximo ${SCHEMA_VERSION}).`);
 	}
-	importarRegistro(dados);
-	return json(obterRegistroDetalhado(dados.registro.id), { status: 200 });
+	importarRegistro(locals.usuario.id, dados);
+	return json(obterRegistroDetalhado(dados.registro.id, locals.usuario.id), { status: 200 });
 };

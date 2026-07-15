@@ -31,6 +31,7 @@ export interface ListagemRegistros {
 }
 
 export function listarRegistros(
+	usuarioId: string,
 	opts: { busca?: string; offset?: number; limit?: number } = {}
 ): ListagemRegistros {
 	const limit = opts.limit ?? 20;
@@ -40,56 +41,69 @@ export function listarRegistros(
 		busca
 			? db
 					.prepare(
-						`SELECT * FROM registros WHERE titulo LIKE '%' || @busca || '%' ORDER BY criado_em DESC LIMIT @limit OFFSET @offset`
+						`SELECT * FROM registros WHERE usuario_id = @usuarioId AND titulo LIKE '%' || @busca || '%'
+						 ORDER BY criado_em DESC LIMIT @limit OFFSET @offset`
 					)
-					.all({ busca, limit: limit + 1, offset })
+					.all({ usuarioId, busca, limit: limit + 1, offset })
 			: db
-					.prepare(`SELECT * FROM registros ORDER BY criado_em DESC LIMIT @limit OFFSET @offset`)
-					.all({ limit: limit + 1, offset })
+					.prepare(
+						`SELECT * FROM registros WHERE usuario_id = @usuarioId ORDER BY criado_em DESC LIMIT @limit OFFSET @offset`
+					)
+					.all({ usuarioId, limit: limit + 1, offset })
 	) as RegistroRow[];
 	const hasMore = rows.length > limit;
 	return { items: rows.slice(0, limit).map(mapRow), nextOffset: hasMore ? offset + limit : null };
 }
 
-export function obterRegistro(id: string): RegistroProvenencia | null {
-	const row = db.prepare('SELECT * FROM registros WHERE id = @id').get({ id }) as
-		RegistroRow | undefined;
+export function obterRegistro(id: string, usuarioId: string): RegistroProvenencia | null {
+	const row = db
+		.prepare('SELECT * FROM registros WHERE id = @id AND usuario_id = @usuarioId')
+		.get({ id, usuarioId }) as RegistroRow | undefined;
 	return row ? mapRow(row) : null;
 }
 
-export function criarRegistro(input: {
-	titulo: string;
-	descricao?: string | null;
-}): RegistroProvenencia {
+export function criarRegistro(
+	usuarioId: string,
+	input: {
+		titulo: string;
+		descricao?: string | null;
+	}
+): RegistroProvenencia {
 	const id = uuidv7();
 	const criadoEm = new Date().toISOString();
 	db.prepare(
-		`INSERT INTO registros (id, titulo, descricao, status, criado_em) VALUES (@id, @titulo, @descricao, 'rascunho', @criadoEm)`
-	).run({ id, titulo: input.titulo, descricao: input.descricao ?? null, criadoEm });
-	return obterRegistro(id)!;
+		`INSERT INTO registros (id, usuario_id, titulo, descricao, status, criado_em)
+		 VALUES (@id, @usuarioId, @titulo, @descricao, 'rascunho', @criadoEm)`
+	).run({ id, usuarioId, titulo: input.titulo, descricao: input.descricao ?? null, criadoEm });
+	return obterRegistro(id, usuarioId)!;
 }
 
 export class RegistroJaFinalizadoError extends Error {}
 export class RegistroNaoEncontradoError extends Error {}
 
-export function finalizarRegistro(id: string): RegistroProvenencia {
-	const atual = obterRegistro(id);
+export function finalizarRegistro(id: string, usuarioId: string): RegistroProvenencia {
+	const atual = obterRegistro(id, usuarioId);
 	if (!atual) throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
 	if (atual.status === 'finalizado')
 		throw new RegistroJaFinalizadoError('Registro ja esta finalizado.');
 	const finalizadoEm = new Date().toISOString();
 	db.prepare(
-		`UPDATE registros SET status = 'finalizado', finalizado_em = @finalizadoEm WHERE id = @id`
+		`UPDATE registros SET status = 'finalizado', finalizado_em = @finalizadoEm
+		 WHERE id = @id AND usuario_id = @usuarioId`
 	).run({
 		id,
+		usuarioId,
 		finalizadoEm
 	});
-	return obterRegistro(id)!;
+	return obterRegistro(id, usuarioId)!;
 }
 
 /** Cascata (atividades/entidades do Registro) e sempre permitida, em qualquer status — especificacao.md §3. */
-export function excluirRegistro(id: string): void {
-	db.prepare('DELETE FROM registros WHERE id = @id').run({ id });
+export function excluirRegistro(id: string, usuarioId: string): void {
+	db.prepare('DELETE FROM registros WHERE id = @id AND usuario_id = @usuarioId').run({
+		id,
+		usuarioId
+	});
 }
 
 export interface RegistroDetalhado {
@@ -99,14 +113,14 @@ export interface RegistroDetalhado {
 	agentesEnvolvidos: Agente[];
 }
 
-export function obterRegistroDetalhado(id: string): RegistroDetalhado | null {
-	const registro = obterRegistro(id);
+export function obterRegistroDetalhado(id: string, usuarioId: string): RegistroDetalhado | null {
+	const registro = obterRegistro(id, usuarioId);
 	if (!registro) return null;
 	const entidades = listarEntidadesPorRegistro(id);
 	const atividades = listarAtividadesPorRegistro(id);
 	const idsAgentes = new Set(atividades.map((a) => a.agenteId));
 	const agentesEnvolvidos = [...idsAgentes]
-		.map((agenteId) => obterAgente(agenteId))
+		.map((agenteId) => obterAgente(agenteId, usuarioId))
 		.filter((a): a is Agente => a !== null);
 	return { registro, entidades, atividades, agentesEnvolvidos };
 }
