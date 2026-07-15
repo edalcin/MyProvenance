@@ -1,6 +1,25 @@
 -- Espelha docs/especificacao.md §3. IDs sao UUIDv7 gerados em aplicacao.
+CREATE TABLE IF NOT EXISTS usuarios (
+  id TEXT PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  pin_hash TEXT NOT NULL,
+  pin_salt TEXT NOT NULL,
+  criado_em TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sessoes (
+  token_hash TEXT PRIMARY KEY,
+  usuario_id TEXT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  criado_em TEXT NOT NULL,
+  expira_em TEXT NOT NULL
+);
+
+-- usuario_id nullable: SQLite nao permite ADD COLUMN NOT NULL sem DEFAULT em
+-- tabela com linhas existentes. Obrigatoriedade e' garantida na camada de
+-- aplicacao (todo INSERT dos repositories exige usuarioId).
 CREATE TABLE IF NOT EXISTS agentes (
   id TEXT PRIMARY KEY,
+  usuario_id TEXT REFERENCES usuarios(id) ON DELETE CASCADE,
   nome TEXT NOT NULL,
   tipo TEXT NOT NULL CHECK (tipo IN ('pessoa','instituicao','software')),
   afiliacao TEXT,
@@ -9,6 +28,7 @@ CREATE TABLE IF NOT EXISTS agentes (
 
 CREATE TABLE IF NOT EXISTS registros (
   id TEXT PRIMARY KEY,
+  usuario_id TEXT REFERENCES usuarios(id) ON DELETE CASCADE,
   titulo TEXT NOT NULL,
   descricao TEXT,
   status TEXT NOT NULL CHECK (status IN ('rascunho','finalizado')) DEFAULT 'rascunho',
@@ -53,3 +73,6 @@ CREATE INDEX IF NOT EXISTS idx_entidades_registro ON entidades(registro_id);
 CREATE INDEX IF NOT EXISTS idx_entidades_gerada_por ON entidades(gerada_por_atividade_id);
 CREATE INDEX IF NOT EXISTS idx_registros_titulo ON registros(titulo);
 CREATE INDEX IF NOT EXISTS idx_agentes_nome ON agentes(nome);
+CREATE INDEX IF NOT EXISTS idx_registros_usuario ON registros(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_agentes_usuario ON agentes(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_sessoes_usuario ON sessoes(usuario_id);

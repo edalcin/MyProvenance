@@ -21,6 +21,7 @@
 ## Etapa 1 — Fundação de autenticação (servidor)
 
 **Arquivos:**
+
 - Modificar: `src/lib/server/db/schema.sql` — tabelas `usuarios`, `sessoes`; colunas `usuario_id` (nullable) em `registros` e `agentes`.
 - Criar: `src/lib/server/auth.ts` — `gerarSaltHex(): string`, `hashPin(pin: string, saltHex: string): string` (scrypt sync, hex), `verificarPin(pin: string, saltHex: string, hashHex: string): boolean`, `gerarTokenSessao(): string` (32 bytes random hex), `hashToken(token: string): string` (sha256, determinístico — usado como chave primária de `sessoes`).
 - Criar: `src/lib/server/rate-limit.ts` — `Map<string, { falhas: number; bloqueadoAte: number | null }>` em módulo; `estaBloqueado(chave: string): boolean`, `registrarFalha(chave: string): void`, `limparTentativas(chave: string): void`. Bloqueio: 5 falhas → 15 min.
@@ -41,6 +42,7 @@
 ## Etapa 2 — Escopo por usuário nas rotas/repositories existentes
 
 **Arquivos:**
+
 - Modificar: `src/lib/server/db/repositories/registros.ts` — toda função ganha `usuarioId: string` como primeiro parâmetro; queries filtram `WHERE usuario_id = @usuarioId` (incluindo `criarRegistro` que grava o valor).
 - Modificar: `src/lib/server/db/repositories/agentes.ts` — idem.
 - Modificar: `src/lib/server/db/repositories/atividades.ts` — `criarAtividade` recebe `usuarioId`, valida que `registroId` pertence a esse usuário antes de prosseguir (senão 404, não vazar existência de registro de outro usuário).
@@ -56,6 +58,7 @@
 ## Etapa 3 — Modo anônimo no cliente (lógica pura + store)
 
 **Arquivos:**
+
 - Criar: `src/lib/cardinalidade.ts` — `export class RegraCardinalidadeError extends Error {}`; `export function validarCardinalidade(input: { tipo: TipoAtividade; entidadesUsadas: string[]; entidadesGeradas?: unknown[] }): void` (mesma regra de `atividades.ts` hoje).
 - Modificar: `src/lib/server/db/repositories/atividades.ts` — importa `validarCardinalidade`/`RegraCardinalidadeError` de `$lib/cardinalidade` em vez de definir localmente.
 - Criar: `src/lib/client/sessao-anonima.svelte.ts` — module-level `$state`: `registros: RegistroProvenencia[]`, `entidades: Entidade[]`, `atividades: Atividade[]`, `agentes: Agente[]`. Funções: `criarRegistroLocal(input)`, `finalizarRegistroLocal(id)`, `excluirRegistroLocal(id)`, `criarAtividadeLocal(registroId, input)` (usa `validarCardinalidade` + `uuidv7()`), `criarAgenteLocal(input)`, `atualizarAgenteLocal(id, input)`, `excluirAgenteLocal(id)`, `limparSessao()`. `temDadosNaoSalvos` (`$derived`: `registros.length > 0 || agentes.length > 0`).
@@ -71,6 +74,7 @@
 ## Etapa 4 — UI de conta + banner + integração das telas
 
 **Arquivos:**
+
 - Criar: `src/routes/+layout.server.ts` — retorna `{ usuario: locals.usuario }`.
 - Modificar: `src/routes/+layout.svelte` — hidrata `usuarioAtual` a partir de `data.usuario`; nav mostra "Entrar"/"Criar conta" (anônimo) ou `username` + "Sair" (autenticado); banner fixo quando anônimo com `sessaoAnonima.temDadosNaoSalvos`; `beforeunload` quando anônimo com dados.
 - Criar: `src/lib/components/entrar-dialog.svelte` — form username+PIN, POST `/auth/entrar`, recarrega em sucesso.

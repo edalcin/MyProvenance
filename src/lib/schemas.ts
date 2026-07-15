@@ -7,6 +7,17 @@ import { z } from 'zod';
 export const tipoAgenteSchema = z.enum(['pessoa', 'instituicao', 'software']);
 export const tipoAtividadeSchema = z.enum(['criacao', 'transformacao', 'analise']);
 
+export const usernameSchema = z
+	.string()
+	.trim()
+	.min(3, 'Usuario deve ter ao menos 3 caracteres.')
+	.max(30, 'Usuario deve ter no maximo 30 caracteres.')
+	.regex(/^[a-zA-Z0-9_]+$/, 'Usuario aceita apenas letras, numeros e underscore.');
+export const pinSchema = z.string().regex(/^\d{6}$/, 'PIN deve ter exatamente 6 digitos.');
+
+export const registrarUsuarioSchema = z.object({ username: usernameSchema, pin: pinSchema });
+export const entrarSchema = z.object({ username: usernameSchema, pin: pinSchema });
+
 export const agenteInputSchema = z.object({
 	nome: z.string().trim().min(1, 'Nome e obrigatorio.').max(200),
 	tipo: tipoAgenteSchema,

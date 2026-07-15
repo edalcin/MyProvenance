@@ -15,6 +15,11 @@ export interface Agente {
 	identificadorExterno: string | null;
 }
 
+export interface Usuario {
+	id: string;
+	username: string;
+}
+
 export interface RegistroProvenencia {
 	id: string;
 	titulo: string;
