@@ -1,5 +1,5 @@
 import { gerarDiagramaMermaid } from '$lib/mermaid';
-import { formatarData } from '$lib/format';
+import { formatarData, formatarDataSemHora } from '$lib/format';
 import { TIPO_ATIVIDADE_LABEL } from '$lib/types';
 import type { RegistroDetalhado } from './types';
 
@@ -47,7 +47,7 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 		linhas.push('_Nenhuma Atividade._', '');
 	} else {
 		linhas.push(
-			'| Tipo | Data/hora | Agente | Entidades usadas → Entidades geradas | Detalhes |',
+			'| Tipo | Data | Agente | Entidades usadas → Entidades geradas | Detalhes |',
 			'|---|---|---|---|---|'
 		);
 		for (const a of atividades) {
@@ -76,7 +76,7 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 			}
 
 			linhas.push(
-				`| ${TIPO_ATIVIDADE_LABEL[a.tipo]} | ${formatarData(a.dataHora)} | ${nomeAgente.get(a.agenteId) ?? '—'} | ${escaparCelula(fluxo)} | ${escaparCelula(detalhesPartes.join('; ') || '—')} |`
+				`| ${TIPO_ATIVIDADE_LABEL[a.tipo]} | ${formatarDataSemHora(a.dataHora)} | ${nomeAgente.get(a.agenteId) ?? '—'} | ${escaparCelula(fluxo)} | ${escaparCelula(detalhesPartes.join('; ') || '—')} |`
 			);
 		}
 		linhas.push('');
