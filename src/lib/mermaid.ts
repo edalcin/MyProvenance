@@ -1,12 +1,7 @@
-import type { Agente, Atividade, Entidade, TipoAtividade } from './types';
+import type { Agente, Atividade, Entidade } from './types';
+import { TIPO_ATIVIDADE_LABEL } from './types';
 
 /** Diagrama Mermaid a partir do grafo de um Registro — regras em docs/especificacao.md §5. */
-
-const TIPO_LABEL: Record<TipoAtividade, string> = {
-	criacao: 'Criação',
-	transformacao: 'Transformação',
-	analise: 'Análise'
-};
 
 function escapar(texto: string): string {
 	return texto.replace(/"/g, "'").replace(/[\r\n]+/g, ' ');
@@ -38,7 +33,7 @@ export function gerarDiagramaMermaid(dados: {
 		const agente = nomeAgente.get(atividade.agenteId) ?? 'Agente';
 		const data = atividade.dataHora.slice(0, 10);
 		const resumo = atividade.descricao ? `: ${escapar(atividade.descricao)}` : '';
-		const rotulo = `${TIPO_LABEL[atividade.tipo]}${resumo} (${escapar(agente)}, ${data})`;
+		const rotulo = `${TIPO_ATIVIDADE_LABEL[atividade.tipo]}${resumo} (${escapar(agente)}, ${data})`;
 
 		for (const usadaId of atividade.entidadesUsadas) {
 			const origem = idDoNo.get(usadaId);

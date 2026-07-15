@@ -78,6 +78,45 @@
 			salvando = false;
 		}
 	}
+
+	let inputImportacao: HTMLInputElement;
+	let importando = $state(false);
+
+	async function aoSelecionarArquivo(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const arquivo = input.files?.[0];
+		if (!arquivo) return;
+		importando = true;
+		try {
+			const texto = await arquivo.text();
+			let dados: unknown;
+			try {
+				dados = JSON.parse(texto);
+			} catch {
+				toast.error('Arquivo nao e um JSON valido.');
+				return;
+			}
+			const resposta = await fetch('/registros/import', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(dados)
+			});
+			if (!resposta.ok) {
+				const erro = await resposta.json().catch(() => ({ message: 'Erro ao importar Registro.' }));
+				toast.error(erro.message ?? 'Erro ao importar Registro.');
+				return;
+			}
+			const detalhe: { registro: RegistroProvenencia } = await resposta.json();
+			const existe = itens.some((i) => i.id === detalhe.registro.id);
+			itens = existe
+				? itens.map((i) => (i.id === detalhe.registro.id ? detalhe.registro : i))
+				: [detalhe.registro, ...itens];
+			toast.success('Registro importado.');
+		} finally {
+			importando = false;
+			input.value = '';
+		}
+	}
 </script>
 
 <svelte:head><title>Registros — MyProvenance</title></svelte:head>
@@ -85,6 +124,18 @@
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-center justify-between gap-3">
 		<h1 class="text-2xl font-semibold tracking-tight">Registros de Proveniência</h1>
+		<div class="flex flex-wrap gap-2">
+			<input
+				bind:this={inputImportacao}
+				type="file"
+				accept="application/json,.json"
+				class="hidden"
+				onchange={aoSelecionarArquivo}
+			/>
+			<Button variant="outline" onclick={() => inputImportacao.click()} disabled={importando}>
+				<i class="bx bx-upload"></i>
+				{importando ? 'Importando…' : 'Importar'}
+			</Button>
 		<Dialog.Root bind:open={dialogAberto}>
 			<Dialog.Trigger>
 				{#snippet child({ props })}
@@ -121,6 +172,7 @@
 				</form>
 			</Dialog.Content>
 		</Dialog.Root>
+		</div>
 	</div>
 
 	<Input placeholder="Buscar por titulo…" bind:value={busca} oninput={aoDigitarBusca} class="max-w-sm" />

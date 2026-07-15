@@ -11,7 +11,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import MermaidDiagram from '$lib/components/mermaid-diagram.svelte';
 	import ActivityForm from '$lib/components/activity-form.svelte';
-	import type { Agente, Atividade, Entidade } from '$lib/types';
+	import { TIPO_ATIVIDADE_LABEL, type Agente, type Atividade, type Entidade } from '$lib/types';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -25,8 +25,6 @@
 	const diagrama = $derived(gerarDiagramaMermaid({ entidades, atividades, agentesEnvolvidos }));
 	const nomeEntidade = $derived(new Map(entidades.map((e) => [e.id, e.nome])));
 	const nomeAgente = $derived(new Map(agentesEnvolvidos.map((a) => [a.id, a.nome])));
-
-	const TIPO_ATIVIDADE_LABEL = { criacao: 'Criação', transformacao: 'Transformação', analise: 'Análise' } as const;
 
 	let dialogAtividadeAberto = $state(false);
 	let abaAtiva = $state('criacao');
@@ -67,6 +65,38 @@
 		toast.success('Registro excluido.');
 		goto('/registros');
 	}
+
+	let exportandoJson = $state(false);
+
+	async function exportarJson() {
+		if (registro.status === 'rascunho') {
+			const confirmado = confirm(
+				'Exportar o JSON finaliza o Registro — o historico existente nao podera mais ser editado depois disso. Continuar?'
+			);
+			if (!confirmado) return;
+		}
+		exportandoJson = true;
+		try {
+			const resposta = await fetch(`/registros/${registro.id}/export.json`);
+			if (!resposta.ok) {
+				toast.error('Erro ao exportar JSON.');
+				return;
+			}
+			const texto = await resposta.text();
+			registro = JSON.parse(texto).registro;
+			const cabecalho = resposta.headers.get('content-disposition') ?? '';
+			const nomeArquivo = /filename="([^"]+)"/.exec(cabecalho)?.[1] ?? `${registro.id}.json`;
+			const url = URL.createObjectURL(new Blob([texto], { type: 'application/json' }));
+			const ancora = document.createElement('a');
+			ancora.href = url;
+			ancora.download = nomeArquivo;
+			ancora.click();
+			URL.revokeObjectURL(url);
+			toast.success('JSON exportado.');
+		} finally {
+			exportandoJson = false;
+		}
+	}
 </script>
 
 <svelte:head><title>{registro.titulo} — MyProvenance</title></svelte:head>
@@ -85,13 +115,20 @@
 				<div class="prose prose-sm dark:prose-invert max-w-none">{@html registro.descricao}</div>
 			{/if}
 		</div>
-		<div class="flex shrink-0 gap-2">
+		<div class="flex shrink-0 flex-wrap gap-2">
 			{#if registro.status === 'rascunho'}
 				<Button variant="outline" onclick={finalizar} disabled={finalizando}>
 					<i class="bx bx-check-circle"></i>
 					{finalizando ? 'Finalizando…' : 'Finalizar'}
 				</Button>
 			{/if}
+			<Button variant="outline" onclick={exportarJson} disabled={exportandoJson}>
+				<i class="bx bx-download"></i>
+				{exportandoJson ? 'Exportando…' : 'Exportar JSON'}
+			</Button>
+			<Button variant="outline" href="/registros/{registro.id}/export.md">
+				<i class="bx bx-file"></i> Exportar relatório .md
+			</Button>
 			<Button variant="destructive" onclick={excluirRegistro}>
 				<i class="bx bx-trash"></i> Excluir Registro
 			</Button>

@@ -53,3 +53,58 @@ export const criarAtividadeInputSchema = z.object({
 	entidadeGerada: novaEntidadeInputSchema.nullable().optional()
 });
 export type CriarAtividadeInput = z.infer<typeof criarAtividadeInputSchema>;
+
+/**
+ * Validacao do JSON exportado/importado — docs/especificacao.md §4.
+ * Usada no upload (upsert por id, ADR-0004): campos completos (com id), nao os de criacao via formulario.
+ */
+export const agenteExportadoSchema = z.object({
+	id: z.uuid(),
+	nome: z.string().trim().min(1).max(200),
+	tipo: tipoAgenteSchema,
+	afiliacao: z.string().trim().max(300).nullable(),
+	identificadorExterno: z.string().trim().max(200).nullable()
+});
+
+export const entidadeExportadaSchema = z.object({
+	id: z.uuid(),
+	registroId: z.uuid(),
+	nome: z.string().trim().min(1).max(300),
+	descricao: z.string().trim().max(5000).nullable(),
+	formato: z.string().trim().max(100).nullable(),
+	localizacao: z.string().trim().max(2000).nullable(),
+	licenca: z.string().trim().max(300).nullable(),
+	geradaPorAtividadeId: z.uuid()
+});
+
+export const atividadeExportadaSchema = z.object({
+	id: z.uuid(),
+	registroId: z.uuid(),
+	tipo: tipoAtividadeSchema,
+	agenteId: z.uuid(),
+	dataHora: z.iso.datetime({ offset: true }),
+	descricao: z.string().trim().max(5000).nullable(),
+	entidadesUsadas: z.array(z.uuid()),
+	entidadeGeradaId: z.uuid().nullable(),
+	local: z.string().trim().max(500).nullable(),
+	instrumento: z.string().trim().max(300).nullable(),
+	processo: z.string().trim().max(20000).nullable(),
+	parametros: z.array(parametroAtividadeSchema).nullable(),
+	ambienteExecucao: ambienteExecucaoSchema.nullable()
+});
+
+export const registroExportadoSchema = z.object({
+	schemaVersion: z.number().int(),
+	registro: z.object({
+		id: z.uuid(),
+		titulo: z.string().trim().min(1).max(300),
+		descricao: z.string().trim().max(20000).nullable(),
+		status: z.enum(['rascunho', 'finalizado']),
+		criadoEm: z.iso.datetime({ offset: true }),
+		finalizadoEm: z.iso.datetime({ offset: true }).nullable()
+	}),
+	agentes: z.array(agenteExportadoSchema),
+	entidades: z.array(entidadeExportadaSchema),
+	atividades: z.array(atividadeExportadaSchema)
+});
+export type RegistroExportadoValidado = z.infer<typeof registroExportadoSchema>;
