@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="MyProvenanceLogo.png" alt="MyProvenance" width="120" />
+</p>
+
 # MyProvenance
 
 **A história por trás dos seus dados de pesquisa merece ser preservada.**
