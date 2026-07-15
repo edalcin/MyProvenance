@@ -45,3 +45,31 @@ export function inserirEntidade(entidade: Entidade): void {
 		 VALUES (@id, @registroId, @nome, @descricao, @formato, @localizacao, @licenca, @geradaPorAtividadeId)`
 	).run(entidade);
 }
+
+export interface EntidadeEditInput {
+	nome: string;
+	descricao?: string | null;
+	formato?: string | null;
+	localizacao?: string | null;
+	licenca?: string | null;
+}
+
+/** Uso interno — Entidade so e' editada como efeito de atualizarAtividade() (ver repositories/atividades.ts). */
+export function atualizarEntidade(id: string, input: EntidadeEditInput): void {
+	db.prepare(
+		`UPDATE entidades SET nome = @nome, descricao = @descricao, formato = @formato,
+		 localizacao = @localizacao, licenca = @licenca WHERE id = @id`
+	).run({
+		id,
+		nome: input.nome,
+		descricao: input.descricao ?? null,
+		formato: input.formato ?? null,
+		localizacao: input.localizacao ?? null,
+		licenca: input.licenca ?? null
+	});
+}
+
+/** Uso interno — so removida se nao estiver em uso como entrada de outra Atividade (FK bloqueia). */
+export function excluirEntidade(id: string): void {
+	db.prepare('DELETE FROM entidades WHERE id = @id').run({ id });
+}

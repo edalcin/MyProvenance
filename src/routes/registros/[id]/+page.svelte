@@ -51,6 +51,8 @@
 	let dialogAtividadeAberto = $state(false);
 	let abaAtiva = $state('criacao');
 	let finalizando = $state(false);
+	let atividadeEmEdicao: Atividade | null = $state(null);
+	let dialogEdicaoAberto = $state(false);
 
 	function aoAtividadeCriada(resultado: {
 		atividade: Atividade;
@@ -66,6 +68,38 @@
 			agentesEnvolvidos = [...agentesEnvolvidos, resultado.agente];
 		}
 		dialogAtividadeAberto = false;
+	}
+
+	function abrirEdicaoAtividade(atividade: Atividade) {
+		atividadeEmEdicao = atividade;
+		dialogEdicaoAberto = true;
+	}
+
+	function aoAtividadeAtualizada(resultado: {
+		atividade: Atividade;
+		entidadesGeradas: Entidade[];
+		agente: Agente | null;
+	}) {
+		atividades = atividades
+			.map((a) => (a.id === resultado.atividade.id ? resultado.atividade : a))
+			.sort((a, b) => a.dataHora.localeCompare(b.dataHora));
+
+		// Entidades geradas por esta Atividade podem ter sido adicionadas/editadas/removidas —
+		// substitui o conjunto antigo pelo atual retornado pelo servidor/sessao.
+		entidades = [
+			...entidades.filter((e) => e.geradaPorAtividadeId !== resultado.atividade.id),
+			...resultado.entidadesGeradas
+		];
+
+		// Recalcula Agentes envolvidos: remove os que ficaram sem nenhuma Atividade, adiciona o novo.
+		const idsEmUso = new Set(atividades.map((a) => a.agenteId));
+		let novosAgentes = agentesEnvolvidos.filter((a) => idsEmUso.has(a.id));
+		if (resultado.agente && !novosAgentes.some((a) => a.id === resultado.agente!.id)) {
+			novosAgentes = [...novosAgentes, resultado.agente];
+		}
+		agentesEnvolvidos = novosAgentes;
+
+		dialogEdicaoAberto = false;
 	}
 
 	async function finalizar() {
@@ -256,13 +290,26 @@
 				<ul class="flex flex-col gap-2">
 					{#each atividades as atividade (atividade.id)}
 						<li class="border-border bg-card flex flex-col gap-1 rounded-lg border p-3 text-sm">
-							<div class="flex flex-wrap items-center gap-2">
-								<Badge variant="outline">{TIPO_ATIVIDADE_LABEL[atividade.tipo]}</Badge>
-								<span class="text-muted-foreground text-xs">{formatarData(atividade.dataHora)}</span
-								>
-								<span class="text-muted-foreground text-xs"
-									>· {nomeAgente.get(atividade.agenteId) ?? 'Agente'}</span
-								>
+							<div class="flex flex-wrap items-center justify-between gap-2">
+								<div class="flex flex-wrap items-center gap-2">
+									<Badge variant="outline">{TIPO_ATIVIDADE_LABEL[atividade.tipo]}</Badge>
+									<span class="text-muted-foreground text-xs"
+										>{formatarData(atividade.dataHora)}</span
+									>
+									<span class="text-muted-foreground text-xs"
+										>· {nomeAgente.get(atividade.agenteId) ?? 'Agente'}</span
+									>
+								</div>
+								{#if registro.status === 'rascunho'}
+									<Button
+										variant="ghost"
+										size="icon-sm"
+										onclick={() => abrirEdicaoAtividade(atividade)}
+										aria-label="Editar Atividade"
+									>
+										<i class="bx bx-edit-alt"></i>
+									</Button>
+								{/if}
 							</div>
 							{#if atividade.descricao}<p>{atividade.descricao}</p>{/if}
 							<p class="text-muted-foreground text-xs">
@@ -288,6 +335,31 @@
 				</ul>
 			{/if}
 		</section>
+
+		{#if atividadeEmEdicao}
+			{#key atividadeEmEdicao.id}
+				<Dialog.Root bind:open={dialogEdicaoAberto}>
+					<Dialog.Content class="max-h-[85vh] overflow-y-auto sm:max-w-xl">
+						<Dialog.Header>
+							<Dialog.Title>Editar Atividade</Dialog.Title>
+							<Dialog.Description>
+								O tipo ({TIPO_ATIVIDADE_LABEL[atividadeEmEdicao.tipo]}) nao pode ser alterado.
+							</Dialog.Description>
+						</Dialog.Header>
+						<ActivityForm
+							tipo={atividadeEmEdicao.tipo}
+							registroId={registro.id}
+							entidadesDisponiveis={entidades}
+							atividadeParaEditar={atividadeEmEdicao}
+							agenteAtual={agentesEnvolvidos.find((a) => a.id === atividadeEmEdicao!.agenteId) ??
+								null}
+							onAtualizada={aoAtividadeAtualizada}
+							onCancelar={() => (dialogEdicaoAberto = false)}
+						/>
+					</Dialog.Content>
+				</Dialog.Root>
+			{/key}
+		{/if}
 
 		<section class="flex flex-col gap-3">
 			<h2 class="text-lg font-medium">Entidades</h2>

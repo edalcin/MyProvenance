@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
@@ -6,15 +7,18 @@
 	import * as dados from '$lib/client/dados';
 	import type { Agente } from '$lib/types';
 
-	// eslint-disable-next-line no-useless-assignment -- prop $bindable: lido pelo pai via bind:value, nao localmente.
-	let { value = $bindable(''), onAgente }: { value?: string; onAgente?: (agente: Agente) => void } =
-		$props();
+	let {
+		// eslint-disable-next-line no-useless-assignment -- prop $bindable: lido pelo pai via bind:value, nao localmente.
+		value = $bindable(''),
+		inicial = null,
+		onAgente
+	}: { value?: string; inicial?: Agente | null; onAgente?: (agente: Agente) => void } = $props();
 
 	let aberto = $state(false);
 	let busca = $state('');
 	let resultados: Agente[] = $state([]);
 	let carregando = $state(false);
-	let selecionado: Agente | null = $state(null);
+	let selecionado: Agente | null = $state(untrack(() => inicial));
 	let timer: ReturnType<typeof setTimeout>;
 
 	async function pesquisar(texto: string) {

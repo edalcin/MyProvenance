@@ -22,6 +22,7 @@ import type {
 export class RegistroJaFinalizadoError extends Error {}
 export class RegistroNaoEncontradoError extends Error {}
 export class AgenteEmUsoError extends Error {}
+export class EntidadeEmUsoError extends Error {}
 
 interface EstadoSessao {
 	registros: RegistroProvenencia[];
@@ -211,6 +212,132 @@ export const sessaoAnonima = {
 		estado.entidades = [...estado.entidades, ...entidadesGeradas];
 
 		return { atividade, entidadesGeradas };
+	},
+
+	/** Edicao so em Registro Rascunho (ADR-0003) — tipo e imutavel. */
+	atualizarAtividade(
+		registroId: string,
+		atividadeId: string,
+		input: {
+			agenteId: string;
+			dataHora: string;
+			descricao?: string | null;
+			entidadesUsadas: string[];
+			local?: string | null;
+			instrumento?: string | null;
+			processo?: string | null;
+			parametros?: ParametroAtividade[] | null;
+			ambienteExecucao?: AmbienteExecucao | null;
+			entidadesGeradas?: {
+				id?: string;
+				nome: string;
+				descricao?: string | null;
+				formato?: string | null;
+				localizacao?: string | null;
+				licenca?: string | null;
+			}[];
+		}
+	): { atividade: Atividade; entidadesGeradas: Entidade[] } {
+		const registro = this.obterRegistro(registroId);
+		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (registro.status === 'finalizado') {
+			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+		}
+		const atual = estado.atividades.find(
+			(a) => a.id === atividadeId && a.registroId === registroId
+		);
+		if (!atual) throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+
+		validarCardinalidade({
+			tipo: atual.tipo,
+			entidadesUsadas: input.entidadesUsadas,
+			entidadesGeradas: input.entidadesGeradas
+		});
+
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- lookup local, descartado no fim da funcao.
+		const entidadesDoRegistro = new Set(
+			estado.entidades.filter((e) => e.registroId === registroId).map((e) => e.id)
+		);
+		for (const entidadeId of input.entidadesUsadas) {
+			if (!entidadesDoRegistro.has(entidadeId)) {
+				throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+			}
+		}
+
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- lookup local, descartado no fim da funcao.
+		const geradasAntesIds = new Set(
+			estado.entidades.filter((e) => e.geradaPorAtividadeId === atividadeId).map((e) => e.id)
+		);
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- lookup local, descartado no fim da funcao.
+		const mantidas = new Set<string>();
+		const entidadesGeradas: Entidade[] = [];
+		let entidades = estado.entidades;
+
+		for (const nova of input.entidadesGeradas ?? []) {
+			if (nova.id) {
+				if (!geradasAntesIds.has(nova.id)) {
+					throw new RegraCardinalidadeError(`Entidade ${nova.id} nao pertence a esta Atividade.`);
+				}
+				const editada: Entidade = {
+					id: nova.id,
+					registroId,
+					nome: nova.nome,
+					descricao: nova.descricao ?? null,
+					formato: nova.formato ?? null,
+					localizacao: nova.localizacao ?? null,
+					licenca: nova.licenca ?? null,
+					geradaPorAtividadeId: atividadeId
+				};
+				entidades = entidades.map((e) => (e.id === nova.id ? editada : e));
+				mantidas.add(nova.id);
+				entidadesGeradas.push(editada);
+			} else {
+				const criada: Entidade = {
+					id: uuidv7(),
+					registroId,
+					nome: nova.nome,
+					descricao: nova.descricao ?? null,
+					formato: nova.formato ?? null,
+					localizacao: nova.localizacao ?? null,
+					licenca: nova.licenca ?? null,
+					geradaPorAtividadeId: atividadeId
+				};
+				entidades = [...entidades, criada];
+				entidadesGeradas.push(criada);
+			}
+		}
+
+		for (const idAntiga of geradasAntesIds) {
+			if (mantidas.has(idAntiga)) continue;
+			const emUso = estado.atividades.some(
+				(a) => a.id !== atividadeId && a.entidadesUsadas.includes(idAntiga)
+			);
+			if (emUso) {
+				throw new EntidadeEmUsoError('Entidade em uso por outra Atividade como entrada.');
+			}
+			entidades = entidades.filter((e) => e.id !== idAntiga);
+		}
+
+		const atividadeAtualizada: Atividade = {
+			...atual,
+			agenteId: input.agenteId,
+			dataHora: input.dataHora,
+			descricao: input.descricao ?? null,
+			entidadesUsadas: input.entidadesUsadas,
+			entidadesGeradas: entidadesGeradas.map((e) => e.id),
+			local: input.local ?? null,
+			instrumento: input.instrumento ?? null,
+			processo: input.processo ?? null,
+			parametros: input.parametros ?? null,
+			ambienteExecucao: input.ambienteExecucao ?? null
+		};
+
+		estado.entidades = entidades;
+		estado.atividades = estado.atividades.map((a) =>
+			a.id === atividadeId ? atividadeAtualizada : a
+		);
+
+		return { atividade: atividadeAtualizada, entidadesGeradas };
 	},
 
 	// --- Agentes ---------------------------------------------------------

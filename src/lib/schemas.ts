@@ -69,6 +69,25 @@ export const criarAtividadeInputSchema = z.object({
 });
 export type CriarAtividadeInput = z.infer<typeof criarAtividadeInputSchema>;
 
+export const entidadeGeradaEditInputSchema = novaEntidadeInputSchema.extend({
+	id: z.uuid().optional()
+});
+
+/** Edicao de Atividade (Rascunho apenas, ADR-0003) - tipo e imutavel, nao entra aqui. */
+export const atualizarAtividadeInputSchema = z.object({
+	agenteId: z.uuid(),
+	dataHora: z.iso.datetime({ offset: true }),
+	descricao: z.string().trim().max(5000).nullable().optional(),
+	entidadesUsadas: z.array(z.uuid()).default([]),
+	local: z.string().trim().max(500).nullable().optional(),
+	instrumento: z.string().trim().max(300).nullable().optional(),
+	processo: z.string().trim().max(20000).nullable().optional(),
+	parametros: z.array(parametroAtividadeSchema).nullable().optional(),
+	ambienteExecucao: ambienteExecucaoSchema.nullable().optional(),
+	entidadesGeradas: z.array(entidadeGeradaEditInputSchema).optional().default([])
+});
+export type AtualizarAtividadeInput = z.infer<typeof atualizarAtividadeInputSchema>;
+
 /**
  * Validacao do JSON exportado/importado — docs/especificacao.md §4.
  * Usada no upload (upsert por id, ADR-0004): campos completos (com id), nao os de criacao via formulario.

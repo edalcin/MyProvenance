@@ -7,9 +7,15 @@ import type {
 	ParametroAtividade,
 	TipoAtividade
 } from '$lib/types';
-import { RegistroNaoEncontradoError } from './registros';
+import { RegistroNaoEncontradoError, RegistroJaFinalizadoError } from './registros';
 import { RegraCardinalidadeError, validarCardinalidade } from '$lib/cardinalidade';
-import { inserirEntidade, listarEntidadesPorRegistro } from './entidades';
+import {
+	inserirEntidade,
+	listarEntidadesPorRegistro,
+	atualizarEntidade,
+	excluirEntidade,
+	obterEntidade
+} from './entidades';
 
 interface AtividadeRow {
 	id: string;
@@ -168,4 +174,127 @@ const criarAtividadeTx = db.transaction(
 /** Sempre permitido, mesmo em Registro finalizado — finalizado so bloqueia editar/excluir historico (ADR-0003). */
 export function criarAtividade(usuarioId: string, registroId: string, input: CriarAtividadeInput) {
 	return criarAtividadeTx(usuarioId, registroId, input);
+}
+
+export interface EntidadeGeradaEditInput extends NovaEntidadeInput {
+	/** presente = edita a Entidade existente; ausente = cria uma nova. */
+	id?: string;
+}
+
+export interface AtualizarAtividadeInput {
+	agenteId: string;
+	dataHora: string;
+	descricao?: string | null;
+	entidadesUsadas: string[];
+	local?: string | null;
+	instrumento?: string | null;
+	processo?: string | null;
+	parametros?: ParametroAtividade[] | null;
+	ambienteExecucao?: AmbienteExecucao | null;
+	entidadesGeradas?: EntidadeGeradaEditInput[];
+}
+
+const obterStatusRegistroDoUsuarioStmt = db.prepare(
+	'SELECT status FROM registros WHERE id = @registroId AND usuario_id = @usuarioId'
+);
+
+const atualizarAtividadeStmt = db.prepare(
+	`UPDATE atividades SET agente_id = @agenteId, data_hora = @dataHora, descricao = @descricao,
+	 local = @local, instrumento = @instrumento, processo = @processo, parametros = @parametros,
+	 ambiente_execucao = @ambienteExecucao WHERE id = @id`
+);
+
+const limparUsoStmt = db.prepare(
+	'DELETE FROM atividade_entidades_usadas WHERE atividade_id = @atividadeId'
+);
+
+/** Edicao so em Registro Rascunho (ADR-0003) — tipo e imutavel, cardinalidade revalidada com o tipo original. */
+const atualizarAtividadeTx = db.transaction(
+	(usuarioId: string, registroId: string, atividadeId: string, input: AtualizarAtividadeInput) => {
+		const registro = obterStatusRegistroDoUsuarioStmt.get({ registroId, usuarioId }) as
+			{ status: string } | undefined;
+		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (registro.status === 'finalizado') {
+			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+		}
+
+		const atual = obterAtividade(atividadeId);
+		if (!atual || atual.registroId !== registroId) {
+			throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+		}
+
+		validarCardinalidade({
+			tipo: atual.tipo,
+			entidadesUsadas: input.entidadesUsadas,
+			entidadesGeradas: input.entidadesGeradas
+		});
+
+		const entidadesDoRegistro = new Set(listarEntidadesPorRegistro(registroId).map((e) => e.id));
+		for (const entidadeId of input.entidadesUsadas) {
+			if (!entidadesDoRegistro.has(entidadeId)) {
+				throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+			}
+		}
+
+		atualizarAtividadeStmt.run({
+			id: atividadeId,
+			agenteId: input.agenteId,
+			dataHora: input.dataHora,
+			descricao: input.descricao ?? null,
+			local: input.local ?? null,
+			instrumento: input.instrumento ?? null,
+			processo: input.processo ?? null,
+			parametros: input.parametros ? JSON.stringify(input.parametros) : null,
+			ambienteExecucao: input.ambienteExecucao ? JSON.stringify(input.ambienteExecucao) : null
+		});
+
+		limparUsoStmt.run({ atividadeId });
+		for (const entidadeId of input.entidadesUsadas) {
+			inserirUsoStmt.run({ atividadeId, entidadeId });
+		}
+
+		// Entidades geradas: mantidas com id sao atualizadas, sem id sao novas, as que sobraram
+		// da versao anterior sao excluidas — a FK bloqueia (409) se estiverem em uso como entrada
+		// de outra Atividade.
+		const geradasAntesIds = new Set(entidadesGeradasPor(atividadeId));
+		const mantidas = new Set<string>();
+		const entidadesGeradas: Entidade[] = [];
+		for (const nova of input.entidadesGeradas ?? []) {
+			if (nova.id) {
+				if (!geradasAntesIds.has(nova.id)) {
+					throw new RegraCardinalidadeError(`Entidade ${nova.id} nao pertence a esta Atividade.`);
+				}
+				atualizarEntidade(nova.id, nova);
+				mantidas.add(nova.id);
+				entidadesGeradas.push(obterEntidade(nova.id)!);
+			} else {
+				const entidade: Entidade = {
+					id: uuidv7(),
+					registroId,
+					nome: nova.nome,
+					descricao: nova.descricao ?? null,
+					formato: nova.formato ?? null,
+					localizacao: nova.localizacao ?? null,
+					licenca: nova.licenca ?? null,
+					geradaPorAtividadeId: atividadeId
+				};
+				inserirEntidade(entidade);
+				entidadesGeradas.push(entidade);
+			}
+		}
+		for (const idAntiga of geradasAntesIds) {
+			if (!mantidas.has(idAntiga)) excluirEntidade(idAntiga);
+		}
+
+		return { atividade: obterAtividade(atividadeId)!, entidadesGeradas };
+	}
+);
+
+export function atualizarAtividade(
+	usuarioId: string,
+	registroId: string,
+	atividadeId: string,
+	input: AtualizarAtividadeInput
+) {
+	return atualizarAtividadeTx(usuarioId, registroId, atividadeId, input);
 }

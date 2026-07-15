@@ -14,7 +14,11 @@ import type {
 	RegistroProvenencia,
 	TipoAgente
 } from '$lib/types';
-import type { CriarAtividadeInput, RegistroExportadoValidado } from '$lib/schemas';
+import type {
+	AtualizarAtividadeInput,
+	CriarAtividadeInput,
+	RegistroExportadoValidado
+} from '$lib/schemas';
 
 interface Pagina<T> {
 	items: T[];
@@ -114,6 +118,21 @@ export async function criarAtividade(
 		body: JSON.stringify(input)
 	});
 	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao criar Atividade.');
+	return resposta.json();
+}
+
+export async function atualizarAtividade(
+	registroId: string,
+	atividadeId: string,
+	input: AtualizarAtividadeInput
+): Promise<{ atividade: Atividade; entidadesGeradas: Entidade[] }> {
+	if (!autenticado()) return sessaoAnonima.atualizarAtividade(registroId, atividadeId, input);
+	const resposta = await fetch(`/registros/${registroId}/atividades/${atividadeId}`, {
+		method: 'PATCH',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify(input)
+	});
+	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao atualizar Atividade.');
 	return resposta.json();
 }
 

@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { criarAgente } from './agentes';
-import { criarAtividade } from './atividades';
+import { criarAtividade, atualizarAtividade } from './atividades';
 import { RegraCardinalidadeError } from '$lib/cardinalidade';
-import { criarRegistro, finalizarRegistro, RegistroJaFinalizadoError } from './registros';
+import {
+	criarRegistro,
+	finalizarRegistro,
+	RegistroJaFinalizadoError,
+	RegistroNaoEncontradoError
+} from './registros';
 import { criarUsuario } from './usuarios';
 
 // ponytail: DB_PATH=':memory:' injetado por vite.config.ts (test.env) — sem framework extra,
@@ -180,6 +185,159 @@ describe('regra de cardinalidade de Atividade', () => {
 				entidadesGeradas: [{ nome: 'x' }]
 			})
 		).toThrow(RegraCardinalidadeError);
+	});
+});
+
+describe('atualizarAtividade (edicao em Rascunho, ADR-0003)', () => {
+	const agente = criarAgente(usuarioId, { nome: 'Fulano Edicao', tipo: 'pessoa' });
+	const agente2 = criarAgente(usuarioId, { nome: 'Fulana Edicao 2', tipo: 'pessoa' });
+
+	it('edita campos simples e a Entidade gerada existente', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro edicao simples' });
+		const { atividade, entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date('2026-01-01').toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'original.csv' }]
+		});
+
+		const resultado = atualizarAtividade(usuarioId, registro.id, atividade.id, {
+			agenteId: agente2.id,
+			dataHora: new Date('2026-02-01').toISOString(),
+			descricao: 'Editado',
+			entidadesUsadas: [],
+			entidadesGeradas: [{ id: entidadesGeradas[0].id, nome: 'renomeado.csv' }]
+		});
+
+		expect(resultado.atividade.agenteId).toBe(agente2.id);
+		expect(resultado.atividade.descricao).toBe('Editado');
+		expect(resultado.entidadesGeradas).toHaveLength(1);
+		expect(resultado.entidadesGeradas[0].nome).toBe('renomeado.csv');
+		expect(resultado.entidadesGeradas[0].id).toBe(entidadesGeradas[0].id);
+	});
+
+	it('adiciona e remove Entidades geradas na mesma edicao', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro edicao add remove' });
+		const { atividade, entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'a.csv' }, { nome: 'b.csv' }]
+		});
+
+		const resultado = atualizarAtividade(usuarioId, registro.id, atividade.id, {
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ id: entidadesGeradas[0].id, nome: 'a.csv' }, { nome: 'c.csv' }]
+		});
+
+		expect(resultado.entidadesGeradas.map((e) => e.nome).sort()).toEqual(['a.csv', 'c.csv']);
+		expect(resultado.entidadesGeradas.some((e) => e.id === entidadesGeradas[1].id)).toBe(false);
+	});
+
+	it('rejeita edicao apos Registro finalizado (ADR-0003)', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro finalizado edicao' });
+		const { atividade } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'x.csv' }]
+		});
+		finalizarRegistro(registro.id, usuarioId);
+
+		expect(() =>
+			atualizarAtividade(usuarioId, registro.id, atividade.id, {
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [],
+				entidadesGeradas: [{ nome: 'y.csv' }]
+			})
+		).toThrow(RegistroJaFinalizadoError);
+	});
+
+	it('rejeita cardinalidade invalida na edicao (Transformacao sem Entidade usada)', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro card invalida edicao' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'bruto.csv' }]
+		});
+		const { atividade } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'transformacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'limpo.csv' }]
+		});
+
+		expect(() =>
+			atualizarAtividade(usuarioId, registro.id, atividade.id, {
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [],
+				entidadesGeradas: [{ nome: 'limpo.csv' }]
+			})
+		).toThrow(RegraCardinalidadeError);
+	});
+
+	it('rejeita remover Entidade gerada que outra Atividade usa como entrada', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro entidade em uso edicao' });
+		const { atividade: criacao, entidadesGeradas: brutas } = criarAtividade(
+			usuarioId,
+			registro.id,
+			{
+				tipo: 'criacao',
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [],
+				entidadesGeradas: [{ nome: 'usado_depois.csv' }]
+			}
+		);
+		criarAtividade(usuarioId, registro.id, {
+			tipo: 'transformacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'derivado.csv' }]
+		});
+
+		// sem id = troca a Entidade gerada original (em uso por outra Atividade) por uma nova —
+		// a exclusao da antiga falha na FK (SqliteError generico, nao classe de dominio).
+		expect(() =>
+			atualizarAtividade(usuarioId, registro.id, criacao.id, {
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [],
+				entidadesGeradas: [{ nome: 'outra.csv' }]
+			})
+		).toThrow();
+	});
+
+	it('rejeita editar Atividade de Registro de outro usuario', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro alheio edicao' });
+		const { atividade } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'x.csv' }]
+		});
+		const outroUsuarioId = criarUsuario({ username: 'outro_teste_atividades', pin: '654321' }).id;
+
+		expect(() =>
+			atualizarAtividade(outroUsuarioId, registro.id, atividade.id, {
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [],
+				entidadesGeradas: []
+			})
+		).toThrow(RegistroNaoEncontradoError);
 	});
 });
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -14,16 +15,29 @@
 		tipo,
 		registroId,
 		entidadesDisponiveis,
-		onCriada
+		atividadeParaEditar = null,
+		agenteAtual = null,
+		onCriada,
+		onAtualizada,
+		onCancelar
 	}: {
 		tipo: TipoAtividade;
 		registroId: string;
 		entidadesDisponiveis: Entidade[];
-		onCriada: (resultado: {
+		/** Presente = formulario em modo edicao (so Registro Rascunho, ADR-0003) — tipo nao muda. */
+		atividadeParaEditar?: Atividade | null;
+		agenteAtual?: Agente | null;
+		onCriada?: (resultado: {
 			atividade: Atividade;
 			entidadesGeradas: Entidade[];
 			agente: Agente | null;
 		}) => void;
+		onAtualizada?: (resultado: {
+			atividade: Atividade;
+			entidadesGeradas: Entidade[];
+			agente: Agente | null;
+		}) => void;
+		onCancelar?: () => void;
 	} = $props();
 
 	function hojeLocal(): string {
@@ -38,7 +52,16 @@
 		return new Date(ano, mes - 1, dia, 12).toISOString();
 	}
 
+	/** Inverso de dataParaIso — le a data em hora local, que e' como foi construida. */
+	function isoParaDataLocal(iso: string): string {
+		const d = new Date(iso);
+		const pad = (n: number) => String(n).padStart(2, '0');
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+	}
+
 	interface EntidadeGeradaForm {
+		/** presente = Entidade ja existente sendo editada; ausente = nova, criada ao salvar. */
+		id?: string;
 		nome: string;
 		descricao: string;
 		formato: string;
@@ -55,24 +78,54 @@
 		return tipo === 'analise' ? [] : [entidadeGeradaVazia()];
 	}
 
-	let agenteId = $state('');
-	let agenteSelecionado: Agente | null = $state(null);
-	let dataHora = $state(hojeLocal());
-	let descricao = $state('');
-	let entidadesUsadas: string[] = $state([]);
+	// untrack: seed unica na montagem a partir das props — em modo edicao o componente e'
+	// remontado por chave (key) a cada Atividade diferente, entao nao precisa re-sincronizar.
+	const iniciais = untrack(() => {
+		const amb = atividadeParaEditar?.ambienteExecucao;
+		return {
+			agenteId: atividadeParaEditar?.agenteId ?? '',
+			dataHora: atividadeParaEditar ? isoParaDataLocal(atividadeParaEditar.dataHora) : hojeLocal(),
+			descricao: atividadeParaEditar?.descricao ?? '',
+			entidadesUsadas: atividadeParaEditar?.entidadesUsadas ?? [],
+			local: atividadeParaEditar?.local ?? '',
+			instrumento: atividadeParaEditar?.instrumento ?? '',
+			processo: atividadeParaEditar?.processo ?? '',
+			sistemaOperacional: amb?.sistemaOperacional ?? '',
+			pacotes: (amb?.pacotes ?? []).map((p) => ({ a: p.nome, b: p.versao })),
+			parametros: (atividadeParaEditar?.parametros ?? []).map((p) => ({ a: p.chave, b: p.valor })),
+			entidadesGeradas: atividadeParaEditar
+				? entidadesDisponiveis
+						.filter((e) => e.geradaPorAtividadeId === atividadeParaEditar!.id)
+						.map((e) => ({
+							id: e.id,
+							nome: e.nome,
+							descricao: e.descricao ?? '',
+							formato: e.formato ?? '',
+							localizacao: e.localizacao ?? '',
+							licenca: e.licenca ?? ''
+						}))
+				: entidadesGeradasIniciais()
+		};
+	});
+
+	let agenteId = $state(iniciais.agenteId);
+	let agenteSelecionado: Agente | null = $state(untrack(() => agenteAtual));
+	let dataHora = $state(iniciais.dataHora);
+	let descricao = $state(iniciais.descricao);
+	let entidadesUsadas: string[] = $state(iniciais.entidadesUsadas);
 
 	// Criacao
-	let local = $state('');
-	let instrumento = $state('');
+	let local = $state(iniciais.local);
+	let instrumento = $state(iniciais.instrumento);
 
 	// Transformacao / Analise
-	let processo = $state('');
-	let sistemaOperacional = $state('');
-	let parametros: { a: string; b: string }[] = $state([]);
-	let pacotes: { a: string; b: string }[] = $state([]);
+	let processo = $state(iniciais.processo);
+	let sistemaOperacional = $state(iniciais.sistemaOperacional);
+	let parametros: { a: string; b: string }[] = $state(iniciais.parametros);
+	let pacotes: { a: string; b: string }[] = $state(iniciais.pacotes);
 
 	// Entidades geradas — Criacao/Transformacao exigem 1+, Analise aceita 0+ (varios artefatos de saida).
-	let entidadesGeradas: EntidadeGeradaForm[] = $state(entidadesGeradasIniciais());
+	let entidadesGeradas: EntidadeGeradaForm[] = $state(iniciais.entidadesGeradas);
 
 	let salvando = $state(false);
 
@@ -82,6 +135,13 @@
 			(tipo === 'criacao' || entidadesUsadas.length > 0) &&
 			entidadesGeradas.every((e) => e.nome.trim()) &&
 			(tipo === 'analise' || entidadesGeradas.length > 0)
+	);
+
+	/** Em edicao, uma Atividade nao pode usar como entrada uma Entidade que ela mesma gera. */
+	const entidadesParaUsar = $derived(
+		atividadeParaEditar
+			? entidadesDisponiveis.filter((e) => e.geradaPorAtividadeId !== atividadeParaEditar!.id)
+			: entidadesDisponiveis
 	);
 
 	function alternarEntidade(id: string, marcado: boolean) {
@@ -123,8 +183,7 @@
 							pacotes: pacotes.filter((p) => p.a.trim()).map((p) => ({ nome: p.a, versao: p.b }))
 						}
 					: null;
-			const corpo = {
-				tipo,
+			const camposComuns = {
 				agenteId,
 				// meio-dia local evita a data exibida "voltar" um dia ao formatar de volta em fuso negativo.
 				dataHora: dataParaIso(dataHora),
@@ -141,6 +200,7 @@
 				entidadesGeradas: entidadesGeradas
 					.filter((e) => e.nome.trim())
 					.map((e) => ({
+						...(e.id ? { id: e.id } : {}),
 						nome: e.nome,
 						descricao: e.descricao || null,
 						formato: e.formato || null,
@@ -148,14 +208,29 @@
 						licenca: e.licenca || null
 					}))
 			};
-			const resultado = await dados.criarAtividade(registroId, corpo).catch((err) => {
-				toast.error(err instanceof Error ? err.message : 'Erro ao criar Atividade.');
-				return null;
-			});
-			if (!resultado) return;
-			onCriada({ ...resultado, agente: agenteSelecionado });
-			toast.success('Atividade adicionada.');
-			limparFormulario();
+
+			if (atividadeParaEditar) {
+				const resultado = await dados
+					.atualizarAtividade(registroId, atividadeParaEditar.id, camposComuns)
+					.catch((err) => {
+						toast.error(err instanceof Error ? err.message : 'Erro ao atualizar Atividade.');
+						return null;
+					});
+				if (!resultado) return;
+				onAtualizada?.({ ...resultado, agente: agenteSelecionado });
+				toast.success('Atividade atualizada.');
+			} else {
+				const resultado = await dados
+					.criarAtividade(registroId, { tipo, ...camposComuns })
+					.catch((err) => {
+						toast.error(err instanceof Error ? err.message : 'Erro ao criar Atividade.');
+						return null;
+					});
+				if (!resultado) return;
+				onCriada?.({ ...resultado, agente: agenteSelecionado });
+				toast.success('Atividade adicionada.');
+				limparFormulario();
+			}
 		} finally {
 			salvando = false;
 		}
@@ -166,7 +241,11 @@
 	<div class="grid grid-cols-2 gap-4">
 		<div class="flex flex-col gap-1.5">
 			<Label>Agente</Label>
-			<AgentPicker bind:value={agenteId} onAgente={(a) => (agenteSelecionado = a)} />
+			<AgentPicker
+				bind:value={agenteId}
+				inicial={agenteAtual}
+				onAgente={(a) => (agenteSelecionado = a)}
+			/>
 		</div>
 		<div class="flex flex-col gap-1.5">
 			<Label for="dataHora-{tipo}">Data</Label>
@@ -202,7 +281,7 @@
 	{:else}
 		<div class="flex flex-col gap-1.5">
 			<Label>Entidades usadas</Label>
-			{#if entidadesDisponiveis.length === 0}
+			{#if entidadesParaUsar.length === 0}
 				<p class="text-muted-foreground text-xs">
 					Nenhuma Entidade disponivel ainda — crie uma via Criacao primeiro.
 				</p>
@@ -210,7 +289,7 @@
 				<div
 					class="border-input flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3"
 				>
-					{#each entidadesDisponiveis as entidade (entidade.id)}
+					{#each entidadesParaUsar as entidade (entidade.id)}
 						<label class="flex items-center gap-2 text-sm">
 							<Checkbox
 								checked={entidadesUsadas.includes(entidade.id)}
@@ -335,7 +414,12 @@
 		</Button>
 	</div>
 
-	<Button type="submit" disabled={!valido || salvando}>
-		{salvando ? 'Salvando…' : 'Adicionar Atividade'}
-	</Button>
+	<div class="flex gap-2">
+		<Button type="submit" disabled={!valido || salvando}>
+			{salvando ? 'Salvando…' : atividadeParaEditar ? 'Salvar alterações' : 'Adicionar Atividade'}
+		</Button>
+		{#if atividadeParaEditar}
+			<Button type="button" variant="outline" onclick={onCancelar}>Cancelar</Button>
+		{/if}
+	</div>
 </form>
