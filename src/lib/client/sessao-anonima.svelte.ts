@@ -73,6 +73,22 @@ export const sessaoAnonima = {
 		return registro;
 	},
 
+	/** Titulo/descricao sao metadados do container — editaveis em qualquer status (§3). */
+	atualizarRegistro(
+		id: string,
+		input: { titulo: string; descricao?: string | null }
+	): RegistroProvenencia {
+		const registro = this.obterRegistro(id);
+		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
+		const atualizado: RegistroProvenencia = {
+			...registro,
+			titulo: input.titulo,
+			descricao: input.descricao ? sanitizarHtmlRico(input.descricao) : (input.descricao ?? null)
+		};
+		estado.registros = estado.registros.map((r) => (r.id === id ? atualizado : r));
+		return atualizado;
+	},
+
 	/** Upsert por id (ADR-0004), local — mesma semantica do upload autenticado. */
 	importarRegistro(dados: RegistroExportadoValidado): RegistroProvenencia {
 		for (const agente of dados.agentes) {

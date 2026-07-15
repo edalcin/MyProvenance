@@ -8,9 +8,12 @@
 	import { gerarDiagramaMermaid } from '$lib/mermaid';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Table from '$lib/components/ui/table';
+	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
 	import MermaidDiagram from '$lib/components/mermaid-diagram.svelte';
 	import ActivityForm from '$lib/components/activity-form.svelte';
 	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
@@ -53,6 +56,36 @@
 	let finalizando = $state(false);
 	let atividadeEmEdicao: Atividade | null = $state(null);
 	let dialogEdicaoAberto = $state(false);
+
+	let dialogEdicaoRegistroAberto = $state(false);
+	let tituloEmEdicao = $state('');
+	let descricaoEmEdicao = $state('');
+	let salvandoRegistro = $state(false);
+
+	function abrirEdicaoRegistro() {
+		if (!registro) return;
+		tituloEmEdicao = registro.titulo;
+		descricaoEmEdicao = registro.descricao ?? '';
+		dialogEdicaoRegistroAberto = true;
+	}
+
+	async function salvarEdicaoRegistro(event: SubmitEvent) {
+		event.preventDefault();
+		if (!registro || !tituloEmEdicao.trim()) return;
+		salvandoRegistro = true;
+		try {
+			registro = await dados.atualizarRegistro(registro.id, {
+				titulo: tituloEmEdicao,
+				descricao: descricaoEmEdicao || null
+			});
+			toast.success('Registro atualizado.');
+			dialogEdicaoRegistroAberto = false;
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'Erro ao atualizar Registro.');
+		} finally {
+			salvandoRegistro = false;
+		}
+	}
 
 	function aoAtividadeCriada(resultado: {
 		atividade: Atividade;
@@ -216,6 +249,38 @@
 				{/if}
 			</div>
 			<div class="flex shrink-0 flex-wrap gap-2">
+				<Dialog.Root bind:open={dialogEdicaoRegistroAberto}>
+					<Dialog.Trigger>
+						{#snippet child({ props })}
+							<Button variant="outline" {...props} onclick={abrirEdicaoRegistro}>
+								<i class="bx bx-edit-alt"></i> Editar
+							</Button>
+						{/snippet}
+					</Dialog.Trigger>
+					<Dialog.Content class="sm:max-w-lg">
+						<Dialog.Header>
+							<Dialog.Title>Editar Registro de Proveniência</Dialog.Title>
+							<Dialog.Description>
+								Titulo e descricao sao metadados do Registro — editaveis mesmo apos finalizado.
+							</Dialog.Description>
+						</Dialog.Header>
+						<form class="flex flex-col gap-4" onsubmit={salvarEdicaoRegistro}>
+							<div class="flex flex-col gap-1.5">
+								<Label for="titulo-edicao">Titulo</Label>
+								<Input id="titulo-edicao" bind:value={tituloEmEdicao} required maxlength={300} />
+							</div>
+							<div class="flex flex-col gap-1.5">
+								<Label for="descricao-edicao">Descricao</Label>
+								<RichTextEditor bind:value={descricaoEmEdicao} />
+							</div>
+							<Dialog.Footer>
+								<Button type="submit" disabled={salvandoRegistro || !tituloEmEdicao.trim()}>
+									{salvandoRegistro ? 'Salvando…' : 'Salvar alterações'}
+								</Button>
+							</Dialog.Footer>
+						</form>
+					</Dialog.Content>
+				</Dialog.Root>
 				{#if registro.status === 'rascunho'}
 					<Button variant="outline" onclick={finalizar} disabled={finalizando}>
 						<i class="bx bx-check-circle"></i>

@@ -78,6 +78,21 @@ export function criarRegistro(
 	return obterRegistro(id, usuarioId)!;
 }
 
+/** Titulo/descricao sao metadados do container, nao "historico" — editaveis em qualquer status (§3). */
+export function atualizarRegistro(
+	id: string,
+	usuarioId: string,
+	input: { titulo: string; descricao?: string | null }
+): RegistroProvenencia {
+	if (!obterRegistro(id, usuarioId))
+		throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
+	db.prepare(
+		`UPDATE registros SET titulo = @titulo, descricao = @descricao
+		 WHERE id = @id AND usuario_id = @usuarioId`
+	).run({ id, usuarioId, titulo: input.titulo, descricao: input.descricao ?? null });
+	return obterRegistro(id, usuarioId)!;
+}
+
 export class RegistroJaFinalizadoError extends Error {}
 export class RegistroNaoEncontradoError extends Error {}
 

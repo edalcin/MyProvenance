@@ -160,7 +160,7 @@ CREATE TABLE atividade_entidades_usadas (
 
 `entidadesGeradas` de uma Atividade é obtido por consulta reversa (`SELECT id FROM entidades WHERE gerada_por_atividade_id = ?`, podendo retornar 0, 1 ou mais linhas) — evita FK circular entre as duas tabelas.
 
-Regra de imutabilidade (ADR-0003): quando `registros.status = 'finalizado'`, a camada de aplicação bloqueia `UPDATE`/`DELETE` em `atividades` e `entidades` daquele `registro_id` — só `INSERT`. Exclusão do Registro inteiro (`DELETE FROM registros`, cascata) é sempre permitida, em qualquer status, mediante confirmação explícita na UI.
+Regra de imutabilidade (ADR-0003): quando `registros.status = 'finalizado'`, a camada de aplicação bloqueia `UPDATE`/`DELETE` em `atividades` e `entidades` daquele `registro_id` — só `INSERT`. O próprio `registros.titulo`/`descricao` não é "histórico" (não faz parte da linhagem de proveniência) e continua editável em qualquer status. Exclusão do Registro inteiro (`DELETE FROM registros`, cascata) é sempre permitida, em qualquer status, mediante confirmação explícita na UI.
 
 ## 4. Formato do JSON exportado
 
@@ -246,7 +246,7 @@ Um único arquivo (`<slug-do-titulo>-provenance.md`), estrutura fixa:
 ## 7. Telas e fluxos
 
 - **Lista de Registros** — rolagem infinita (sem paginação, per `Desenvolvimento.md`), busca por título, botão "Novo Registro", indicador de status (Rascunho/Finalizado). Sem Conta, lista vem da sessão local (sem rolagem infinita real — tudo já em memória).
-- **Detalhe do Registro** — diagrama (renderizado ao vivo, não só no export), lista de Entidades, linha do tempo de Atividades, botões "Adicionar Atividade" (3 formulários — Criação/Transformação/Análise), "Finalizar", "Exportar JSON", "Exportar relatório .md", "Excluir Registro". Cada Atividade tem botões "Editar" e "Excluir" quando o Registro está em Rascunho (tipo é imutável na edição; excluir remove também as Entidades que a Atividade gerou, bloqueado se alguma estiver em uso como entrada de outra Atividade).
+- **Detalhe do Registro** — diagrama (renderizado ao vivo, não só no export), lista de Entidades, linha do tempo de Atividades, botões "Editar" (título/descrição — permitido em qualquer status, não é "histórico"), "Adicionar Atividade" (3 formulários — Criação/Transformação/Análise), "Finalizar", "Exportar JSON", "Exportar relatório .md", "Excluir Registro". Cada Atividade tem botões "Editar" e "Excluir" quando o Registro está em Rascunho (tipo é imutável na edição; excluir remove também as Entidades que a Atividade gerou, bloqueado se alguma estiver em uso como entrada de outra Atividade).
 - **Formulário de Atividade** — campos do §2.3; seletor de Entidade(s) usada(s) restrito às Entidades já existentes no Registro; seletor de Agente com autocomplete + atalho "novo Agente" inline.
 - **Cadastro de Agentes** — lista com rolagem infinita, CRUD simples (Agente não pertence a um Registro, então não é afetado pelo status Rascunho/Finalizado do Registro).
 - **Upload** — tela/ação para importar um JSON previamente baixado (upsert, §4) — local (Blob/FileReader) sem Conta, via `/registros/import` com Conta.
@@ -258,24 +258,25 @@ Um único arquivo (`<slug-do-titulo>-provenance.md`), estrutura fixa:
 
 Todas as rotas de `/registros*` e `/agentes*` exigem sessão válida (cookie) — sem Conta, retornam 401 e o cliente nunca as chama (roda local, ADR-0009). Acesso a recurso de outra Conta retorna 404 (não vaza existência).
 
-| Rota                                     | Método       | Ação                                                    |
-| ---------------------------------------- | ------------ | ------------------------------------------------------- |
-| `/auth/registrar`                        | POST         | cria Conta (username + PIN), loga, seta cookie          |
-| `/auth/entrar`                           | POST         | valida username + PIN (rate limited), loga              |
-| `/auth/sair`                             | POST         | encerra sessão                                          |
-| `/registros`                             | GET          | lista (rolagem infinita)                                |
-| `/registros`                             | POST         | cria Registro (rascunho)                                |
-| `/registros/:id`                         | GET          | detalhe (entidades + atividades + agentes envolvidos)   |
-| `/registros/:id`                         | DELETE       | exclui Registro (cascata)                               |
-| `/registros/:id/finalizar`               | POST         | rascunho → finalizado                                   |
-| `/registros/:id/atividades`              | POST         | cria Atividade (+ Entidade gerada, se houver)           |
-| `/registros/:id/atividades/:atividadeId` | PATCH        | edita Atividade (so Rascunho, tipo imutavel, ADR-0003)  |
-| `/registros/:id/atividades/:atividadeId` | DELETE       | exclui Atividade + suas Entidades geradas (so Rascunho) |
-| `/registros/:id/export.json`             | GET          | baixa JSON (§4)                                         |
-| `/registros/:id/export.md`               | GET          | baixa relatório + diagrama (§6)                         |
-| `/registros/import`                      | POST         | upload de JSON (upsert, §4)                             |
-| `/agentes`                               | GET/POST     | lista (rolagem infinita) / cria                         |
-| `/agentes/:id`                           | PATCH/DELETE | edita / remove                                          |
+| Rota                                     | Método       | Ação                                                         |
+| ---------------------------------------- | ------------ | ------------------------------------------------------------ |
+| `/auth/registrar`                        | POST         | cria Conta (username + PIN), loga, seta cookie               |
+| `/auth/entrar`                           | POST         | valida username + PIN (rate limited), loga                   |
+| `/auth/sair`                             | POST         | encerra sessão                                               |
+| `/registros`                             | GET          | lista (rolagem infinita)                                     |
+| `/registros`                             | POST         | cria Registro (rascunho)                                     |
+| `/registros/:id`                         | GET          | detalhe (entidades + atividades + agentes envolvidos)        |
+| `/registros/:id`                         | PATCH        | edita titulo/descricao (qualquer status, nao e' "historico") |
+| `/registros/:id`                         | DELETE       | exclui Registro (cascata)                                    |
+| `/registros/:id/finalizar`               | POST         | rascunho → finalizado                                        |
+| `/registros/:id/atividades`              | POST         | cria Atividade (+ Entidade gerada, se houver)                |
+| `/registros/:id/atividades/:atividadeId` | PATCH        | edita Atividade (so Rascunho, tipo imutavel, ADR-0003)       |
+| `/registros/:id/atividades/:atividadeId` | DELETE       | exclui Atividade + suas Entidades geradas (so Rascunho)      |
+| `/registros/:id/export.json`             | GET          | baixa JSON (§4)                                              |
+| `/registros/:id/export.md`               | GET          | baixa relatório + diagrama (§6)                              |
+| `/registros/import`                      | POST         | upload de JSON (upsert, §4)                                  |
+| `/agentes`                               | GET/POST     | lista (rolagem infinita) / cria                              |
+| `/agentes/:id`                           | PATCH/DELETE | edita / remove                                               |
 
 Validação e sanitização de toda entrada segue `Desenvolvimento.md` §5. `UPDATE`/`DELETE` em `atividades`/`entidades` de um Registro `finalizado` retornam erro (ADR-0003). Sem Conta, a mesma validação (cardinalidade, sanitização) roda no cliente — módulos compartilhados em `src/lib/` (ADR-0009).
 

@@ -69,6 +69,20 @@ export async function criarRegistro(input: {
 	return resposta.json();
 }
 
+export async function atualizarRegistro(
+	id: string,
+	input: { titulo: string; descricao?: string | null }
+): Promise<RegistroProvenencia> {
+	if (!autenticado()) return sessaoAnonima.atualizarRegistro(id, input);
+	const resposta = await fetch(`/registros/${id}`, {
+		method: 'PATCH',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify(input)
+	});
+	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao atualizar Registro.');
+	return resposta.json();
+}
+
 export async function excluirRegistro(id: string): Promise<void> {
 	if (!autenticado()) return sessaoAnonima.excluirRegistro(id);
 	const resposta = await fetch(`/registros/${id}`, { method: 'DELETE' });
