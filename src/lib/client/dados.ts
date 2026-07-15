@@ -136,6 +136,14 @@ export async function atualizarAtividade(
 	return resposta.json();
 }
 
+export async function excluirAtividade(registroId: string, atividadeId: string): Promise<void> {
+	if (!autenticado()) return sessaoAnonima.excluirAtividade(registroId, atividadeId);
+	const resposta = await fetch(`/registros/${registroId}/atividades/${atividadeId}`, {
+		method: 'DELETE'
+	});
+	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao excluir Atividade.');
+}
+
 // --- Agentes -------------------------------------------------------------
 
 export async function listarAgentes(opts: {

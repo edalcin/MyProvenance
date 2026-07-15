@@ -340,6 +340,36 @@ export const sessaoAnonima = {
 		return { atividade: atividadeAtualizada, entidadesGeradas };
 	},
 
+	/** So em Registro Rascunho (ADR-0003). Remove tambem as Entidades geradas — bloqueado se
+	 * alguma delas estiver em uso como entrada de outra Atividade. */
+	excluirAtividade(registroId: string, atividadeId: string): void {
+		const registro = this.obterRegistro(registroId);
+		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (registro.status === 'finalizado') {
+			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+		}
+		const atual = estado.atividades.find(
+			(a) => a.id === atividadeId && a.registroId === registroId
+		);
+		if (!atual) throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- lookup local, descartado no fim da funcao.
+		const geradasIds = new Set(
+			estado.entidades.filter((e) => e.geradaPorAtividadeId === atividadeId).map((e) => e.id)
+		);
+		for (const entidadeId of geradasIds) {
+			const emUso = estado.atividades.some(
+				(a) => a.id !== atividadeId && a.entidadesUsadas.includes(entidadeId)
+			);
+			if (emUso) {
+				throw new EntidadeEmUsoError('Entidade em uso por outra Atividade como entrada.');
+			}
+		}
+
+		estado.entidades = estado.entidades.filter((e) => !geradasIds.has(e.id));
+		estado.atividades = estado.atividades.filter((a) => a.id !== atividadeId);
+	},
+
 	// --- Agentes ---------------------------------------------------------
 
 	criarAgente(input: {

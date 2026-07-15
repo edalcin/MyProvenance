@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { criarAgente } from './agentes';
-import { criarAtividade, atualizarAtividade } from './atividades';
+import { criarAtividade, atualizarAtividade, excluirAtividade } from './atividades';
 import { RegraCardinalidadeError } from '$lib/cardinalidade';
+import { obterEntidade } from './entidades';
 import {
 	criarRegistro,
 	finalizarRegistro,
@@ -338,6 +339,120 @@ describe('atualizarAtividade (edicao em Rascunho, ADR-0003)', () => {
 				entidadesGeradas: []
 			})
 		).toThrow(RegistroNaoEncontradoError);
+	});
+});
+
+describe('excluirAtividade (edicao em Rascunho, ADR-0003)', () => {
+	const agente = criarAgente(usuarioId, { nome: 'Fulano Exclusao', tipo: 'pessoa' });
+
+	it('exclui Atividade e a Entidade que ela gerou (sem uso em outro lugar)', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro exclusao simples' });
+		const { atividade, entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'apagar.csv' }]
+		});
+
+		excluirAtividade(usuarioId, registro.id, atividade.id);
+
+		expect(() =>
+			atualizarAtividade(usuarioId, registro.id, atividade.id, {
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: []
+			})
+		).toThrow(RegistroNaoEncontradoError);
+		expect(obterEntidade(entidadesGeradas[0].id)).toBeNull();
+	});
+
+	it('exclui so a Entidade gerada pela Atividade removida, preserva as demais', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro exclusao transformacao' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'bruto.csv' }]
+		});
+		const { atividade: transformacao } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'transformacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'limpo.csv' }]
+		});
+
+		excluirAtividade(usuarioId, registro.id, transformacao.id);
+
+		// bruto.csv (gerada pela Criacao, nao pela Transformacao removida) continua disponivel —
+		// reusar numa Atividade nova prova que a Entidade nao foi apagada junto.
+		expect(() =>
+			criarAtividade(usuarioId, registro.id, {
+				tipo: 'analise',
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [brutas[0].id],
+				entidadesGeradas: []
+			})
+		).not.toThrow();
+	});
+
+	it('rejeita excluir apos Registro finalizado (ADR-0003)', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro finalizado exclusao' });
+		const { atividade } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'x.csv' }]
+		});
+		finalizarRegistro(registro.id, usuarioId);
+
+		expect(() => excluirAtividade(usuarioId, registro.id, atividade.id)).toThrow(
+			RegistroJaFinalizadoError
+		);
+	});
+
+	it('rejeita excluir Atividade cuja Entidade gerada esta em uso por outra Atividade', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro entidade em uso exclusao' });
+		const { atividade: criacao, entidadesGeradas: brutas } = criarAtividade(
+			usuarioId,
+			registro.id,
+			{
+				tipo: 'criacao',
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [],
+				entidadesGeradas: [{ nome: 'usado_depois.csv' }]
+			}
+		);
+		criarAtividade(usuarioId, registro.id, {
+			tipo: 'transformacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'derivado.csv' }]
+		});
+
+		expect(() => excluirAtividade(usuarioId, registro.id, criacao.id)).toThrow();
+	});
+
+	it('rejeita excluir Atividade de Registro de outro usuario', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro alheio exclusao' });
+		const { atividade } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'x.csv' }]
+		});
+		const outroUsuarioId = criarUsuario({ username: 'outro_teste_exclusao', pin: '654321' }).id;
+
+		expect(() => excluirAtividade(outroUsuarioId, registro.id, atividade.id)).toThrow(
+			RegistroNaoEncontradoError
+		);
 	});
 });
 

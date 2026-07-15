@@ -102,6 +102,26 @@
 		dialogEdicaoAberto = false;
 	}
 
+	async function excluirAtividade(atividade: Atividade) {
+		if (
+			!confirm(
+				'Excluir esta Atividade? As Entidades geradas por ela tambem serao removidas (se nao estiverem em uso por outra Atividade).'
+			)
+		)
+			return;
+		if (!registro) return;
+		try {
+			await dados.excluirAtividade(registro.id, atividade.id);
+			atividades = atividades.filter((a) => a.id !== atividade.id);
+			entidades = entidades.filter((e) => e.geradaPorAtividadeId !== atividade.id);
+			const idsEmUso = new Set(atividades.map((a) => a.agenteId));
+			agentesEnvolvidos = agentesEnvolvidos.filter((a) => idsEmUso.has(a.id));
+			toast.success('Atividade excluida.');
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'Erro ao excluir Atividade.');
+		}
+	}
+
 	async function finalizar() {
 		if (!registro) return;
 		finalizando = true;
@@ -301,14 +321,24 @@
 									>
 								</div>
 								{#if registro.status === 'rascunho'}
-									<Button
-										variant="ghost"
-										size="icon-sm"
-										onclick={() => abrirEdicaoAtividade(atividade)}
-										aria-label="Editar Atividade"
-									>
-										<i class="bx bx-edit-alt"></i>
-									</Button>
+									<div class="flex items-center gap-1">
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											onclick={() => abrirEdicaoAtividade(atividade)}
+											aria-label="Editar Atividade"
+										>
+											<i class="bx bx-edit-alt"></i>
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											onclick={() => excluirAtividade(atividade)}
+											aria-label="Excluir Atividade"
+										>
+											<i class="bx bx-trash text-destructive"></i>
+										</Button>
+									</div>
 								{/if}
 							</div>
 							{#if atividade.descricao}<p>{atividade.descricao}</p>{/if}

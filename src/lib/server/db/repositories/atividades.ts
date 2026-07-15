@@ -298,3 +298,35 @@ export function atualizarAtividade(
 ) {
 	return atualizarAtividadeTx(usuarioId, registroId, atividadeId, input);
 }
+
+const excluirAtividadeStmt = db.prepare('DELETE FROM atividades WHERE id = @id');
+
+/**
+ * So em Registro Rascunho (ADR-0003). Entidades geradas por esta Atividade sao removidas
+ * junto — a FK bloqueia (409) se alguma delas estiver em uso como entrada de outra Atividade.
+ */
+const excluirAtividadeTx = db.transaction(
+	(usuarioId: string, registroId: string, atividadeId: string) => {
+		const registro = obterStatusRegistroDoUsuarioStmt.get({ registroId, usuarioId }) as
+			{ status: string } | undefined;
+		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (registro.status === 'finalizado') {
+			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+		}
+
+		const atual = obterAtividade(atividadeId);
+		if (!atual || atual.registroId !== registroId) {
+			throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+		}
+
+		for (const entidadeId of entidadesGeradasPor(atividadeId)) {
+			excluirEntidade(entidadeId);
+		}
+		limparUsoStmt.run({ atividadeId });
+		excluirAtividadeStmt.run({ id: atividadeId });
+	}
+);
+
+export function excluirAtividade(usuarioId: string, registroId: string, atividadeId: string): void {
+	excluirAtividadeTx(usuarioId, registroId, atividadeId);
+}
