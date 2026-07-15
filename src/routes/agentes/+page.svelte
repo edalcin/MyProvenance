@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { toast } from 'svelte-sonner';
 	import { onVisible } from '$lib/actions/on-visible';
 	import { Button } from '$lib/components/ui/button';
@@ -9,6 +8,9 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Select from '$lib/components/ui/select';
+	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
+	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
+	import * as dados from '$lib/client/dados';
 	import type { Agente, TipoAgente } from '$lib/types';
 	import type { PageData } from './$types';
 
@@ -20,8 +22,10 @@
 		software: 'Software'
 	};
 
-	// untrack: seed unica na montagem — a pagina gerencia a lista via fetch (busca/scroll infinito) dai em diante.
-	let itens = $state(untrack(() => data.pagina.items));
+	// untrack: seed unica na montagem — autenticado vem do load do servidor, anonimo da sessao local.
+	let itens = $state(
+		untrack(() => (usuarioAtual.valor ? data.pagina.items : sessaoAnonima.agentes))
+	);
 	let proximoOffset = $state(untrack(() => data.pagina.nextOffset));
 	let busca = $state('');
 	let carregandoMais = $state(false);
@@ -37,11 +41,11 @@
 	let salvando = $state(false);
 
 	async function buscarPagina(reiniciar: boolean) {
-		const params = new SvelteURLSearchParams({ limit: '30' });
-		if (busca) params.set('busca', busca);
-		if (!reiniciar && proximoOffset) params.set('offset', String(proximoOffset));
-		const resposta = await fetch(`/agentes?${params}`);
-		const pagina: { items: Agente[]; nextOffset: number | null } = await resposta.json();
+		const pagina = await dados.listarAgentes({
+			busca: busca || undefined,
+			offset: !reiniciar && proximoOffset ? proximoOffset : undefined,
+			limit: 30
+		});
 		itens = reiniciar ? pagina.items : [...itens, ...pagina.items];
 		proximoOffset = pagina.nextOffset;
 	}
@@ -90,22 +94,16 @@
 				afiliacao: formAfiliacao || null,
 				identificadorExterno: formIdentificador || null
 			};
-			const resposta = await fetch(editandoId ? `/agentes/${editandoId}` : '/agentes', {
-				method: editandoId ? 'PATCH' : 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify(corpo)
-			});
-			if (!resposta.ok) {
-				const erro = await resposta.json().catch(() => ({ message: 'Erro ao salvar Agente.' }));
-				toast.error(erro.message ?? 'Erro ao salvar Agente.');
-				return;
-			}
-			const agente: Agente = await resposta.json();
+			const agente = editandoId
+				? await dados.atualizarAgente(editandoId, corpo)
+				: await dados.criarAgente(corpo);
 			itens = editandoId
 				? itens.map((item) => (item.id === agente.id ? agente : item))
 				: [agente, ...itens];
 			toast.success(editandoId ? 'Agente atualizado.' : 'Agente criado.');
 			dialogAberto = false;
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'Erro ao salvar Agente.');
 		} finally {
 			salvando = false;
 		}
@@ -113,14 +111,13 @@
 
 	async function excluir(agente: Agente) {
 		if (!confirm(`Excluir o Agente "${agente.nome}"?`)) return;
-		const resposta = await fetch(`/agentes/${agente.id}`, { method: 'DELETE' });
-		if (!resposta.ok) {
-			const erro = await resposta.json().catch(() => ({ message: 'Erro ao excluir Agente.' }));
-			toast.error(erro.message ?? 'Erro ao excluir Agente.');
-			return;
+		try {
+			await dados.excluirAgente(agente.id);
+			itens = itens.filter((item) => item.id !== agente.id);
+			toast.success('Agente excluido.');
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'Erro ao excluir Agente.');
 		}
-		itens = itens.filter((item) => item.id !== agente.id);
-		toast.success('Agente excluido.');
 	}
 </script>
 
@@ -138,7 +135,9 @@
 			<Dialog.Content class="sm:max-w-md">
 				<Dialog.Header>
 					<Dialog.Title>{editandoId ? 'Editar Agente' : 'Novo Agente'}</Dialog.Title>
-					<Dialog.Description>Cadastro global, reutilizavel entre Registros.</Dialog.Description>
+					<Dialog.Description
+						>Cadastro da sua conta, reutilizavel entre Registros.</Dialog.Description
+					>
 				</Dialog.Header>
 				<form class="flex flex-col gap-4" onsubmit={salvar}>
 					<div class="flex flex-col gap-1.5">

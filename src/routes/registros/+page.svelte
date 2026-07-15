@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
-	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { toast } from 'svelte-sonner';
 	import { onVisible } from '$lib/actions/on-visible';
 	import { formatarData } from '$lib/format';
@@ -11,13 +10,20 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
+	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
+	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
+	import { importarDeArquivo, ArquivoInvalidoError } from '$lib/client/exportar-importar';
+	import * as dados from '$lib/client/dados';
 	import type { RegistroProvenencia } from '$lib/types';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	// untrack: seed unica na montagem — a pagina gerencia a lista via fetch (busca/scroll infinito) dai em diante.
-	let itens = $state(untrack(() => data.pagina.items));
+	// untrack: seed unica na montagem — autenticado vem do load do servidor, anonimo da sessao local
+	// (que ja pode ter dados de navegacao anterior — o load do servidor sempre volta vazio p/ anonimo).
+	let itens = $state(
+		untrack(() => (usuarioAtual.valor ? data.pagina.items : sessaoAnonima.registros))
+	);
 	let proximoOffset = $state(untrack(() => data.pagina.nextOffset));
 	let busca = $state('');
 	let carregandoMais = $state(false);
@@ -31,12 +37,11 @@
 	let timerBusca: ReturnType<typeof setTimeout>;
 
 	async function buscarPagina(reiniciar: boolean) {
-		const params = new SvelteURLSearchParams({ limit: '20' });
-		if (busca) params.set('busca', busca);
-		if (!reiniciar && proximoOffset) params.set('offset', String(proximoOffset));
-		const resposta = await fetch(`/registros?${params}`);
-		const pagina: { items: RegistroProvenencia[]; nextOffset: number | null } =
-			await resposta.json();
+		const pagina = await dados.listarRegistros({
+			busca: busca || undefined,
+			offset: !reiniciar && proximoOffset ? proximoOffset : undefined,
+			limit: 20
+		});
 		itens = reiniciar ? pagina.items : [...itens, ...pagina.items];
 		proximoOffset = pagina.nextOffset;
 	}
@@ -61,22 +66,17 @@
 		if (!novoTitulo.trim()) return;
 		salvando = true;
 		try {
-			const resposta = await fetch('/registros', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ titulo: novoTitulo, descricao: novaDescricao || null })
+			const registro = await dados.criarRegistro({
+				titulo: novoTitulo,
+				descricao: novaDescricao || null
 			});
-			if (!resposta.ok) {
-				const erro = await resposta.json().catch(() => ({ message: 'Erro ao criar Registro.' }));
-				toast.error(erro.message ?? 'Erro ao criar Registro.');
-				return;
-			}
-			const registro: RegistroProvenencia = await resposta.json();
 			itens = [registro, ...itens];
 			toast.success('Registro criado.');
 			dialogAberto = false;
 			novoTitulo = '';
 			novaDescricao = '';
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'Erro ao criar Registro.');
 		} finally {
 			salvando = false;
 		}
@@ -91,30 +91,21 @@
 		if (!arquivo) return;
 		importando = true;
 		try {
-			const texto = await arquivo.text();
-			let dados: unknown;
-			try {
-				dados = JSON.parse(texto);
-			} catch {
-				toast.error('Arquivo nao e um JSON valido.');
-				return;
-			}
-			const resposta = await fetch('/registros/import', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify(dados)
-			});
-			if (!resposta.ok) {
-				const erro = await resposta.json().catch(() => ({ message: 'Erro ao importar Registro.' }));
-				toast.error(erro.message ?? 'Erro ao importar Registro.');
-				return;
-			}
-			const detalhe: { registro: RegistroProvenencia } = await resposta.json();
-			const existe = itens.some((i) => i.id === detalhe.registro.id);
+			const validado = await importarDeArquivo(arquivo);
+			const registro: RegistroProvenencia = await dados.importarRegistro(validado);
+			const existe = itens.some((i) => i.id === registro.id);
 			itens = existe
-				? itens.map((i) => (i.id === detalhe.registro.id ? detalhe.registro : i))
-				: [detalhe.registro, ...itens];
+				? itens.map((i) => (i.id === registro.id ? registro : i))
+				: [registro, ...itens];
 			toast.success('Registro importado.');
+		} catch (err) {
+			const mensagem =
+				err instanceof ArquivoInvalidoError
+					? err.message
+					: err instanceof Error
+						? err.message
+						: 'Erro ao importar Registro.';
+			toast.error(mensagem);
 		} finally {
 			importando = false;
 			input.value = '';

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
 	import { Button } from '$lib/components/ui/button';
+	import * as dados from '$lib/client/dados';
 	import type { Agente } from '$lib/types';
 
 	// eslint-disable-next-line no-useless-assignment -- prop $bindable: lido pelo pai via bind:value, nao localmente.
@@ -19,10 +19,7 @@
 
 	async function pesquisar(texto: string) {
 		carregando = true;
-		const params = new SvelteURLSearchParams({ limit: '10' });
-		if (texto) params.set('busca', texto);
-		const resposta = await fetch(`/agentes?${params}`);
-		const pagina: { items: Agente[] } = await resposta.json();
+		const pagina = await dados.listarAgentes({ limit: 10, busca: texto || undefined });
 		resultados = pagina.items;
 		carregando = false;
 	}
@@ -43,16 +40,12 @@
 	async function criarRapido() {
 		const nome = busca.trim();
 		if (!nome) return;
-		const resposta = await fetch('/agentes', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ nome, tipo: 'pessoa' })
-		});
-		if (!resposta.ok) {
-			toast.error('Erro ao criar Agente.');
-			return;
+		try {
+			const agente = await dados.criarAgente({ nome, tipo: 'pessoa' });
+			escolher(agente);
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : 'Erro ao criar Agente.');
 		}
-		escolher((await resposta.json()) as Agente);
 	}
 </script>
 

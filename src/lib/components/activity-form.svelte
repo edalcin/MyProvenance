@@ -8,6 +8,7 @@
 	import AgentPicker from '$lib/components/agent-picker.svelte';
 	import DynamicPairList from '$lib/components/dynamic-pair-list.svelte';
 	import type { Agente, Atividade, Entidade, TipoAtividade } from '$lib/types';
+	import * as dados from '$lib/client/dados';
 
 	let {
 		tipo,
@@ -147,17 +148,11 @@
 						licenca: e.licenca || null
 					}))
 			};
-			const resposta = await fetch(`/registros/${registroId}/atividades`, {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify(corpo)
+			const resultado = await dados.criarAtividade(registroId, corpo).catch((err) => {
+				toast.error(err instanceof Error ? err.message : 'Erro ao criar Atividade.');
+				return null;
 			});
-			if (!resposta.ok) {
-				const erro = await resposta.json().catch(() => ({ message: 'Erro ao criar Atividade.' }));
-				toast.error(erro.message ?? 'Erro ao criar Atividade.');
-				return;
-			}
-			const resultado = await resposta.json();
+			if (!resultado) return;
 			onCriada({ ...resultado, agente: agenteSelecionado });
 			toast.success('Atividade adicionada.');
 			limparFormulario();
