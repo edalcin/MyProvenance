@@ -1,3 +1,36 @@
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# SQLite local (dev) — em producao DB_PATH fica fora do container
+/data
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Ferramentas locais (Claude Code / graphify) — nao versionar
 .agents/
 .claude/
 skills-lock.json
+graphify-out/
