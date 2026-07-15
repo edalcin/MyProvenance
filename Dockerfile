@@ -21,8 +21,10 @@ RUN npm run build
 FROM node:22-alpine AS runtime
 WORKDIR /app
 # libstdc++ — dependencia de runtime do addon nativo do better-sqlite3, sem toolchain de build.
+# uid 99 / gid 100 (grupo "users", ja existente no Alpine base) = "nobody:users" padrao do
+# UNRAID — volumes criados pela interface (Storage/appsdata) usam esse dono por default.
 RUN apk add --no-cache libstdc++ && \
-    addgroup -S myprovenance && adduser -S myprovenance -G myprovenance
+    adduser -S -D -H -u 99 -G users myprovenance
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/build ./build
