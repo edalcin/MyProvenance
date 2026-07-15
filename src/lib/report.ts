@@ -1,7 +1,7 @@
 import { gerarDiagramaMermaid } from '$lib/mermaid';
 import { formatarData } from '$lib/format';
 import { TIPO_ATIVIDADE_LABEL } from '$lib/types';
-import type { RegistroDetalhado } from './db/repositories/registros';
+import type { RegistroDetalhado } from './types';
 
 function escaparCelula(texto: string): string {
 	return texto.replace(/\|/g, '\\|').replace(/[\r\n]+/g, ' ');

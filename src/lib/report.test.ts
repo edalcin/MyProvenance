@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gerarRelatorioMarkdown } from './report';
-import { slugify } from './slug';
-import type { RegistroDetalhado } from './db/repositories/registros';
+import { slugify } from '$lib/slug';
+import type { RegistroDetalhado } from './types';
 
 describe('slugify', () => {
 	it('remove acentos, minusculiza e troca separadores por hifen', () => {

@@ -102,3 +102,11 @@ export const TIPO_ATIVIDADE_LABEL: Record<TipoAtividade, string> = {
 	transformacao: 'Transformação',
 	analise: 'Análise'
 };
+
+/** Registro + grafo completo — retornado por obterRegistroDetalhado (servidor e sessao anonima). */
+export interface RegistroDetalhado {
+	registro: RegistroProvenencia;
+	entidades: Entidade[];
+	atividades: Atividade[];
+	agentesEnvolvidos: Agente[];
+}

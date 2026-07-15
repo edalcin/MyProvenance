@@ -4,8 +4,8 @@ import {
 	finalizarRegistro,
 	obterRegistroDetalhado
 } from '$lib/server/db/repositories/registros';
-import { gerarJsonExportado } from '$lib/server/export';
-import { slugify } from '$lib/server/slug';
+import { gerarJsonExportado } from '$lib/export';
+import { slugify } from '$lib/slug';
 import type { RequestHandler } from './$types';
 
 /** Primeira exportacao do JSON finaliza o Registro (Rascunho -> Finalizado) — CONTEXT.md, ADR-0003. */

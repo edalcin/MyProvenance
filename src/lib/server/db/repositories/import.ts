@@ -1,5 +1,5 @@
 import { db } from '../client';
-import { sanitizarHtmlRico } from '$lib/server/sanitize';
+import { sanitizarHtmlRico } from '$lib/sanitize';
 import type { RegistroExportadoValidado } from '$lib/schemas';
 
 /**

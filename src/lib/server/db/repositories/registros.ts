@@ -1,6 +1,6 @@
 import { uuidv7 } from 'uuidv7';
 import { db } from '../client';
-import type { Agente, Atividade, Entidade, RegistroProvenencia, StatusRegistro } from '$lib/types';
+import type { Agente, RegistroDetalhado, RegistroProvenencia, StatusRegistro } from '$lib/types';
 import { obterAgente } from './agentes';
 import { listarEntidadesPorRegistro } from './entidades';
 import { listarAtividadesPorRegistro } from './atividades';
@@ -104,13 +104,6 @@ export function excluirRegistro(id: string, usuarioId: string): void {
 		id,
 		usuarioId
 	});
-}
-
-export interface RegistroDetalhado {
-	registro: RegistroProvenencia;
-	entidades: Entidade[];
-	atividades: Atividade[];
-	agentesEnvolvidos: Agente[];
 }
 
 export function obterRegistroDetalhado(id: string, usuarioId: string): RegistroDetalhado | null {

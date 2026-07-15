@@ -8,6 +8,7 @@ import type {
 	TipoAtividade
 } from '$lib/types';
 import { RegistroNaoEncontradoError } from './registros';
+import { RegraCardinalidadeError, validarCardinalidade } from '$lib/cardinalidade';
 import { inserirEntidade, listarEntidadesPorRegistro } from './entidades';
 
 interface AtividadeRow {
@@ -98,25 +99,6 @@ export interface CriarAtividadeInput {
 	ambienteExecucao?: AmbienteExecucao | null;
 	/** obrigatorio 1+ em criacao/transformacao; opcional (0+) em analise. */
 	entidadesGeradas?: NovaEntidadeInput[];
-}
-
-/** Regra de cardinalidade por tipo — CONTEXT.md: Criacao usa 0 gera 1+, Transformacao usa 1+ gera 1+, Analise usa 1+ gera 0+. */
-export class RegraCardinalidadeError extends Error {}
-
-function validarCardinalidade(input: CriarAtividadeInput): void {
-	const usadas = input.entidadesUsadas.length;
-	const geradas = input.entidadesGeradas?.length ?? 0;
-	if (input.tipo === 'criacao') {
-		if (usadas !== 0) throw new RegraCardinalidadeError('Criacao nao usa Entidades existentes.');
-		if (geradas < 1) throw new RegraCardinalidadeError('Criacao deve gerar 1 ou mais Entidades.');
-	} else if (input.tipo === 'transformacao') {
-		if (usadas < 1) throw new RegraCardinalidadeError('Transformacao usa 1 ou mais Entidades.');
-		if (geradas < 1) {
-			throw new RegraCardinalidadeError('Transformacao deve gerar 1 ou mais Entidades.');
-		}
-	} else if (usadas < 1) {
-		throw new RegraCardinalidadeError('Analise usa 1 ou mais Entidades.');
-	}
 }
 
 const inserirAtividadeStmt = db.prepare(

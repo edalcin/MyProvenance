@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { ZodType } from 'zod';
-import { RegraCardinalidadeError } from './db/repositories/atividades';
+import { RegraCardinalidadeError } from '$lib/cardinalidade';
 import { RegistroJaFinalizadoError, RegistroNaoEncontradoError } from './db/repositories/registros';
 
 export async function parseBody<T>(request: Request, schema: ZodType<T>): Promise<T> {

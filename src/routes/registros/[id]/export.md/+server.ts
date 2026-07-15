@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { obterRegistroDetalhado } from '$lib/server/db/repositories/registros';
-import { gerarRelatorioMarkdown } from '$lib/server/report';
-import { slugify } from '$lib/server/slug';
+import { gerarRelatorioMarkdown } from '$lib/report';
+import { slugify } from '$lib/slug';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = ({ params, locals }) => {

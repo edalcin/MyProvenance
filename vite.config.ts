@@ -72,9 +72,11 @@ export default defineConfig({
 			devOptions: { enabled: false }
 		})
 	],
+	// DB_PATH=':memory:' vem de .env.test — $env/dynamic/private captura o valor no
+	// resolve inicial do config; test.env (aplicado so no worker do vitest) e tarde
+	// demais pro plugin do SvelteKit ver, entao nao funciona pra esse caso.
 	test: {
 		environment: 'node',
-		include: ['src/**/*.{test,spec}.ts'],
-		env: { DB_PATH: ':memory:' }
+		include: ['src/**/*.{test,spec}.ts']
 	}
 });

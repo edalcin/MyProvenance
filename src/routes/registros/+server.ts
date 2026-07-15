@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 import { criarRegistro, listarRegistros } from '$lib/server/db/repositories/registros';
-import { sanitizarHtmlRico } from '$lib/server/sanitize';
+import { sanitizarHtmlRico } from '$lib/sanitize';
 import { registroInputSchema } from '$lib/schemas';
 import { parseBody, parsePaginationParams } from '$lib/server/api-utils';
 import type { RequestHandler } from './$types';
