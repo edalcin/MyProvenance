@@ -33,7 +33,8 @@ export function listarEntidadesPorRegistro(registroId: string): Entidade[] {
 }
 
 export function obterEntidade(id: string): Entidade | null {
-	const row = db.prepare('SELECT * FROM entidades WHERE id = @id').get({ id }) as EntidadeRow | undefined;
+	const row = db.prepare('SELECT * FROM entidades WHERE id = @id').get({ id }) as
+		EntidadeRow | undefined;
 	return row ? mapRow(row) : null;
 }
 

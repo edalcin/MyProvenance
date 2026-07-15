@@ -1,0 +1,14 @@
+node_modules
+build
+.svelte-kit
+data
+*.sqlite
+.env
+.env.*
+!.env.example
+.git
+.claude
+.agents
+graphify-out
+docs
+*.md

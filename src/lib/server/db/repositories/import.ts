@@ -43,7 +43,9 @@ const upsertEntidadeStmt = db.prepare(`
 		gerada_por_atividade_id = excluded.gerada_por_atividade_id
 `);
 
-const limparUsoStmt = db.prepare('DELETE FROM atividade_entidades_usadas WHERE atividade_id = @atividadeId');
+const limparUsoStmt = db.prepare(
+	'DELETE FROM atividade_entidades_usadas WHERE atividade_id = @atividadeId'
+);
 const inserirUsoStmt = db.prepare(
 	'INSERT INTO atividade_entidades_usadas (atividade_id, entidade_id) VALUES (@atividadeId, @entidadeId)'
 );
@@ -56,7 +58,9 @@ export const importarRegistro = db.transaction((dados: RegistroExportadoValidado
 	upsertRegistroStmt.run({
 		id: dados.registro.id,
 		titulo: dados.registro.titulo,
-		descricao: dados.registro.descricao ? sanitizarHtmlRico(dados.registro.descricao) : dados.registro.descricao,
+		descricao: dados.registro.descricao
+			? sanitizarHtmlRico(dados.registro.descricao)
+			: dados.registro.descricao,
 		status: dados.registro.status,
 		criadoEm: dados.registro.criadoEm,
 		finalizadoEm: dados.registro.finalizadoEm
@@ -74,7 +78,9 @@ export const importarRegistro = db.transaction((dados: RegistroExportadoValidado
 			instrumento: atividade.instrumento,
 			processo: atividade.processo,
 			parametros: atividade.parametros ? JSON.stringify(atividade.parametros) : null,
-			ambienteExecucao: atividade.ambienteExecucao ? JSON.stringify(atividade.ambienteExecucao) : null
+			ambienteExecucao: atividade.ambienteExecucao
+				? JSON.stringify(atividade.ambienteExecucao)
+				: null
 		});
 	}
 

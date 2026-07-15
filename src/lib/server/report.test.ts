@@ -5,7 +5,9 @@ import type { RegistroDetalhado } from './db/repositories/registros';
 
 describe('slugify', () => {
 	it('remove acentos, minusculiza e troca separadores por hifen', () => {
-		expect(slugify('Levantamento — Trilha do Ouro (2026)')).toBe('levantamento-trilha-do-ouro-2026');
+		expect(slugify('Levantamento — Trilha do Ouro (2026)')).toBe(
+			'levantamento-trilha-do-ouro-2026'
+		);
 	});
 
 	it('cai para "registro" quando nao sobra nada alfanumerico', () => {

@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
 	import { Button } from '$lib/components/ui/button';
 	import type { Agente } from '$lib/types';
 
-	let { value = $bindable(''), onAgente }: { value?: string; onAgente?: (agente: Agente) => void } = $props();
+	// eslint-disable-next-line no-useless-assignment -- prop $bindable: lido pelo pai via bind:value, nao localmente.
+	let { value = $bindable(''), onAgente }: { value?: string; onAgente?: (agente: Agente) => void } =
+		$props();
 
 	let aberto = $state(false);
 	let busca = $state('');
@@ -16,7 +19,7 @@
 
 	async function pesquisar(texto: string) {
 		carregando = true;
-		const params = new URLSearchParams({ limit: '10' });
+		const params = new SvelteURLSearchParams({ limit: '10' });
 		if (texto) params.set('busca', texto);
 		const resposta = await fetch(`/agentes?${params}`);
 		const pagina: { items: Agente[] } = await resposta.json();

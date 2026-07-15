@@ -10,9 +10,29 @@ export default defineConfig({
 		sveltekit({
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
-				runes: ({ filename }) => filename.split(/[/\\]/).includes('node_modules') ? undefined : true
+				runes: ({ filename }) =>
+					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter()
+			adapter: adapter(),
+			// Desenvolvimento.md §5 — nonce automatico por request para scripts/estilos que o
+			// SvelteKit gera (ex.: anti-flash de tema do mode-watcher); demais headers em hooks.server.ts.
+			csp: {
+				mode: 'auto',
+				directives: {
+					'default-src': ['self'],
+					// mode-watcher injeta um script inline anti-flash de tema fora do pipeline de nonce
+					// do SvelteKit; hash fixo do conteudo (estavel enquanto themeColors nao mudar).
+					'script-src': ['self', 'sha256-VmP2arq8etV2Q1kwJrHsnROqCloQE6iCMv2do81Ns44='],
+					'style-src': ['self', 'unsafe-inline'],
+					'img-src': ['self', 'data:'],
+					'font-src': ['self', 'data:'],
+					'connect-src': ['self'],
+					'object-src': ['none'],
+					'base-uri': ['self'],
+					'form-action': ['self'],
+					'frame-ancestors': ['none']
+				}
+			}
 		}),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
@@ -42,7 +62,8 @@ export default defineConfig({
 						options: { cacheName: 'paginas', networkTimeoutSeconds: 3 }
 					},
 					{
-						urlPattern: ({ url }) => url.pathname.startsWith('/registros') || url.pathname.startsWith('/agentes'),
+						urlPattern: ({ url }) =>
+							url.pathname.startsWith('/registros') || url.pathname.startsWith('/agentes'),
 						handler: 'NetworkFirst',
 						options: { cacheName: 'dados-api', networkTimeoutSeconds: 3 }
 					}

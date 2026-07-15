@@ -1,6 +1,12 @@
 import { uuidv7 } from 'uuidv7';
 import { db } from '../client';
-import type { AmbienteExecucao, Atividade, Entidade, ParametroAtividade, TipoAtividade } from '$lib/types';
+import type {
+	AmbienteExecucao,
+	Atividade,
+	Entidade,
+	ParametroAtividade,
+	TipoAtividade
+} from '$lib/types';
 import { inserirEntidade, listarEntidadesPorRegistro } from './entidades';
 
 interface AtividadeRow {
@@ -17,7 +23,11 @@ interface AtividadeRow {
 	ambiente_execucao: string | null;
 }
 
-function mapRow(row: AtividadeRow, entidadesUsadas: string[], entidadeGeradaId: string | null): Atividade {
+function mapRow(
+	row: AtividadeRow,
+	entidadesUsadas: string[],
+	entidadeGeradaId: string | null
+): Atividade {
 	return {
 		id: row.id,
 		registroId: row.registro_id,
@@ -31,7 +41,9 @@ function mapRow(row: AtividadeRow, entidadesUsadas: string[], entidadeGeradaId: 
 		instrumento: row.instrumento,
 		processo: row.processo,
 		parametros: row.parametros ? (JSON.parse(row.parametros) as ParametroAtividade[]) : null,
-		ambienteExecucao: row.ambiente_execucao ? (JSON.parse(row.ambiente_execucao) as AmbienteExecucao) : null
+		ambienteExecucao: row.ambiente_execucao
+			? (JSON.parse(row.ambiente_execucao) as AmbienteExecucao)
+			: null
 	};
 }
 
@@ -58,7 +70,8 @@ export function listarAtividadesPorRegistro(registroId: string): Atividade[] {
 }
 
 export function obterAtividade(id: string): Atividade | null {
-	const row = db.prepare('SELECT * FROM atividades WHERE id = @id').get({ id }) as AtividadeRow | undefined;
+	const row = db.prepare('SELECT * FROM atividades WHERE id = @id').get({ id }) as
+		AtividadeRow | undefined;
 	if (!row) return null;
 	return mapRow(row, entidadesUsadasDe(row.id), entidadeGeradaPor(row.id));
 }

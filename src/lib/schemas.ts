@@ -36,7 +36,11 @@ export const parametroAtividadeSchema = z.object({
 
 export const ambienteExecucaoSchema = z.object({
 	sistemaOperacional: z.string().trim().max(200).optional(),
-	pacotes: z.array(z.object({ nome: z.string().trim().min(1).max(200), versao: z.string().trim().max(100) })).optional()
+	pacotes: z
+		.array(
+			z.object({ nome: z.string().trim().min(1).max(200), versao: z.string().trim().max(100) })
+		)
+		.optional()
 });
 
 export const criarAtividadeInputSchema = z.object({

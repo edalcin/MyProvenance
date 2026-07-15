@@ -14,43 +14,43 @@ Termos em **negrito** neste documento são os termos canônicos definidos em `CO
 
 ### 2.1 Registro de Proveniência
 
-| Campo | Tipo | Obrigatório | Notas |
-|---|---|---|---|
-| `id` | UUIDv7 | sim | chave primária |
-| `titulo` | texto | sim | |
-| `descricao` | texto rico (TipTap) | não | |
-| `status` | enum: `rascunho` \| `finalizado` | sim | default `rascunho`; ver ADR-0003 |
-| `criadoEm` | datetime | sim | |
-| `finalizadoEm` | datetime | não | preenchido na 1ª exportação ou ação explícita |
-| `schemaVersion` | inteiro | sim (no JSON exportado) | ver §4 |
+| Campo           | Tipo                             | Obrigatório             | Notas                                         |
+| --------------- | -------------------------------- | ----------------------- | --------------------------------------------- |
+| `id`            | UUIDv7                           | sim                     | chave primária                                |
+| `titulo`        | texto                            | sim                     |                                               |
+| `descricao`     | texto rico (TipTap)              | não                     |                                               |
+| `status`        | enum: `rascunho` \| `finalizado` | sim                     | default `rascunho`; ver ADR-0003              |
+| `criadoEm`      | datetime                         | sim                     |                                               |
+| `finalizadoEm`  | datetime                         | não                     | preenchido na 1ª exportação ou ação explícita |
+| `schemaVersion` | inteiro                          | sim (no JSON exportado) | ver §4                                        |
 
 ### 2.2 Entidade
 
-| Campo | Tipo | Obrigatório | Notas |
-|---|---|---|---|
-| `id` | UUIDv7 | sim | |
-| `registroId` | UUIDv7 | sim | FK |
-| `nome` | texto | sim | |
-| `descricao` | texto | não | |
-| `formato` | texto | não | livre, com sugestões: CSV, TSV, XLSX, ODS, JSON, Parquet, GeoTIFF, Shapefile, GeoJSON |
-| `localizacao` | texto (URL ou caminho) | não | onde o dado real está guardado, fora da ferramenta |
-| `licenca` | texto | não | ex.: CC-BY 4.0, ou URL da licença |
-| `geradaPorAtividadeId` | UUIDv7 | sim | toda Entidade nasce de exatamente 1 Atividade (Criação, Transformação, ou Análise com saída) |
+| Campo                  | Tipo                   | Obrigatório | Notas                                                                                        |
+| ---------------------- | ---------------------- | ----------- | -------------------------------------------------------------------------------------------- |
+| `id`                   | UUIDv7                 | sim         |                                                                                              |
+| `registroId`           | UUIDv7                 | sim         | FK                                                                                           |
+| `nome`                 | texto                  | sim         |                                                                                              |
+| `descricao`            | texto                  | não         |                                                                                              |
+| `formato`              | texto                  | não         | livre, com sugestões: CSV, TSV, XLSX, ODS, JSON, Parquet, GeoTIFF, Shapefile, GeoJSON        |
+| `localizacao`          | texto (URL ou caminho) | não         | onde o dado real está guardado, fora da ferramenta                                           |
+| `licenca`              | texto                  | não         | ex.: CC-BY 4.0, ou URL da licença                                                            |
+| `geradaPorAtividadeId` | UUIDv7                 | sim         | toda Entidade nasce de exatamente 1 Atividade (Criação, Transformação, ou Análise com saída) |
 
 ### 2.3 Atividade
 
 Campos comuns a todos os tipos:
 
-| Campo | Tipo | Obrigatório | Notas |
-|---|---|---|---|
-| `id` | UUIDv7 | sim | |
-| `registroId` | UUIDv7 | sim | FK |
-| `tipo` | enum: `criacao` \| `transformacao` \| `analise` | sim | |
-| `agenteId` | UUIDv7 | sim | FK para **Agente** |
-| `dataHora` | datetime | sim | |
-| `descricao` | texto | não | descrição livre do que aconteceu |
-| `entidadesUsadas` | lista de UUIDv7 | condicional | vazio em Criação; 1+ em Transformação/Análise |
-| `entidadeGeradaId` | UUIDv7 \| null | condicional | sempre em Criação/Transformação; opcional em Análise |
+| Campo              | Tipo                                            | Obrigatório | Notas                                                |
+| ------------------ | ----------------------------------------------- | ----------- | ---------------------------------------------------- |
+| `id`               | UUIDv7                                          | sim         |                                                      |
+| `registroId`       | UUIDv7                                          | sim         | FK                                                   |
+| `tipo`             | enum: `criacao` \| `transformacao` \| `analise` | sim         |                                                      |
+| `agenteId`         | UUIDv7                                          | sim         | FK para **Agente**                                   |
+| `dataHora`         | datetime                                        | sim         |                                                      |
+| `descricao`        | texto                                           | não         | descrição livre do que aconteceu                     |
+| `entidadesUsadas`  | lista de UUIDv7                                 | condicional | vazio em Criação; 1+ em Transformação/Análise        |
+| `entidadeGeradaId` | UUIDv7 \| null                                  | condicional | sempre em Criação/Transformação; opcional em Análise |
 
 Campos por tipo:
 
@@ -62,13 +62,13 @@ Regra de cardinalidade (ver `CONTEXT.md`): Criação gera 1, usa 0. Transformaç
 
 ### 2.4 Agente
 
-| Campo | Tipo | Obrigatório | Notas |
-|---|---|---|---|
-| `id` | UUIDv7 | sim | |
-| `nome` | texto | sim | |
-| `tipo` | enum: `pessoa` \| `instituicao` \| `software` | sim | |
-| `afiliacao` | texto | não | |
-| `identificadorExterno` | texto | não | ORCID, RRID, ou similar |
+| Campo                  | Tipo                                          | Obrigatório | Notas                   |
+| ---------------------- | --------------------------------------------- | ----------- | ----------------------- |
+| `id`                   | UUIDv7                                        | sim         |                         |
+| `nome`                 | texto                                         | sim         |                         |
+| `tipo`                 | enum: `pessoa` \| `instituicao` \| `software` | sim         |                         |
+| `afiliacao`            | texto                                         | não         |                         |
+| `identificadorExterno` | texto                                         | não         | ORCID, RRID, ou similar |
 
 Cadastro global, reutilizável entre Registros (não pertence a um único Registro) — ver `CONTEXT.md`.
 
@@ -135,48 +135,48 @@ Customizado, inspirado no vocabulário PROV, não PROV-JSON formal (ADR-0005). C
 
 ```json
 {
-  "schemaVersion": 1,
-  "registro": {
-    "id": "018f2f3a-...",
-    "titulo": "Levantamento de espécies — Trilha do Ouro",
-    "descricao": "<p>Coleta de campo 2026...</p>",
-    "status": "finalizado",
-    "criadoEm": "2026-03-01T10:00:00Z",
-    "finalizadoEm": "2026-03-15T18:00:00Z"
-  },
-  "agentes": [
-    {
-      "id": "018f2f3b-...",
-      "nome": "Fulana da Silva",
-      "tipo": "pessoa",
-      "afiliacao": "UFRJ",
-      "identificadorExterno": "0000-0002-XXXX-XXXX"
-    }
-  ],
-  "entidades": [
-    {
-      "id": "018f2f3c-...",
-      "nome": "campo_bruto.csv",
-      "descricao": "Planilha de campo original",
-      "formato": "CSV",
-      "localizacao": "file:///dados/campo_bruto.csv",
-      "licenca": "CC-BY 4.0",
-      "geradaPorAtividadeId": "018f2f3d-..."
-    }
-  ],
-  "atividades": [
-    {
-      "id": "018f2f3d-...",
-      "tipo": "criacao",
-      "agenteId": "018f2f3b-...",
-      "dataHora": "2026-03-01T09:00:00Z",
-      "descricao": "Coleta de campo",
-      "local": "-22.95, -43.20",
-      "instrumento": "GPS Garmin eTrex 32x",
-      "entidadesUsadas": [],
-      "entidadeGeradaId": "018f2f3c-..."
-    }
-  ]
+	"schemaVersion": 1,
+	"registro": {
+		"id": "018f2f3a-...",
+		"titulo": "Levantamento de espécies — Trilha do Ouro",
+		"descricao": "<p>Coleta de campo 2026...</p>",
+		"status": "finalizado",
+		"criadoEm": "2026-03-01T10:00:00Z",
+		"finalizadoEm": "2026-03-15T18:00:00Z"
+	},
+	"agentes": [
+		{
+			"id": "018f2f3b-...",
+			"nome": "Fulana da Silva",
+			"tipo": "pessoa",
+			"afiliacao": "UFRJ",
+			"identificadorExterno": "0000-0002-XXXX-XXXX"
+		}
+	],
+	"entidades": [
+		{
+			"id": "018f2f3c-...",
+			"nome": "campo_bruto.csv",
+			"descricao": "Planilha de campo original",
+			"formato": "CSV",
+			"localizacao": "file:///dados/campo_bruto.csv",
+			"licenca": "CC-BY 4.0",
+			"geradaPorAtividadeId": "018f2f3d-..."
+		}
+	],
+	"atividades": [
+		{
+			"id": "018f2f3d-...",
+			"tipo": "criacao",
+			"agenteId": "018f2f3b-...",
+			"dataHora": "2026-03-01T09:00:00Z",
+			"descricao": "Coleta de campo",
+			"local": "-22.95, -43.20",
+			"instrumento": "GPS Garmin eTrex 32x",
+			"entidadesUsadas": [],
+			"entidadeGeradaId": "018f2f3c-..."
+		}
+	]
 }
 ```
 
@@ -205,7 +205,7 @@ flowchart LR
 Um único arquivo (`<slug-do-titulo>-provenance.md`), estrutura fixa:
 
 1. **Cabeçalho** — título, descrição, status, data de exportação.
-2. **Diagrama** — bloco ```` ```mermaid ```` do §5.
+2. **Diagrama** — bloco ` ```mermaid ` do §5.
 3. **Entidades** — tabela: nome, formato, localização, licença.
 4. **Linha do tempo de Atividades** — ordenada por `dataHora`: tipo, data/hora, Agente, Entidades usadas → Entidade gerada, campos específicos do tipo (local/instrumento; ou processo/parâmetros/ambiente de execução). Inclui Análises sem saída.
 5. **Agentes envolvidos** — tabela: nome, tipo, afiliação.
@@ -221,19 +221,19 @@ Um único arquivo (`<slug-do-titulo>-provenance.md`), estrutura fixa:
 
 ## 8. Rotas (esboço, SvelteKit)
 
-| Rota | Método | Ação |
-|---|---|---|
-| `/registros` | GET | lista (rolagem infinita) |
-| `/registros` | POST | cria Registro (rascunho) |
-| `/registros/:id` | GET | detalhe (entidades + atividades + agentes envolvidos) |
-| `/registros/:id` | DELETE | exclui Registro (cascata) |
-| `/registros/:id/finalizar` | POST | rascunho → finalizado |
-| `/registros/:id/atividades` | POST | cria Atividade (+ Entidade gerada, se houver) |
-| `/registros/:id/export.json` | GET | baixa JSON (§4) |
-| `/registros/:id/export.md` | GET | baixa relatório + diagrama (§6) |
-| `/registros/import` | POST | upload de JSON (upsert, §4) |
-| `/agentes` | GET/POST | lista (rolagem infinita) / cria |
-| `/agentes/:id` | PATCH/DELETE | edita / remove |
+| Rota                         | Método       | Ação                                                  |
+| ---------------------------- | ------------ | ----------------------------------------------------- |
+| `/registros`                 | GET          | lista (rolagem infinita)                              |
+| `/registros`                 | POST         | cria Registro (rascunho)                              |
+| `/registros/:id`             | GET          | detalhe (entidades + atividades + agentes envolvidos) |
+| `/registros/:id`             | DELETE       | exclui Registro (cascata)                             |
+| `/registros/:id/finalizar`   | POST         | rascunho → finalizado                                 |
+| `/registros/:id/atividades`  | POST         | cria Atividade (+ Entidade gerada, se houver)         |
+| `/registros/:id/export.json` | GET          | baixa JSON (§4)                                       |
+| `/registros/:id/export.md`   | GET          | baixa relatório + diagrama (§6)                       |
+| `/registros/import`          | POST         | upload de JSON (upsert, §4)                           |
+| `/agentes`                   | GET/POST     | lista (rolagem infinita) / cria                       |
+| `/agentes/:id`               | PATCH/DELETE | edita / remove                                        |
 
 Validação e sanitização de toda entrada segue `Desenvolvimento.md` §5. `UPDATE`/`DELETE` em `atividades`/`entidades` de um Registro `finalizado` retornam erro (ADR-0003).
 

@@ -12,7 +12,10 @@ export async function parseBody<T>(request: Request, schema: ZodType<T>): Promis
 	}
 	const resultado = schema.safeParse(corpo);
 	if (!resultado.success) {
-		error(400, resultado.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; '));
+		error(
+			400,
+			resultado.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')
+		);
 	}
 	return resultado.data;
 }
@@ -22,7 +25,8 @@ export function parsePaginationParams(url: URL): { busca?: string; offset: numbe
 	const offsetParam = Number(url.searchParams.get('offset'));
 	const limitParam = Number(url.searchParams.get('limit'));
 	const offset = Number.isFinite(offsetParam) && offsetParam > 0 ? Math.floor(offsetParam) : 0;
-	const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(Math.floor(limitParam), 100) : 30;
+	const limit =
+		Number.isFinite(limitParam) && limitParam > 0 ? Math.min(Math.floor(limitParam), 100) : 30;
 	return { busca, offset, limit };
 }
 

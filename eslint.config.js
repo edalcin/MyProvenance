@@ -20,7 +20,12 @@ export default defineConfig(
 		rules: {
 			// typescript-eslint strongly recommend that you do not use the no-undef lint rule on TypeScript projects.
 			// see: https://typescript-eslint.io/troubleshooting/faqs/eslint/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
-			"no-undef": 'off'
+			'no-undef': 'off',
+			// convencao: prefixo `_` marca intencionalmente nao usado (ex.: {@const _ = trigger} p/ forcar reatividade).
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ varsIgnorePattern: '^_', argsIgnorePattern: '^_' }
+			]
 		}
 	},
 	{
@@ -31,6 +36,14 @@ export default defineConfig(
 				extraFileExtensions: ['.svelte'],
 				parser: ts.parser
 			}
+		}
+	},
+	{
+		// Componentes shadcn-svelte gerados (nao mantidos a mao) — href generico e passthrough
+		// de chamadores ja resolvidos, o proprio primitivo nao pode chamar resolve() por si.
+		files: ['src/lib/components/ui/**/*.svelte'],
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off'
 		}
 	},
 	{

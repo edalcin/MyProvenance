@@ -25,7 +25,9 @@ export interface ListagemAgentes {
 	nextOffset: number | null;
 }
 
-export function listarAgentes(opts: { busca?: string; offset?: number; limit?: number } = {}): ListagemAgentes {
+export function listarAgentes(
+	opts: { busca?: string; offset?: number; limit?: number } = {}
+): ListagemAgentes {
 	const limit = opts.limit ?? 30;
 	const offset = opts.offset ?? 0;
 	const busca = opts.busca?.trim();
@@ -36,14 +38,17 @@ export function listarAgentes(opts: { busca?: string; offset?: number; limit?: n
 						`SELECT * FROM agentes WHERE nome LIKE '%' || @busca || '%' ORDER BY nome LIMIT @limit OFFSET @offset`
 					)
 					.all({ busca, limit: limit + 1, offset })
-			: db.prepare(`SELECT * FROM agentes ORDER BY nome LIMIT @limit OFFSET @offset`).all({ limit: limit + 1, offset })
+			: db
+					.prepare(`SELECT * FROM agentes ORDER BY nome LIMIT @limit OFFSET @offset`)
+					.all({ limit: limit + 1, offset })
 	) as AgenteRow[];
 	const hasMore = rows.length > limit;
 	return { items: rows.slice(0, limit).map(mapRow), nextOffset: hasMore ? offset + limit : null };
 }
 
 export function obterAgente(id: string): Agente | null {
-	const row = db.prepare('SELECT * FROM agentes WHERE id = @id').get({ id }) as AgenteRow | undefined;
+	const row = db.prepare('SELECT * FROM agentes WHERE id = @id').get({ id }) as
+		AgenteRow | undefined;
 	return row ? mapRow(row) : null;
 }
 
@@ -81,7 +86,9 @@ export function atualizarAgente(id: string, input: Partial<AgenteInput>): Agente
 		tipo: input.tipo ?? atual.tipo,
 		afiliacao: input.afiliacao !== undefined ? input.afiliacao : atual.afiliacao,
 		identificadorExterno:
-			input.identificadorExterno !== undefined ? input.identificadorExterno : atual.identificadorExterno
+			input.identificadorExterno !== undefined
+				? input.identificadorExterno
+				: atual.identificadorExterno
 	});
 	return obterAgente(id);
 }

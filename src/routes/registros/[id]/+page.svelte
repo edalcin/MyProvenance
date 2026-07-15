@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { formatarData } from '$lib/format';
@@ -30,8 +31,14 @@
 	let abaAtiva = $state('criacao');
 	let finalizando = $state(false);
 
-	function aoAtividadeCriada(resultado: { atividade: Atividade; entidadeGerada: Entidade | null; agente: Agente | null }) {
-		atividades = [...atividades, resultado.atividade].sort((a, b) => a.dataHora.localeCompare(b.dataHora));
+	function aoAtividadeCriada(resultado: {
+		atividade: Atividade;
+		entidadeGerada: Entidade | null;
+		agente: Agente | null;
+	}) {
+		atividades = [...atividades, resultado.atividade].sort((a, b) =>
+			a.dataHora.localeCompare(b.dataHora)
+		);
 		if (resultado.entidadeGerada) entidades = [...entidades, resultado.entidadeGerada];
 		if (resultado.agente && !agentesEnvolvidos.some((a) => a.id === resultado.agente!.id)) {
 			agentesEnvolvidos = [...agentesEnvolvidos, resultado.agente];
@@ -44,7 +51,9 @@
 		try {
 			const resposta = await fetch(`/registros/${registro.id}/finalizar`, { method: 'POST' });
 			if (!resposta.ok) {
-				const erro = await resposta.json().catch(() => ({ message: 'Erro ao finalizar Registro.' }));
+				const erro = await resposta
+					.json()
+					.catch(() => ({ message: 'Erro ao finalizar Registro.' }));
 				toast.error(erro.message ?? 'Erro ao finalizar Registro.');
 				return;
 			}
@@ -56,14 +65,19 @@
 	}
 
 	async function excluirRegistro() {
-		if (!confirm(`Excluir o Registro "${registro.titulo}"? Esta acao remove todas as Entidades e Atividades.`)) return;
+		if (
+			!confirm(
+				`Excluir o Registro "${registro.titulo}"? Esta acao remove todas as Entidades e Atividades.`
+			)
+		)
+			return;
 		const resposta = await fetch(`/registros/${registro.id}`, { method: 'DELETE' });
 		if (!resposta.ok) {
 			toast.error('Erro ao excluir Registro.');
 			return;
 		}
 		toast.success('Registro excluido.');
-		goto('/registros');
+		goto(resolve('/registros'));
 	}
 
 	let exportandoJson = $state(false);
@@ -112,6 +126,7 @@
 			</div>
 			<p class="text-muted-foreground text-xs">Criado em {formatarData(registro.criadoEm)}</p>
 			{#if registro.descricao}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitizado no servidor (sanitizarHtmlRico, allowlist fixo) antes de persistir. -->
 				<div class="prose prose-sm dark:prose-invert max-w-none">{@html registro.descricao}</div>
 			{/if}
 		</div>
@@ -138,7 +153,9 @@
 	<section class="flex flex-col gap-3">
 		<h2 class="text-lg font-medium">Diagrama de proveniência</h2>
 		{#if entidades.length === 0}
-			<p class="text-muted-foreground text-sm">Adicione a primeira Atividade (Criação) para iniciar a linhagem.</p>
+			<p class="text-muted-foreground text-sm">
+				Adicione a primeira Atividade (Criação) para iniciar a linhagem.
+			</p>
 		{:else}
 			<MermaidDiagram codigo={diagrama} />
 		{/if}
@@ -157,7 +174,8 @@
 					<Dialog.Header>
 						<Dialog.Title>Adicionar Atividade</Dialog.Title>
 						<Dialog.Description>
-							Criação gera 1 Entidade nova. Transformação usa 1+ e gera 1. Análise usa 1+ e gera 0 ou 1.
+							Criação gera 1 Entidade nova. Transformação usa 1+ e gera 1. Análise usa 1+ e gera 0
+							ou 1.
 						</Dialog.Description>
 					</Dialog.Header>
 					<Tabs.Root bind:value={abaAtiva}>
@@ -167,13 +185,28 @@
 							<Tabs.Trigger value="analise">Análise</Tabs.Trigger>
 						</Tabs.List>
 						<Tabs.Content value="criacao">
-							<ActivityForm tipo="criacao" registroId={registro.id} entidadesDisponiveis={entidades} onCriada={aoAtividadeCriada} />
+							<ActivityForm
+								tipo="criacao"
+								registroId={registro.id}
+								entidadesDisponiveis={entidades}
+								onCriada={aoAtividadeCriada}
+							/>
 						</Tabs.Content>
 						<Tabs.Content value="transformacao">
-							<ActivityForm tipo="transformacao" registroId={registro.id} entidadesDisponiveis={entidades} onCriada={aoAtividadeCriada} />
+							<ActivityForm
+								tipo="transformacao"
+								registroId={registro.id}
+								entidadesDisponiveis={entidades}
+								onCriada={aoAtividadeCriada}
+							/>
 						</Tabs.Content>
 						<Tabs.Content value="analise">
-							<ActivityForm tipo="analise" registroId={registro.id} entidadesDisponiveis={entidades} onCriada={aoAtividadeCriada} />
+							<ActivityForm
+								tipo="analise"
+								registroId={registro.id}
+								entidadesDisponiveis={entidades}
+								onCriada={aoAtividadeCriada}
+							/>
 						</Tabs.Content>
 					</Tabs.Root>
 				</Dialog.Content>
@@ -189,7 +222,9 @@
 						<div class="flex flex-wrap items-center gap-2">
 							<Badge variant="outline">{TIPO_ATIVIDADE_LABEL[atividade.tipo]}</Badge>
 							<span class="text-muted-foreground text-xs">{formatarData(atividade.dataHora)}</span>
-							<span class="text-muted-foreground text-xs">· {nomeAgente.get(atividade.agenteId) ?? 'Agente'}</span>
+							<span class="text-muted-foreground text-xs"
+								>· {nomeAgente.get(atividade.agenteId) ?? 'Agente'}</span
+							>
 						</div>
 						{#if atividade.descricao}<p>{atividade.descricao}</p>{/if}
 						<p class="text-muted-foreground text-xs">
@@ -197,7 +232,9 @@
 								{atividade.entidadesUsadas.map((id) => nomeEntidade.get(id) ?? id).join(', ')}
 								<i class="bx bx-right-arrow-alt"></i>
 							{/if}
-							{atividade.entidadeGeradaId ? (nomeEntidade.get(atividade.entidadeGeradaId) ?? '—') : '(sem Entidade gerada)'}
+							{atividade.entidadeGeradaId
+								? (nomeEntidade.get(atividade.entidadeGeradaId) ?? '—')
+								: '(sem Entidade gerada)'}
 						</p>
 						{#if atividade.local || atividade.instrumento}
 							<p class="text-muted-foreground text-xs">
@@ -205,7 +242,8 @@
 							</p>
 						{/if}
 						{#if atividade.processo}
-							<pre class="bg-muted overflow-x-auto rounded p-2 text-xs whitespace-pre-wrap">{atividade.processo}</pre>
+							<pre
+								class="bg-muted overflow-x-auto rounded p-2 text-xs whitespace-pre-wrap">{atividade.processo}</pre>
 						{/if}
 					</li>
 				{/each}

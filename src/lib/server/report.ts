@@ -35,7 +35,9 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 	} else {
 		linhas.push('| Nome | Formato | Localização | Licença |', '|---|---|---|---|');
 		for (const e of entidades) {
-			linhas.push(`| ${escaparCelula(e.nome)} | ${e.formato ?? '—'} | ${e.localizacao ?? '—'} | ${e.licenca ?? '—'} |`);
+			linhas.push(
+				`| ${escaparCelula(e.nome)} | ${e.formato ?? '—'} | ${e.localizacao ?? '—'} | ${e.licenca ?? '—'} |`
+			);
 		}
 		linhas.push('');
 	}
@@ -44,10 +46,15 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 	if (atividades.length === 0) {
 		linhas.push('_Nenhuma Atividade._', '');
 	} else {
-		linhas.push('| Tipo | Data/hora | Agente | Entidades usadas → Entidade gerada | Detalhes |', '|---|---|---|---|---|');
+		linhas.push(
+			'| Tipo | Data/hora | Agente | Entidades usadas → Entidade gerada | Detalhes |',
+			'|---|---|---|---|---|'
+		);
 		for (const a of atividades) {
 			const usadas = a.entidadesUsadas.map((id) => nomeEntidade.get(id) ?? id).join(', ');
-			const gerada = a.entidadeGeradaId ? (nomeEntidade.get(a.entidadeGeradaId) ?? a.entidadeGeradaId) : '(sem saída)';
+			const gerada = a.entidadeGeradaId
+				? (nomeEntidade.get(a.entidadeGeradaId) ?? a.entidadeGeradaId)
+				: '(sem saída)';
 			const fluxo = usadas ? `${usadas} → ${gerada}` : gerada;
 
 			const detalhesPartes: string[] = [];
@@ -56,11 +63,16 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 			if (a.instrumento) detalhesPartes.push(`Instrumento: ${a.instrumento}`);
 			if (a.processo) detalhesPartes.push(`Processo: ${a.processo}`);
 			if (a.parametros?.length) {
-				detalhesPartes.push(`Parâmetros: ${a.parametros.map((p) => `${p.chave}=${p.valor}`).join(', ')}`);
+				detalhesPartes.push(
+					`Parâmetros: ${a.parametros.map((p) => `${p.chave}=${p.valor}`).join(', ')}`
+				);
 			}
-			if (a.ambienteExecucao?.sistemaOperacional) detalhesPartes.push(`SO: ${a.ambienteExecucao.sistemaOperacional}`);
+			if (a.ambienteExecucao?.sistemaOperacional)
+				detalhesPartes.push(`SO: ${a.ambienteExecucao.sistemaOperacional}`);
 			if (a.ambienteExecucao?.pacotes?.length) {
-				detalhesPartes.push(`Pacotes: ${a.ambienteExecucao.pacotes.map((p) => `${p.nome}@${p.versao}`).join(', ')}`);
+				detalhesPartes.push(
+					`Pacotes: ${a.ambienteExecucao.pacotes.map((p) => `${p.nome}@${p.versao}`).join(', ')}`
+				);
 			}
 
 			linhas.push(

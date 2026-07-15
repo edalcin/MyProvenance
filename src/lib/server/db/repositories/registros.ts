@@ -30,7 +30,9 @@ export interface ListagemRegistros {
 	nextOffset: number | null;
 }
 
-export function listarRegistros(opts: { busca?: string; offset?: number; limit?: number } = {}): ListagemRegistros {
+export function listarRegistros(
+	opts: { busca?: string; offset?: number; limit?: number } = {}
+): ListagemRegistros {
 	const limit = opts.limit ?? 20;
 	const offset = opts.offset ?? 0;
 	const busca = opts.busca?.trim();
@@ -50,11 +52,15 @@ export function listarRegistros(opts: { busca?: string; offset?: number; limit?:
 }
 
 export function obterRegistro(id: string): RegistroProvenencia | null {
-	const row = db.prepare('SELECT * FROM registros WHERE id = @id').get({ id }) as RegistroRow | undefined;
+	const row = db.prepare('SELECT * FROM registros WHERE id = @id').get({ id }) as
+		RegistroRow | undefined;
 	return row ? mapRow(row) : null;
 }
 
-export function criarRegistro(input: { titulo: string; descricao?: string | null }): RegistroProvenencia {
+export function criarRegistro(input: {
+	titulo: string;
+	descricao?: string | null;
+}): RegistroProvenencia {
 	const id = uuidv7();
 	const criadoEm = new Date().toISOString();
 	db.prepare(
@@ -69,9 +75,12 @@ export class RegistroNaoEncontradoError extends Error {}
 export function finalizarRegistro(id: string): RegistroProvenencia {
 	const atual = obterRegistro(id);
 	if (!atual) throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
-	if (atual.status === 'finalizado') throw new RegistroJaFinalizadoError('Registro ja esta finalizado.');
+	if (atual.status === 'finalizado')
+		throw new RegistroJaFinalizadoError('Registro ja esta finalizado.');
 	const finalizadoEm = new Date().toISOString();
-	db.prepare(`UPDATE registros SET status = 'finalizado', finalizado_em = @finalizadoEm WHERE id = @id`).run({
+	db.prepare(
+		`UPDATE registros SET status = 'finalizado', finalizado_em = @finalizadoEm WHERE id = @id`
+	).run({
 		id,
 		finalizadoEm
 	});
@@ -96,6 +105,8 @@ export function obterRegistroDetalhado(id: string): RegistroDetalhado | null {
 	const entidades = listarEntidadesPorRegistro(id);
 	const atividades = listarAtividadesPorRegistro(id);
 	const idsAgentes = new Set(atividades.map((a) => a.agenteId));
-	const agentesEnvolvidos = [...idsAgentes].map((agenteId) => obterAgente(agenteId)).filter((a): a is Agente => a !== null);
+	const agentesEnvolvidos = [...idsAgentes]
+		.map((agenteId) => obterAgente(agenteId))
+		.filter((a): a is Agente => a !== null);
 	return { registro, entidades, atividades, agentesEnvolvidos };
 }

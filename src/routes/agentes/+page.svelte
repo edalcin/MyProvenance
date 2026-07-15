@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { toast } from 'svelte-sonner';
 	import { onVisible } from '$lib/actions/on-visible';
 	import { Button } from '$lib/components/ui/button';
@@ -13,7 +14,11 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const TIPO_LABEL: Record<TipoAgente, string> = { pessoa: 'Pessoa', instituicao: 'Instituição', software: 'Software' };
+	const TIPO_LABEL: Record<TipoAgente, string> = {
+		pessoa: 'Pessoa',
+		instituicao: 'Instituição',
+		software: 'Software'
+	};
 
 	// untrack: seed unica na montagem — a pagina gerencia a lista via fetch (busca/scroll infinito) dai em diante.
 	let itens = $state(untrack(() => data.pagina.items));
@@ -32,7 +37,7 @@
 	let salvando = $state(false);
 
 	async function buscarPagina(reiniciar: boolean) {
-		const params = new URLSearchParams({ limit: '30' });
+		const params = new SvelteURLSearchParams({ limit: '30' });
 		if (busca) params.set('busca', busca);
 		if (!reiniciar && proximoOffset) params.set('offset', String(proximoOffset));
 		const resposta = await fetch(`/agentes?${params}`);
@@ -96,7 +101,9 @@
 				return;
 			}
 			const agente: Agente = await resposta.json();
-			itens = editandoId ? itens.map((item) => (item.id === agente.id ? agente : item)) : [agente, ...itens];
+			itens = editandoId
+				? itens.map((item) => (item.id === agente.id ? agente : item))
+				: [agente, ...itens];
 			toast.success(editandoId ? 'Agente atualizado.' : 'Agente criado.');
 			dialogAberto = false;
 		} finally {
@@ -151,11 +158,21 @@
 					</div>
 					<div class="flex flex-col gap-1.5">
 						<Label for="afiliacao">Afiliacao</Label>
-						<Input id="afiliacao" bind:value={formAfiliacao} maxlength={300} placeholder="Ex.: UFRJ" />
+						<Input
+							id="afiliacao"
+							bind:value={formAfiliacao}
+							maxlength={300}
+							placeholder="Ex.: UFRJ"
+						/>
 					</div>
 					<div class="flex flex-col gap-1.5">
 						<Label for="identificador">Identificador externo</Label>
-						<Input id="identificador" bind:value={formIdentificador} maxlength={200} placeholder="ORCID, RRID…" />
+						<Input
+							id="identificador"
+							bind:value={formIdentificador}
+							maxlength={200}
+							placeholder="ORCID, RRID…"
+						/>
 					</div>
 					<Dialog.Footer>
 						<Button type="submit" disabled={salvando || !formNome.trim()}>
@@ -167,7 +184,12 @@
 		</Dialog.Root>
 	</div>
 
-	<Input placeholder="Buscar por nome…" bind:value={busca} oninput={aoDigitarBusca} class="max-w-sm" />
+	<Input
+		placeholder="Buscar por nome…"
+		bind:value={busca}
+		oninput={aoDigitarBusca}
+		class="max-w-sm"
+	/>
 
 	{#if itens.length === 0 && !carregandoBusca}
 		<p class="text-muted-foreground py-12 text-center text-sm">Nenhum Agente cadastrado ainda.</p>
@@ -175,7 +197,9 @@
 
 	<ul class="flex flex-col gap-2">
 		{#each itens as agente (agente.id)}
-			<li class="border-border bg-card flex items-center justify-between gap-3 rounded-lg border p-4">
+			<li
+				class="border-border bg-card flex items-center justify-between gap-3 rounded-lg border p-4"
+			>
 				<div class="flex flex-col gap-0.5">
 					<span class="font-medium">{agente.nome}</span>
 					<span class="text-muted-foreground text-xs">
@@ -185,10 +209,20 @@
 				</div>
 				<div class="flex items-center gap-2">
 					<Badge variant="outline">{TIPO_LABEL[agente.tipo]}</Badge>
-					<Button variant="ghost" size="icon-sm" onclick={() => abrirEdicao(agente)} aria-label="Editar Agente">
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						onclick={() => abrirEdicao(agente)}
+						aria-label="Editar Agente"
+					>
 						<i class="bx bx-edit-alt"></i>
 					</Button>
-					<Button variant="ghost" size="icon-sm" onclick={() => excluir(agente)} aria-label="Excluir Agente">
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						onclick={() => excluir(agente)}
+						aria-label="Excluir Agente"
+					>
 						<i class="bx bx-trash text-destructive"></i>
 					</Button>
 				</div>

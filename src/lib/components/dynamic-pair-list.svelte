@@ -28,7 +28,13 @@
 		<div class="flex items-center gap-2">
 			<Input placeholder={rotuloA} bind:value={item.a} class="flex-1" />
 			<Input placeholder={rotuloB} bind:value={item.b} class="flex-1" />
-			<Button type="button" variant="ghost" size="icon-sm" onclick={() => remover(indice)} aria-label="Remover">
+			<Button
+				type="button"
+				variant="ghost"
+				size="icon-sm"
+				onclick={() => remover(indice)}
+				aria-label="Remover"
+			>
 				<i class="bx bx-x"></i>
 			</Button>
 		</div>

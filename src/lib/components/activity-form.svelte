@@ -18,7 +18,11 @@
 		tipo: TipoAtividade;
 		registroId: string;
 		entidadesDisponiveis: Entidade[];
-		onCriada: (resultado: { atividade: Atividade; entidadeGerada: Entidade | null; agente: Agente | null }) => void;
+		onCriada: (resultado: {
+			atividade: Atividade;
+			entidadeGerada: Entidade | null;
+			agente: Agente | null;
+		}) => void;
 	} = $props();
 
 	function agoraLocal(): string {
@@ -108,9 +112,10 @@
 				local: tipo === 'criacao' ? local || null : null,
 				instrumento: tipo === 'criacao' ? instrumento || null : null,
 				processo: tipo !== 'criacao' ? processo || null : null,
-				parametros: tipo !== 'criacao' && parametros.some((p) => p.a.trim())
-					? parametros.filter((p) => p.a.trim()).map((p) => ({ chave: p.a, valor: p.b }))
-					: null,
+				parametros:
+					tipo !== 'criacao' && parametros.some((p) => p.a.trim())
+						? parametros.filter((p) => p.a.trim()).map((p) => ({ chave: p.a, valor: p.b }))
+						: null,
 				ambienteExecucao,
 				entidadeGerada: precisaGerarEntidade
 					? {
@@ -156,7 +161,12 @@
 
 	<div class="flex flex-col gap-1.5">
 		<Label for="descricao-{tipo}">Descricao</Label>
-		<Textarea id="descricao-{tipo}" bind:value={descricao} placeholder="O que aconteceu…" rows={2} />
+		<Textarea
+			id="descricao-{tipo}"
+			bind:value={descricao}
+			placeholder="O que aconteceu…"
+			rows={2}
+		/>
 	</div>
 
 	{#if tipo === 'criacao'}
@@ -174,9 +184,13 @@
 		<div class="flex flex-col gap-1.5">
 			<Label>Entidades usadas</Label>
 			{#if entidadesDisponiveis.length === 0}
-				<p class="text-muted-foreground text-xs">Nenhuma Entidade disponivel ainda — crie uma via Criacao primeiro.</p>
+				<p class="text-muted-foreground text-xs">
+					Nenhuma Entidade disponivel ainda — crie uma via Criacao primeiro.
+				</p>
 			{:else}
-				<div class="border-input flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3">
+				<div
+					class="border-input flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3"
+				>
 					{#each entidadesDisponiveis as entidade (entidade.id)}
 						<label class="flex items-center gap-2 text-sm">
 							<Checkbox
@@ -184,7 +198,8 @@
 								onCheckedChange={(marcado) => alternarEntidade(entidade.id, marcado === true)}
 							/>
 							{entidade.nome}
-							{#if entidade.formato}<span class="text-muted-foreground">({entidade.formato})</span>{/if}
+							{#if entidade.formato}<span class="text-muted-foreground">({entidade.formato})</span
+								>{/if}
 						</label>
 					{/each}
 				</div>
@@ -193,21 +208,40 @@
 
 		<div class="flex flex-col gap-1.5">
 			<Label for="processo-{tipo}">Processo</Label>
-			<Textarea id="processo-{tipo}" bind:value={processo} placeholder="Script, codigo, passos…" rows={3} />
+			<Textarea
+				id="processo-{tipo}"
+				bind:value={processo}
+				placeholder="Script, codigo, passos…"
+				rows={3}
+			/>
 		</div>
 
 		<div class="flex flex-col gap-1.5">
 			<Label>Parametros</Label>
-			<DynamicPairList bind:itens={parametros} rotuloA="Chave" rotuloB="Valor" rotuloAdicionar="Adicionar parametro" />
+			<DynamicPairList
+				bind:itens={parametros}
+				rotuloA="Chave"
+				rotuloB="Valor"
+				rotuloAdicionar="Adicionar parametro"
+			/>
 		</div>
 
 		<div class="flex flex-col gap-1.5">
 			<Label for="sistemaOperacional-{tipo}">Ambiente de execucao — sistema operacional</Label>
-			<Input id="sistemaOperacional-{tipo}" bind:value={sistemaOperacional} placeholder="Ex.: Ubuntu 24.04" />
+			<Input
+				id="sistemaOperacional-{tipo}"
+				bind:value={sistemaOperacional}
+				placeholder="Ex.: Ubuntu 24.04"
+			/>
 		</div>
 		<div class="flex flex-col gap-1.5">
 			<Label>Pacotes</Label>
-			<DynamicPairList bind:itens={pacotes} rotuloA="Nome" rotuloB="Versao" rotuloAdicionar="Adicionar pacote" />
+			<DynamicPairList
+				bind:itens={pacotes}
+				rotuloA="Nome"
+				rotuloB="Versao"
+				rotuloAdicionar="Adicionar pacote"
+			/>
 		</div>
 	{/if}
 
@@ -237,7 +271,11 @@
 			</div>
 			<div class="flex flex-col gap-1.5">
 				<Label for="localizacaoGerada-{tipo}">Localizacao</Label>
-				<Input id="localizacaoGerada-{tipo}" bind:value={localizacaoGerada} placeholder="URL ou caminho" />
+				<Input
+					id="localizacaoGerada-{tipo}"
+					bind:value={localizacaoGerada}
+					placeholder="URL ou caminho"
+				/>
 			</div>
 			<div class="flex flex-col gap-1.5">
 				<Label for="descricaoGerada-{tipo}">Descricao</Label>
