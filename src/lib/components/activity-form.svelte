@@ -20,7 +20,7 @@
 		entidadesDisponiveis: Entidade[];
 		onCriada: (resultado: {
 			atividade: Atividade;
-			entidadeGerada: Entidade | null;
+			entidadesGeradas: Entidade[];
 			agente: Agente | null;
 		}) => void;
 	} = $props();
@@ -35,6 +35,23 @@
 	function dataParaIso(dataStr: string): string {
 		const [ano, mes, dia] = dataStr.split('-').map(Number);
 		return new Date(ano, mes - 1, dia, 12).toISOString();
+	}
+
+	interface EntidadeGeradaForm {
+		nome: string;
+		descricao: string;
+		formato: string;
+		localizacao: string;
+		licenca: string;
+	}
+
+	function entidadeGeradaVazia(): EntidadeGeradaForm {
+		return { nome: '', descricao: '', formato: '', localizacao: '', licenca: '' };
+	}
+
+	/** Criacao/Transformacao exigem 1+; Analise comeca vazia (saida opcional). */
+	function entidadesGeradasIniciais(): EntidadeGeradaForm[] {
+		return tipo === 'analise' ? [] : [entidadeGeradaVazia()];
 	}
 
 	let agenteId = $state('');
@@ -53,28 +70,29 @@
 	let parametros: { a: string; b: string }[] = $state([]);
 	let pacotes: { a: string; b: string }[] = $state([]);
 
-	// Analise: saida opcional
-	let gerarSaida = $state(false);
-
-	// Entidade gerada (obrigatoria em criacao/transformacao; condicional em analise)
-	let nomeGerada = $state('');
-	let descricaoGerada = $state('');
-	let formatoGerada = $state('');
-	let localizacaoGerada = $state('');
-	let licencaGerada = $state('');
+	// Entidades geradas — Criacao/Transformacao exigem 1+, Analise aceita 0+ (varios artefatos de saida).
+	let entidadesGeradas: EntidadeGeradaForm[] = $state(entidadesGeradasIniciais());
 
 	let salvando = $state(false);
 
-	const precisaGerarEntidade = $derived(tipo !== 'analise' || gerarSaida);
 	const valido = $derived(
 		agenteId &&
 			dataHora &&
 			(tipo === 'criacao' || entidadesUsadas.length > 0) &&
-			(!precisaGerarEntidade || nomeGerada.trim())
+			entidadesGeradas.every((e) => e.nome.trim()) &&
+			(tipo === 'analise' || entidadesGeradas.length > 0)
 	);
 
 	function alternarEntidade(id: string, marcado: boolean) {
 		entidadesUsadas = marcado ? [...entidadesUsadas, id] : entidadesUsadas.filter((e) => e !== id);
+	}
+
+	function adicionarEntidadeGerada() {
+		entidadesGeradas = [...entidadesGeradas, entidadeGeradaVazia()];
+	}
+
+	function removerEntidadeGerada(indice: number) {
+		entidadesGeradas = entidadesGeradas.filter((_, i) => i !== indice);
 	}
 
 	function limparFormulario() {
@@ -89,12 +107,7 @@
 		sistemaOperacional = '';
 		parametros = [];
 		pacotes = [];
-		gerarSaida = false;
-		nomeGerada = '';
-		descricaoGerada = '';
-		formatoGerada = '';
-		localizacaoGerada = '';
-		licencaGerada = '';
+		entidadesGeradas = entidadesGeradasIniciais();
 	}
 
 	async function enviar(event: SubmitEvent) {
@@ -124,15 +137,15 @@
 						? parametros.filter((p) => p.a.trim()).map((p) => ({ chave: p.a, valor: p.b }))
 						: null,
 				ambienteExecucao,
-				entidadeGerada: precisaGerarEntidade
-					? {
-							nome: nomeGerada,
-							descricao: descricaoGerada || null,
-							formato: formatoGerada || null,
-							localizacao: localizacaoGerada || null,
-							licenca: licencaGerada || null
-						}
-					: null
+				entidadesGeradas: entidadesGeradas
+					.filter((e) => e.nome.trim())
+					.map((e) => ({
+						nome: e.nome,
+						descricao: e.descricao || null,
+						formato: e.formato || null,
+						localizacao: e.localizacao || null,
+						licenca: e.licenca || null
+					}))
 			};
 			const resposta = await fetch(`/registros/${registroId}/atividades`, {
 				method: 'POST',
@@ -256,44 +269,76 @@
 		</div>
 	{/if}
 
-	{#if tipo === 'analise'}
-		<label class="flex items-center gap-2 text-sm">
-			<Checkbox checked={gerarSaida} onCheckedChange={(v) => (gerarSaida = v === true)} />
-			Esta Analise gera uma Entidade de saida (relatorio, figura…)
-		</label>
-	{/if}
-
-	{#if precisaGerarEntidade}
-		<div class="border-input flex flex-col gap-4 rounded-md border p-3">
-			<p class="text-sm font-medium">Entidade gerada</p>
-			<div class="flex flex-col gap-1.5">
-				<Label for="nomeGerada-{tipo}">Nome</Label>
-				<Input id="nomeGerada-{tipo}" bind:value={nomeGerada} required maxlength={300} />
-			</div>
-			<div class="grid grid-cols-2 gap-4">
-				<div class="flex flex-col gap-1.5">
-					<Label for="formatoGerada-{tipo}">Formato</Label>
-					<Input id="formatoGerada-{tipo}" bind:value={formatoGerada} placeholder="CSV, JSON…" />
+	<div class="flex flex-col gap-2">
+		<Label>
+			Entidades geradas
+			{#if tipo === 'analise'}
+				<span class="text-muted-foreground font-normal">(opcional)</span>
+			{/if}
+		</Label>
+		{#each entidadesGeradas as entidadeGerada, indice (indice)}
+			<div class="border-input flex flex-col gap-4 rounded-md border p-3">
+				<div class="flex items-center justify-between">
+					<p class="text-sm font-medium">Entidade gerada {indice + 1}</p>
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon-sm"
+						onclick={() => removerEntidadeGerada(indice)}
+						aria-label="Remover Entidade gerada"
+					>
+						<i class="bx bx-trash"></i>
+					</Button>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="licencaGerada-{tipo}">Licenca</Label>
-					<Input id="licencaGerada-{tipo}" bind:value={licencaGerada} placeholder="CC-BY 4.0…" />
+					<Label for="nomeGerada-{tipo}-{indice}">Nome</Label>
+					<Input
+						id="nomeGerada-{tipo}-{indice}"
+						bind:value={entidadeGerada.nome}
+						required
+						maxlength={300}
+					/>
+				</div>
+				<div class="grid grid-cols-2 gap-4">
+					<div class="flex flex-col gap-1.5">
+						<Label for="formatoGerada-{tipo}-{indice}">Formato</Label>
+						<Input
+							id="formatoGerada-{tipo}-{indice}"
+							bind:value={entidadeGerada.formato}
+							placeholder="CSV, JSON…"
+						/>
+					</div>
+					<div class="flex flex-col gap-1.5">
+						<Label for="licencaGerada-{tipo}-{indice}">Licenca</Label>
+						<Input
+							id="licencaGerada-{tipo}-{indice}"
+							bind:value={entidadeGerada.licenca}
+							placeholder="CC-BY 4.0…"
+						/>
+					</div>
+				</div>
+				<div class="flex flex-col gap-1.5">
+					<Label for="localizacaoGerada-{tipo}-{indice}">Localizacao</Label>
+					<Input
+						id="localizacaoGerada-{tipo}-{indice}"
+						bind:value={entidadeGerada.localizacao}
+						placeholder="URL ou caminho"
+					/>
+				</div>
+				<div class="flex flex-col gap-1.5">
+					<Label for="descricaoGerada-{tipo}-{indice}">Descricao</Label>
+					<Textarea
+						id="descricaoGerada-{tipo}-{indice}"
+						bind:value={entidadeGerada.descricao}
+						rows={2}
+					/>
 				</div>
 			</div>
-			<div class="flex flex-col gap-1.5">
-				<Label for="localizacaoGerada-{tipo}">Localizacao</Label>
-				<Input
-					id="localizacaoGerada-{tipo}"
-					bind:value={localizacaoGerada}
-					placeholder="URL ou caminho"
-				/>
-			</div>
-			<div class="flex flex-col gap-1.5">
-				<Label for="descricaoGerada-{tipo}">Descricao</Label>
-				<Textarea id="descricaoGerada-{tipo}" bind:value={descricaoGerada} rows={2} />
-			</div>
-		</div>
-	{/if}
+		{/each}
+		<Button type="button" variant="outline" size="sm" onclick={adicionarEntidadeGerada}>
+			<i class="bx bx-plus"></i> Adicionar Entidade gerada
+		</Button>
+	</div>
 
 	<Button type="submit" disabled={!valido || salvando}>
 		{salvando ? 'Salvando…' : 'Adicionar Atividade'}

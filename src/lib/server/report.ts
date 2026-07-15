@@ -47,15 +47,15 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 		linhas.push('_Nenhuma Atividade._', '');
 	} else {
 		linhas.push(
-			'| Tipo | Data/hora | Agente | Entidades usadas → Entidade gerada | Detalhes |',
+			'| Tipo | Data/hora | Agente | Entidades usadas → Entidades geradas | Detalhes |',
 			'|---|---|---|---|---|'
 		);
 		for (const a of atividades) {
 			const usadas = a.entidadesUsadas.map((id) => nomeEntidade.get(id) ?? id).join(', ');
-			const gerada = a.entidadeGeradaId
-				? (nomeEntidade.get(a.entidadeGeradaId) ?? a.entidadeGeradaId)
+			const geradas = a.entidadesGeradas.length
+				? a.entidadesGeradas.map((id) => nomeEntidade.get(id) ?? id).join(', ')
 				: '(sem saída)';
-			const fluxo = usadas ? `${usadas} → ${gerada}` : gerada;
+			const fluxo = usadas ? `${usadas} → ${geradas}` : geradas;
 
 			const detalhesPartes: string[] = [];
 			if (a.descricao) detalhesPartes.push(a.descricao);

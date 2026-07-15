@@ -25,7 +25,7 @@ function entidade(id: string, nome: string, geradaPor: string): Entidade {
 
 function atividade(
 	partial: Partial<Atividade> &
-		Pick<Atividade, 'id' | 'tipo' | 'entidadesUsadas' | 'entidadeGeradaId'>
+		Pick<Atividade, 'id' | 'tipo' | 'entidadesUsadas' | 'entidadesGeradas'>
 ): Atividade {
 	return {
 		registroId: 'r1',
@@ -48,7 +48,7 @@ describe('gerarDiagramaMermaid', () => {
 			id: 'a1',
 			tipo: 'criacao',
 			entidadesUsadas: [],
-			entidadeGeradaId: 'e1'
+			entidadesGeradas: ['e1']
 		});
 		const saida = gerarDiagramaMermaid({
 			entidades: [e1],
@@ -66,13 +66,13 @@ describe('gerarDiagramaMermaid', () => {
 			id: 'a1',
 			tipo: 'criacao',
 			entidadesUsadas: [],
-			entidadeGeradaId: 'e1'
+			entidadesGeradas: ['e1']
 		});
 		const a2 = atividade({
 			id: 'a2',
 			tipo: 'transformacao',
 			entidadesUsadas: ['e1'],
-			entidadeGeradaId: 'e2',
+			entidadesGeradas: ['e2'],
 			descricao: 'limpeza'
 		});
 		const saida = gerarDiagramaMermaid({
@@ -91,19 +91,19 @@ describe('gerarDiagramaMermaid', () => {
 			id: 'a1',
 			tipo: 'criacao',
 			entidadesUsadas: [],
-			entidadeGeradaId: 'e1'
+			entidadesGeradas: ['e1']
 		});
 		const a2 = atividade({
 			id: 'a2',
 			tipo: 'criacao',
 			entidadesUsadas: [],
-			entidadeGeradaId: 'e2'
+			entidadesGeradas: ['e2']
 		});
 		const a3 = atividade({
 			id: 'a3',
 			tipo: 'transformacao',
 			entidadesUsadas: ['e1', 'e2'],
-			entidadeGeradaId: 'e3'
+			entidadesGeradas: ['e3']
 		});
 		const saida = gerarDiagramaMermaid({
 			entidades: [e1, e2, e3],
@@ -114,19 +114,44 @@ describe('gerarDiagramaMermaid', () => {
 		expect(saida).toContain('E2 -->|"Transformação (Fulana, 2026-03-05)"| E3');
 	});
 
+	it('uma Atividade pode gerar mais de uma Entidade — seta para cada saida', () => {
+		const e1 = entidade('e1', 'bruto.csv', 'a1');
+		const e2 = entidade('e2', 'parte1.csv', 'a2');
+		const e3 = entidade('e3', 'parte2.csv', 'a2');
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1']
+		});
+		const a2 = atividade({
+			id: 'a2',
+			tipo: 'transformacao',
+			entidadesUsadas: ['e1'],
+			entidadesGeradas: ['e2', 'e3']
+		});
+		const saida = gerarDiagramaMermaid({
+			entidades: [e1, e2, e3],
+			atividades: [a1, a2],
+			agentesEnvolvidos: [agente]
+		});
+		expect(saida).toContain('E1 -->|"Transformação (Fulana, 2026-03-05)"| E2');
+		expect(saida).toContain('E1 -->|"Transformação (Fulana, 2026-03-05)"| E3');
+	});
+
 	it('Analise sem saida nao aparece no diagrama', () => {
 		const e1 = entidade('e1', 'bruto.csv', 'a1');
 		const a1 = atividade({
 			id: 'a1',
 			tipo: 'criacao',
 			entidadesUsadas: [],
-			entidadeGeradaId: 'e1'
+			entidadesGeradas: ['e1']
 		});
 		const a2 = atividade({
 			id: 'a2',
 			tipo: 'analise',
 			entidadesUsadas: ['e1'],
-			entidadeGeradaId: null
+			entidadesGeradas: []
 		});
 		const saida = gerarDiagramaMermaid({
 			entidades: [e1],
@@ -142,7 +167,7 @@ describe('gerarDiagramaMermaid', () => {
 			id: 'a1',
 			tipo: 'criacao',
 			entidadesUsadas: [],
-			entidadeGeradaId: 'e1'
+			entidadesGeradas: ['e1']
 		});
 		const saida = gerarDiagramaMermaid({
 			entidades: [e1],

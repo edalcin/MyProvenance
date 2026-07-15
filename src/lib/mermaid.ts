@@ -24,9 +24,7 @@ export function gerarDiagramaMermaid(dados: {
 
 	for (const atividade of dados.atividades) {
 		// Analise sem saida nao gera no novo, nao aparece no diagrama (so na tabela de Atividades do relatorio).
-		if (!atividade.entidadeGeradaId) continue;
-		const destino = idDoNo.get(atividade.entidadeGeradaId);
-		if (!destino) continue;
+		if (atividade.entidadesGeradas.length === 0) continue;
 		// Criacao (sem entrada) e no sem seta de entrada — raiz da lineage.
 		if (atividade.entidadesUsadas.length === 0) continue;
 
@@ -35,10 +33,14 @@ export function gerarDiagramaMermaid(dados: {
 		const resumo = atividade.descricao ? `: ${escapar(atividade.descricao)}` : '';
 		const rotulo = `${TIPO_ATIVIDADE_LABEL[atividade.tipo]}${resumo} (${escapar(agente)}, ${data})`;
 
-		for (const usadaId of atividade.entidadesUsadas) {
-			const origem = idDoNo.get(usadaId);
-			if (!origem) continue;
-			linhas.push(`  ${origem} -->|"${rotulo}"| ${destino}`);
+		for (const geradaId of atividade.entidadesGeradas) {
+			const destino = idDoNo.get(geradaId);
+			if (!destino) continue;
+			for (const usadaId of atividade.entidadesUsadas) {
+				const origem = idDoNo.get(usadaId);
+				if (!origem) continue;
+				linhas.push(`  ${origem} -->|"${rotulo}"| ${destino}`);
+			}
 		}
 	}
 

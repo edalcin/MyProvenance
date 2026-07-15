@@ -41,16 +41,16 @@ Termos em **negrito** neste documento são os termos canônicos definidos em `CO
 
 Campos comuns a todos os tipos:
 
-| Campo              | Tipo                                            | Obrigatório | Notas                                                |
-| ------------------ | ----------------------------------------------- | ----------- | ---------------------------------------------------- |
-| `id`               | UUIDv7                                          | sim         |                                                      |
-| `registroId`       | UUIDv7                                          | sim         | FK                                                   |
-| `tipo`             | enum: `criacao` \| `transformacao` \| `analise` | sim         |                                                      |
-| `agenteId`         | UUIDv7                                          | sim         | FK para **Agente**                                   |
-| `dataHora`         | datetime                                        | sim         |                                                      |
-| `descricao`        | texto                                           | não         | descrição livre do que aconteceu                     |
-| `entidadesUsadas`  | lista de UUIDv7                                 | condicional | vazio em Criação; 1+ em Transformação/Análise        |
-| `entidadeGeradaId` | UUIDv7 \| null                                  | condicional | sempre em Criação/Transformação; opcional em Análise |
+| Campo              | Tipo                                            | Obrigatório | Notas                                         |
+| ------------------ | ----------------------------------------------- | ----------- | --------------------------------------------- |
+| `id`               | UUIDv7                                          | sim         |                                               |
+| `registroId`       | UUIDv7                                          | sim         | FK                                            |
+| `tipo`             | enum: `criacao` \| `transformacao` \| `analise` | sim         |                                               |
+| `agenteId`         | UUIDv7                                          | sim         | FK para **Agente**                            |
+| `dataHora`         | datetime                                        | sim         |                                               |
+| `descricao`        | texto                                           | não         | descrição livre do que aconteceu              |
+| `entidadesUsadas`  | lista de UUIDv7                                 | condicional | vazio em Criação; 1+ em Transformação/Análise |
+| `entidadesGeradas` | lista de UUIDv7                                 | condicional | 1+ em Criação/Transformação; 0+ em Análise    |
 
 Campos por tipo:
 
@@ -58,7 +58,7 @@ Campos por tipo:
 - **Transformação** — `processo` (texto: script/código/passos), `parametros` (lista chave-valor livre), `ambienteExecucao` (`{ sistemaOperacional, pacotes: [{ nome, versao }] }`).
 - **Análise** — `processo`, `ambienteExecucao` — mesmos campos de Transformação, ambos opcionais.
 
-Regra de cardinalidade (ver `CONTEXT.md`): Criação gera 1, usa 0. Transformação usa 1+, gera 1. Análise usa 1+, gera 0 ou 1.
+Regra de cardinalidade (ver `CONTEXT.md`): Criação gera 1+, usa 0. Transformação usa 1+, gera 1+. Análise usa 1+, gera 0+.
 
 ### 2.4 Agente
 
@@ -125,7 +125,7 @@ CREATE TABLE atividade_entidades_usadas (
 );
 ```
 
-`entidadeGeradaId` de uma Atividade é obtido por consulta reversa (`SELECT id FROM entidades WHERE gerada_por_atividade_id = ?`) — evita FK circular entre as duas tabelas.
+`entidadesGeradas` de uma Atividade é obtido por consulta reversa (`SELECT id FROM entidades WHERE gerada_por_atividade_id = ?`, podendo retornar 0, 1 ou mais linhas) — evita FK circular entre as duas tabelas.
 
 Regra de imutabilidade (ADR-0003): quando `registros.status = 'finalizado'`, a camada de aplicação bloqueia `UPDATE`/`DELETE` em `atividades` e `entidades` daquele `registro_id` — só `INSERT`. Exclusão do Registro inteiro (`DELETE FROM registros`, cascata) é sempre permitida, em qualquer status, mediante confirmação explícita na UI.
 
@@ -135,7 +135,7 @@ Customizado, inspirado no vocabulário PROV, não PROV-JSON formal (ADR-0005). C
 
 ```json
 {
-	"schemaVersion": 1,
+	"schemaVersion": 2,
 	"registro": {
 		"id": "018f2f3a-...",
 		"titulo": "Levantamento de espécies — Trilha do Ouro",
@@ -174,7 +174,7 @@ Customizado, inspirado no vocabulário PROV, não PROV-JSON formal (ADR-0005). C
 			"local": "-22.95, -43.20",
 			"instrumento": "GPS Garmin eTrex 32x",
 			"entidadesUsadas": [],
-			"entidadeGeradaId": "018f2f3c-..."
+			"entidadesGeradas": ["018f2f3c-..."]
 		}
 	]
 }
@@ -187,7 +187,7 @@ Upload (retomar): upsert por `registro.id` — se existe localmente, atualiza; s
 Gerado a partir do grafo de Entidades/Atividades de um Registro. Regras:
 
 - Cada **Entidade** é um nó: `id["nome (formato)"]`.
-- Cada Atividade que **gera** uma Entidade produz uma seta por Entidade **usada** apontando para a Entidade gerada, rotulada `tipo: descrição curta (Agente, data)`. Quando a Atividade usa mais de uma Entidade (fusão de datasets), a mesma seta/rótulo se repete em cada entrada convergindo no mesmo nó de saída.
+- Cada Atividade que **gera** Entidades produz uma seta de cada Entidade **usada** para cada Entidade **gerada**, rotulada `tipo: descrição curta (Agente, data)`. Quando a Atividade usa e/ou gera mais de uma Entidade, a mesma seta/rótulo se repete para cada combinação entrada×saída (fan-out completo).
 - **Criação** (sem entrada) aparece como nó sem seta de entrada — raiz da lineage.
 - **Análise sem saída** não gera nó novo; não aparece no diagrama, só na tabela de Atividades do relatório (§6).
 

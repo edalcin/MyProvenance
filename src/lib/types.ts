@@ -58,7 +58,7 @@ export interface Atividade {
 	dataHora: string;
 	descricao: string | null;
 	entidadesUsadas: string[];
-	entidadeGeradaId: string | null;
+	entidadesGeradas: string[];
 	// Criação
 	local: string | null;
 	instrumento: string | null;
@@ -77,7 +77,7 @@ export interface RegistroExportado {
 	atividades: Atividade[];
 }
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const FORMATOS_SUGERIDOS = [
 	'CSV',

@@ -11,15 +11,41 @@ describe('regra de cardinalidade de Atividade', () => {
 
 	it('Criacao gera 1 Entidade sem usar nenhuma', () => {
 		const registro = criarRegistro({ titulo: 'Registro criacao' });
-		const { atividade, entidadeGerada } = criarAtividade(registro.id, {
+		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
-			entidadeGerada: { nome: 'campo_bruto.csv' }
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
-		expect(atividade.entidadeGeradaId).toBe(entidadeGerada?.id);
+		expect(atividade.entidadesGeradas).toEqual([entidadesGeradas[0].id]);
 		expect(atividade.entidadesUsadas).toHaveLength(0);
+	});
+
+	it('Criacao pode gerar mais de uma Entidade', () => {
+		const registro = criarRegistro({ titulo: 'Registro criacao multipla' });
+		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'parte1.csv' }, { nome: 'parte2.csv' }]
+		});
+		expect(entidadesGeradas.map((e) => e.nome)).toEqual(['parte1.csv', 'parte2.csv']);
+		expect(atividade.entidadesGeradas).toHaveLength(2);
+	});
+
+	it('Criacao sem gerar nenhuma Entidade e rejeitada', () => {
+		const registro = criarRegistro({ titulo: 'Registro sem saida' });
+		expect(() =>
+			criarAtividade(registro.id, {
+				tipo: 'criacao',
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [],
+				entidadesGeradas: []
+			})
+		).toThrow(RegraCardinalidadeError);
 	});
 
 	it('Criacao com Entidade de entrada e rejeitada', () => {
@@ -30,86 +56,124 @@ describe('regra de cardinalidade de Atividade', () => {
 				agenteId: agente.id,
 				dataHora: new Date().toISOString(),
 				entidadesUsadas: ['id-inexistente'],
-				entidadeGerada: { nome: 'x' }
+				entidadesGeradas: [{ nome: 'x' }]
 			})
 		).toThrow(RegraCardinalidadeError);
 	});
 
 	it('Transformacao usa 1+ Entidades do mesmo Registro e gera 1', () => {
 		const registro = criarRegistro({ titulo: 'Registro transformacao' });
-		const { entidadeGerada: bruta } = criarAtividade(registro.id, {
+		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
-			entidadeGerada: { nome: 'campo_bruto.csv' }
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
-		const { atividade, entidadeGerada } = criarAtividade(registro.id, {
+		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
 			tipo: 'transformacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
-			entidadesUsadas: [bruta!.id],
-			entidadeGerada: { nome: 'campo_limpo.csv' }
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'campo_limpo.csv' }]
 		});
-		expect(atividade.entidadesUsadas).toEqual([bruta!.id]);
-		expect(entidadeGerada?.nome).toBe('campo_limpo.csv');
+		expect(atividade.entidadesUsadas).toEqual([brutas[0].id]);
+		expect(entidadesGeradas[0].nome).toBe('campo_limpo.csv');
+	});
+
+	it('Transformacao pode gerar mais de uma Entidade', () => {
+		const registro = criarRegistro({ titulo: 'Registro transformacao multipla' });
+		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
+		});
+		const { entidadesGeradas } = criarAtividade(registro.id, {
+			tipo: 'transformacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'treino.csv' }, { nome: 'teste.csv' }]
+		});
+		expect(entidadesGeradas.map((e) => e.nome)).toEqual(['treino.csv', 'teste.csv']);
 	});
 
 	it('Transformacao sem Entidade gerada e rejeitada', () => {
 		const registro = criarRegistro({ titulo: 'Registro transformacao invalida' });
-		const { entidadeGerada: bruta } = criarAtividade(registro.id, {
+		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
-			entidadeGerada: { nome: 'campo_bruto.csv' }
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
 		expect(() =>
 			criarAtividade(registro.id, {
 				tipo: 'transformacao',
 				agenteId: agente.id,
 				dataHora: new Date().toISOString(),
-				entidadesUsadas: [bruta!.id]
+				entidadesUsadas: [brutas[0].id]
 			})
 		).toThrow(RegraCardinalidadeError);
 	});
 
 	it('Analise aceita gerar 0 Entidades (relatorio sem saida)', () => {
 		const registro = criarRegistro({ titulo: 'Registro analise' });
-		const { entidadeGerada: bruta } = criarAtividade(registro.id, {
+		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
-			entidadeGerada: { nome: 'campo_bruto.csv' }
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
 		});
-		const { atividade, entidadeGerada } = criarAtividade(registro.id, {
+		const { atividade, entidadesGeradas } = criarAtividade(registro.id, {
 			tipo: 'analise',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
-			entidadesUsadas: [bruta!.id]
+			entidadesUsadas: [brutas[0].id]
 		});
-		expect(entidadeGerada).toBeNull();
-		expect(atividade.entidadeGeradaId).toBeNull();
+		expect(entidadesGeradas).toHaveLength(0);
+		expect(atividade.entidadesGeradas).toHaveLength(0);
+	});
+
+	it('Analise pode gerar mais de uma Entidade (varios artefatos de saida)', () => {
+		const registro = criarRegistro({ titulo: 'Registro analise multipla' });
+		const { entidadesGeradas: brutas } = criarAtividade(registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
+		});
+		const { entidadesGeradas } = criarAtividade(registro.id, {
+			tipo: 'analise',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'grafico.png' }, { nome: 'tabela.csv' }]
+		});
+		expect(entidadesGeradas.map((e) => e.nome)).toEqual(['grafico.png', 'tabela.csv']);
 	});
 
 	it('Entidade de outro Registro nao pode ser usada', () => {
 		const registroA = criarRegistro({ titulo: 'Registro A' });
 		const registroB = criarRegistro({ titulo: 'Registro B' });
-		const { entidadeGerada: entidadeDeA } = criarAtividade(registroA.id, {
+		const { entidadesGeradas: deA } = criarAtividade(registroA.id, {
 			tipo: 'criacao',
 			agenteId: agente.id,
 			dataHora: new Date().toISOString(),
 			entidadesUsadas: [],
-			entidadeGerada: { nome: 'so_de_A.csv' }
+			entidadesGeradas: [{ nome: 'so_de_A.csv' }]
 		});
 		expect(() =>
 			criarAtividade(registroB.id, {
 				tipo: 'transformacao',
 				agenteId: agente.id,
 				dataHora: new Date().toISOString(),
-				entidadesUsadas: [entidadeDeA!.id],
-				entidadeGerada: { nome: 'x' }
+				entidadesUsadas: [deA[0].id],
+				entidadesGeradas: [{ nome: 'x' }]
 			})
 		).toThrow(RegraCardinalidadeError);
 	});

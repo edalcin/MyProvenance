@@ -33,13 +33,14 @@
 
 	function aoAtividadeCriada(resultado: {
 		atividade: Atividade;
-		entidadeGerada: Entidade | null;
+		entidadesGeradas: Entidade[];
 		agente: Agente | null;
 	}) {
 		atividades = [...atividades, resultado.atividade].sort((a, b) =>
 			a.dataHora.localeCompare(b.dataHora)
 		);
-		if (resultado.entidadeGerada) entidades = [...entidades, resultado.entidadeGerada];
+		if (resultado.entidadesGeradas.length)
+			entidades = [...entidades, ...resultado.entidadesGeradas];
 		if (resultado.agente && !agentesEnvolvidos.some((a) => a.id === resultado.agente!.id)) {
 			agentesEnvolvidos = [...agentesEnvolvidos, resultado.agente];
 		}
@@ -232,8 +233,8 @@
 								{atividade.entidadesUsadas.map((id) => nomeEntidade.get(id) ?? id).join(', ')}
 								<i class="bx bx-right-arrow-alt"></i>
 							{/if}
-							{atividade.entidadeGeradaId
-								? (nomeEntidade.get(atividade.entidadeGeradaId) ?? '—')
+							{atividade.entidadesGeradas.length > 0
+								? atividade.entidadesGeradas.map((id) => nomeEntidade.get(id) ?? id).join(', ')
 								: '(sem Entidade gerada)'}
 						</p>
 						{#if atividade.local || atividade.instrumento}

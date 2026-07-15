@@ -13,13 +13,13 @@ Registro manual, preenchido pelo usuário via formulário, de um processo que us
 _Avoid_: Evento
 
 **Criação**:
-Atividade que gera exatamente 1 Entidade nova, sem usar nenhuma Entidade de entrada. É a origem de uma linhagem.
+Atividade que gera 1 ou mais Entidades novas, sem usar nenhuma Entidade de entrada. É a origem de uma linhagem.
 
 **Transformação**:
-Atividade que usa 1 ou mais Entidades existentes e gera exatamente 1 Entidade nova (a próxima versão).
+Atividade que usa 1 ou mais Entidades existentes e gera 1 ou mais Entidades novas.
 
 **Análise**:
-Atividade que usa 1 ou mais Entidades existentes e gera 0 ou 1 Entidade nova. A saída (ex.: relatório, figura, resultado estatístico) é opcional.
+Atividade que usa 1 ou mais Entidades existentes e gera 0 ou mais Entidades novas. A saída (ex.: relatório, figura, resultado estatístico) é opcional e pode ser mais de um artefato.
 
 **Agente**:
 Registro cadastrado e reutilizável que identifica quem ou o que é responsável por uma Atividade: Pessoa, Instituição ou Software. Selecionado via autocomplete a partir de um cadastro, nunca redigitado — evita duplicidade e inconsistência de nomes entre Atividades.

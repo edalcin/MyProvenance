@@ -26,7 +26,7 @@ interface AtividadeRow {
 function mapRow(
 	row: AtividadeRow,
 	entidadesUsadas: string[],
-	entidadeGeradaId: string | null
+	entidadesGeradas: string[]
 ): Atividade {
 	return {
 		id: row.id,
@@ -36,7 +36,7 @@ function mapRow(
 		dataHora: row.data_hora,
 		descricao: row.descricao,
 		entidadesUsadas,
-		entidadeGeradaId,
+		entidadesGeradas,
 		local: row.local,
 		instrumento: row.instrumento,
 		processo: row.processo,
@@ -54,26 +54,26 @@ function entidadesUsadasDe(atividadeId: string): string[] {
 	return rows.map((r) => r.entidade_id);
 }
 
-/** entidadeGeradaId nao tem coluna propria (evita FK circular) — consulta reversa, ver especificacao.md §3. */
-function entidadeGeradaPor(atividadeId: string): string | null {
-	const row = db
+/** entidadesGeradas nao tem coluna propria (evita FK circular) — consulta reversa, ver especificacao.md §3. */
+function entidadesGeradasPor(atividadeId: string): string[] {
+	const rows = db
 		.prepare('SELECT id FROM entidades WHERE gerada_por_atividade_id = @atividadeId')
-		.get({ atividadeId }) as { id: string } | undefined;
-	return row?.id ?? null;
+		.all({ atividadeId }) as { id: string }[];
+	return rows.map((r) => r.id);
 }
 
 export function listarAtividadesPorRegistro(registroId: string): Atividade[] {
 	const rows = db
 		.prepare('SELECT * FROM atividades WHERE registro_id = @registroId ORDER BY data_hora')
 		.all({ registroId }) as AtividadeRow[];
-	return rows.map((row) => mapRow(row, entidadesUsadasDe(row.id), entidadeGeradaPor(row.id)));
+	return rows.map((row) => mapRow(row, entidadesUsadasDe(row.id), entidadesGeradasPor(row.id)));
 }
 
 export function obterAtividade(id: string): Atividade | null {
 	const row = db.prepare('SELECT * FROM atividades WHERE id = @id').get({ id }) as
 		AtividadeRow | undefined;
 	if (!row) return null;
-	return mapRow(row, entidadesUsadasDe(row.id), entidadeGeradaPor(row.id));
+	return mapRow(row, entidadesUsadasDe(row.id), entidadesGeradasPor(row.id));
 }
 
 export interface NovaEntidadeInput {
@@ -95,24 +95,26 @@ export interface CriarAtividadeInput {
 	processo?: string | null;
 	parametros?: ParametroAtividade[] | null;
 	ambienteExecucao?: AmbienteExecucao | null;
-	/** obrigatoria em criacao/transformacao; opcional (0 ou 1) em analise. */
-	entidadeGerada?: NovaEntidadeInput | null;
+	/** obrigatorio 1+ em criacao/transformacao; opcional (0+) em analise. */
+	entidadesGeradas?: NovaEntidadeInput[];
 }
 
-/** Regra de cardinalidade por tipo — CONTEXT.md: Criacao usa 0 gera 1, Transformacao usa 1+ gera 1, Analise usa 1+ gera 0|1. */
+/** Regra de cardinalidade por tipo — CONTEXT.md: Criacao usa 0 gera 1+, Transformacao usa 1+ gera 1+, Analise usa 1+ gera 0+. */
 export class RegraCardinalidadeError extends Error {}
 
 function validarCardinalidade(input: CriarAtividadeInput): void {
 	const usadas = input.entidadesUsadas.length;
-	const gera = !!input.entidadeGerada;
+	const geradas = input.entidadesGeradas?.length ?? 0;
 	if (input.tipo === 'criacao') {
 		if (usadas !== 0) throw new RegraCardinalidadeError('Criacao nao usa Entidades existentes.');
-		if (!gera) throw new RegraCardinalidadeError('Criacao deve gerar exatamente 1 Entidade.');
+		if (geradas < 1) throw new RegraCardinalidadeError('Criacao deve gerar 1 ou mais Entidades.');
 	} else if (input.tipo === 'transformacao') {
 		if (usadas < 1) throw new RegraCardinalidadeError('Transformacao usa 1 ou mais Entidades.');
-		if (!gera) throw new RegraCardinalidadeError('Transformacao deve gerar exatamente 1 Entidade.');
-	} else {
-		if (usadas < 1) throw new RegraCardinalidadeError('Analise usa 1 ou mais Entidades.');
+		if (geradas < 1) {
+			throw new RegraCardinalidadeError('Transformacao deve gerar 1 ou mais Entidades.');
+		}
+	} else if (usadas < 1) {
+		throw new RegraCardinalidadeError('Analise usa 1 ou mais Entidades.');
 	}
 }
 
@@ -153,22 +155,22 @@ const criarAtividadeTx = db.transaction((registroId: string, input: CriarAtivida
 		inserirUsoStmt.run({ atividadeId, entidadeId });
 	}
 
-	let entidadeGerada: Entidade | null = null;
-	if (input.entidadeGerada) {
-		entidadeGerada = {
+	const entidadesGeradas: Entidade[] = (input.entidadesGeradas ?? []).map((nova) => {
+		const entidade: Entidade = {
 			id: uuidv7(),
 			registroId,
-			nome: input.entidadeGerada.nome,
-			descricao: input.entidadeGerada.descricao ?? null,
-			formato: input.entidadeGerada.formato ?? null,
-			localizacao: input.entidadeGerada.localizacao ?? null,
-			licenca: input.entidadeGerada.licenca ?? null,
+			nome: nova.nome,
+			descricao: nova.descricao ?? null,
+			formato: nova.formato ?? null,
+			localizacao: nova.localizacao ?? null,
+			licenca: nova.licenca ?? null,
 			geradaPorAtividadeId: atividadeId
 		};
-		inserirEntidade(entidadeGerada);
-	}
+		inserirEntidade(entidade);
+		return entidade;
+	});
 
-	return { atividade: obterAtividade(atividadeId)!, entidadeGerada };
+	return { atividade: obterAtividade(atividadeId)!, entidadesGeradas };
 });
 
 /** Sempre permitido, mesmo em Registro finalizado — finalizado so bloqueia editar/excluir historico (ADR-0003). */

@@ -54,7 +54,7 @@ export const criarAtividadeInputSchema = z.object({
 	processo: z.string().trim().max(20000).nullable().optional(),
 	parametros: z.array(parametroAtividadeSchema).nullable().optional(),
 	ambienteExecucao: ambienteExecucaoSchema.nullable().optional(),
-	entidadeGerada: novaEntidadeInputSchema.nullable().optional()
+	entidadesGeradas: z.array(novaEntidadeInputSchema).optional().default([])
 });
 export type CriarAtividadeInput = z.infer<typeof criarAtividadeInputSchema>;
 
@@ -89,7 +89,8 @@ export const atividadeExportadaSchema = z.object({
 	dataHora: z.iso.datetime({ offset: true }),
 	descricao: z.string().trim().max(5000).nullable(),
 	entidadesUsadas: z.array(z.uuid()),
-	entidadeGeradaId: z.uuid().nullable(),
+	// optional/default: compatibilidade com JSON exportado no schemaVersion 1 (campo nao existia).
+	entidadesGeradas: z.array(z.uuid()).optional().default([]),
 	local: z.string().trim().max(500).nullable(),
 	instrumento: z.string().trim().max(300).nullable(),
 	processo: z.string().trim().max(20000).nullable(),
