@@ -25,15 +25,21 @@
 		}) => void;
 	} = $props();
 
-	function agoraLocal(): string {
+	function hojeLocal(): string {
 		const d = new Date();
 		const pad = (n: number) => String(n).padStart(2, '0');
-		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+	}
+
+	/** "YYYY-MM-DD" -> ISO ao meio-dia local (evita virar o dia anterior/seguinte em fusos negativos/positivos ao reformatar). */
+	function dataParaIso(dataStr: string): string {
+		const [ano, mes, dia] = dataStr.split('-').map(Number);
+		return new Date(ano, mes - 1, dia, 12).toISOString();
 	}
 
 	let agenteId = $state('');
 	let agenteSelecionado: Agente | null = $state(null);
-	let dataHora = $state(agoraLocal());
+	let dataHora = $state(hojeLocal());
 	let descricao = $state('');
 	let entidadesUsadas: string[] = $state([]);
 
@@ -74,7 +80,7 @@
 	function limparFormulario() {
 		agenteId = '';
 		agenteSelecionado = null;
-		dataHora = agoraLocal();
+		dataHora = hojeLocal();
 		descricao = '';
 		entidadesUsadas = [];
 		local = '';
@@ -106,7 +112,8 @@
 			const corpo = {
 				tipo,
 				agenteId,
-				dataHora: new Date(dataHora).toISOString(),
+				// meio-dia local evita a data exibida "voltar" um dia ao formatar de volta em fuso negativo.
+				dataHora: dataParaIso(dataHora),
 				descricao: descricao || null,
 				entidadesUsadas: tipo === 'criacao' ? [] : entidadesUsadas,
 				local: tipo === 'criacao' ? local || null : null,
@@ -154,8 +161,8 @@
 			<AgentPicker bind:value={agenteId} onAgente={(a) => (agenteSelecionado = a)} />
 		</div>
 		<div class="flex flex-col gap-1.5">
-			<Label for="dataHora-{tipo}">Data/hora</Label>
-			<Input id="dataHora-{tipo}" type="datetime-local" bind:value={dataHora} required />
+			<Label for="dataHora-{tipo}">Data</Label>
+			<Input id="dataHora-{tipo}" type="date" bind:value={dataHora} required />
 		</div>
 	</div>
 
@@ -176,8 +183,12 @@
 				<Input id="local-{tipo}" bind:value={local} placeholder="Coordenadas ou local" />
 			</div>
 			<div class="flex flex-col gap-1.5">
-				<Label for="instrumento-{tipo}">Instrumento</Label>
-				<Input id="instrumento-{tipo}" bind:value={instrumento} placeholder="Marca/modelo" />
+				<Label for="instrumento-{tipo}">Ferramenta ou Software</Label>
+				<Input
+					id="instrumento-{tipo}"
+					bind:value={instrumento}
+					placeholder="Marca/modelo ou nome do software"
+				/>
 			</div>
 		</div>
 	{:else}

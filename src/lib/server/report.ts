@@ -60,7 +60,7 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 			const detalhesPartes: string[] = [];
 			if (a.descricao) detalhesPartes.push(a.descricao);
 			if (a.local) detalhesPartes.push(`Local: ${a.local}`);
-			if (a.instrumento) detalhesPartes.push(`Instrumento: ${a.instrumento}`);
+			if (a.instrumento) detalhesPartes.push(`Ferramenta ou Software: ${a.instrumento}`);
 			if (a.processo) detalhesPartes.push(`Processo: ${a.processo}`);
 			if (a.parametros?.length) {
 				detalhesPartes.push(
