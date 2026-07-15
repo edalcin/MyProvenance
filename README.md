@@ -1,6 +1,30 @@
 # MyProvenance
 
-Ferramenta web para documentar a proveniência (origem, transformação e análise) de conjuntos de dados de pesquisa, sem armazenar os dados em si — seguindo o modelo W3C PROV (Entidades, Atividades, Agentes).
+**A história por trás dos seus dados de pesquisa merece ser preservada.**
+
+Todo conjunto de dados carrega uma trajetória: de onde veio, quem coletou, quais transformações sofreu, que análises geraram cada resultado. Quando essa trajetória não é registrada, ela se perde — e com ela se perde a possibilidade de reproduzir um resultado, de auditar um erro, de dar crédito correto a quem gerou o dado original, ou de reutilizar com confiança o trabalho de outra pessoa (ou o seu próprio, meses depois).
+
+**MyProvenance** existe para que essa história nunca se perca. É uma ferramenta web simples e self-hosted para documentar a **proveniência** — origem, transformação e análise — de conjuntos de dados de pesquisa, seguindo o modelo internacional **W3C PROV**. Ela registra os *metadados* do processo científico (quem, quando, como, com quê), nunca o dado em si: seus arquivos continuam onde já estão, sob seu controle.
+
+## Por que isso importa para a ciência
+
+- **Reprodutibilidade** — permite que outros pesquisadores (ou você mesmo, no futuro) sigam exatamente os mesmos passos, com os mesmos parâmetros e versões de software, até o mesmo resultado.
+- **Atribuição e crédito** — identifica com clareza quem gerou cada dado e cada análise, preservando a autoria ao longo de toda a cadeia.
+- **Auditoria e confiança** — quando um erro aparece numa análise, a proveniência permite rastrear o caminho de volta: a falha estava na coleta? Num script de limpeza? Numa etapa de modelagem?
+- **Reusabilidade (o "R" do FAIR)** — dados bem documentados podem ser reaproveitados por outras equipes e outros projetos, multiplicando o valor do trabalho já feito.
+
+Documentar proveniência não é burocracia — é o que transforma um arquivo solto num dado científico verdadeiramente confiável.
+
+## O que o MyProvenance faz por você
+
+- **Registra o ciclo de vida completo** de um conjunto de dados através de três tipos de evento — Criação, Transformação e Análise — cada um com seus próprios campos (instrumento, script, parâmetros, ambiente de execução).
+- **Desenha o diagrama de linhagem automaticamente**, ao vivo, à medida que você registra as etapas — sem precisar desenhar nada à mão.
+- **Gera um relatório `.md` portátil** com o diagrama e todas as tabelas, pronto para anexar a um artigo, repositório ou submissão.
+- **Exporta um JSON completo** do registro para backup, compartilhamento entre colegas ou migração para outra instância.
+- **Não guarda o dado em si** — só a documentação sobre ele. Seus arquivos de pesquisa continuam onde estão.
+- É **grátis, self-hosted e instalável como app (PWA)** — você mantém o controle total sobre onde a informação fica.
+
+Comece registrando a primeira Criação do seu conjunto de dados e deixe a linhagem crescer com o seu projeto.
 
 Ver `CONTEXT.md`, `docs/especificacao.md` e `docs/adr/` para o modelo de domínio e as decisões arquiteturais.
 
