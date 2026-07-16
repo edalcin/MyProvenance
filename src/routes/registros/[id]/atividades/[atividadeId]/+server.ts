@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
 
 /** Edicao so em Registro Rascunho (ADR-0003) — tipo da Atividade e imutavel. */
 export const PATCH: RequestHandler = async ({ params, request, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	const input = await parseBody(request, atualizarAtividadeInputSchema);
 	try {
 		const resultado = atualizarAtividade(locals.usuario.id, params.id, params.atividadeId, input);
@@ -19,7 +19,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 /** Exclusao so em Registro Rascunho (ADR-0003) — remove tambem as Entidades geradas (409 se alguma
  * estiver em uso como entrada de outra Atividade). */
 export const DELETE: RequestHandler = ({ params, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	try {
 		excluirAtividade(locals.usuario.id, params.id, params.atividadeId);
 	} catch (err) {

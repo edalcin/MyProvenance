@@ -60,4 +60,11 @@ describe('gerarRelatorioMarkdown', () => {
 		const md = gerarRelatorioMarkdown(detalhe, '2026-03-15T18:00:00.000Z');
 		expect(md).toContain('arquivo\\|com\\|pipe.csv');
 	});
+
+	it('locale "en" traduz cabecalhos e status', () => {
+		const md = gerarRelatorioMarkdown(detalheVazio, '2026-03-15T18:00:00.000Z', 'en');
+		expect(md).toContain('**Status:** Draft');
+		expect(md).toContain('## Entities');
+		expect(md).toContain('_No entities._');
+	});
 });

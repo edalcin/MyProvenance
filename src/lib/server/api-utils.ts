@@ -8,14 +8,11 @@ export async function parseBody<T>(request: Request, schema: ZodType<T>): Promis
 	try {
 		corpo = await request.json();
 	} catch {
-		error(400, 'Corpo da requisicao precisa ser JSON valido.');
+		error(400, 'error.invalid_json_body');
 	}
 	const resultado = schema.safeParse(corpo);
 	if (!resultado.success) {
-		error(
-			400,
-			resultado.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')
-		);
+		error(400, resultado.error.issues[0].message);
 	}
 	return resultado.data;
 }
@@ -39,7 +36,7 @@ export function toApiError(err: unknown): never {
 		// better-sqlite3 anexa .code do erro nativo do SQLite; sem tipo publico exportado, cast pontual justificado.
 		const codigo = (err as Error & { code: string }).code;
 		if (codigo === 'SQLITE_CONSTRAINT_FOREIGNKEY') {
-			error(409, 'Recurso em uso por outro dado e nao pode ser excluido.');
+			error(409, 'error.resource_in_use');
 		}
 	}
 	throw err;

@@ -10,10 +10,10 @@ import type { RequestHandler } from './$types';
 
 /** Primeira exportacao do JSON finaliza o Registro (Rascunho -> Finalizado) — CONTEXT.md, ADR-0003. */
 export const GET: RequestHandler = ({ params, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	const usuarioId = locals.usuario.id;
 	let detalhe = obterRegistroDetalhado(params.id, usuarioId);
-	if (!detalhe) error(404, 'Registro nao encontrado.');
+	if (!detalhe) error(404, 'error.record_not_found');
 
 	if (detalhe.registro.status === 'rascunho') {
 		try {

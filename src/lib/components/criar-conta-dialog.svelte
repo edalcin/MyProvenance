@@ -8,6 +8,7 @@
 	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
 	import { gerarJsonExportado } from '$lib/export';
 	import * as dadosApi from '$lib/client/dados';
+	import { t } from '$lib/i18n/estado.svelte';
 
 	let aberto = $state(false);
 	let username = $state('');
@@ -50,20 +51,20 @@
 				body: JSON.stringify({ username: username.trim(), pin })
 			});
 			if (!resposta.ok) {
-				const erro = await resposta.json().catch(() => ({ message: 'Erro ao criar conta.' }));
-				toast.error(erro.message ?? 'Erro ao criar conta.');
+				const erro = await resposta
+					.json()
+					.catch(() => ({ message: 'error.create_account_failed' }));
+				toast.error(t(erro.message ?? 'error.create_account_failed'));
 				return;
 			}
 			// dados.ts decide fetch-vs-local por usuarioAtual — sem isto, a migracao abaixo ainda
 			// rodaria contra a propria sessao anonima (no-op seguido de limparSessao).
 			usuarioAtual.definir(await resposta.json());
 			await migrarSessaoAnonima();
-			toast.success('Conta criada — seus dados foram salvos.');
+			toast.success(t('success.account_created'));
 			window.location.reload();
 		} catch {
-			toast.error(
-				'Conta criada, mas houve erro ao migrar os dados locais. Tente entrar e importar o JSON manualmente.'
-			);
+			toast.error(t('error.account_migration_failed'));
 		} finally {
 			criando = false;
 		}
@@ -73,24 +74,25 @@
 <Dialog.Root bind:open={aberto}>
 	<Dialog.Trigger>
 		{#snippet child({ props })}
-			<Button {...props} size="sm"><i class="bx bx-user-plus"></i> Criar conta</Button>
+			<Button {...props} size="sm"
+				><i class="bx bx-user-plus"></i> {t('account.create_button')}</Button
+			>
 		{/snippet}
 	</Dialog.Trigger>
 	<Dialog.Content class="sm:max-w-sm">
 		<Dialog.Header>
-			<Dialog.Title>Criar conta</Dialog.Title>
+			<Dialog.Title>{t('account.create_button')}</Dialog.Title>
 			<Dialog.Description>
-				Salva automaticamente seus Registros e Agentes nesta instância. Sem recuperação de PIN —
-				anote em lugar seguro.
+				{t('account.create_description')}
 			</Dialog.Description>
 		</Dialog.Header>
 		<form class="flex flex-col gap-4" onsubmit={criarConta}>
 			<div class="flex flex-col gap-1.5">
-				<Label for="conta-username">Usuário</Label>
+				<Label for="conta-username">{t('common.username_label')}</Label>
 				<Input id="conta-username" bind:value={username} required autocomplete="username" />
 			</div>
 			<div class="flex flex-col gap-1.5">
-				<Label for="conta-pin">PIN (6 dígitos)</Label>
+				<Label for="conta-pin">{t('common.pin_label')}</Label>
 				<Input
 					id="conta-pin"
 					type="password"
@@ -103,7 +105,7 @@
 				/>
 			</div>
 			<div class="flex flex-col gap-1.5">
-				<Label for="conta-confirmar-pin">Confirmar PIN</Label>
+				<Label for="conta-confirmar-pin">{t('account.confirm_pin_label')}</Label>
 				<Input
 					id="conta-confirmar-pin"
 					type="password"
@@ -117,7 +119,7 @@
 			</div>
 			<Dialog.Footer>
 				<Button type="submit" disabled={criando || !valido}>
-					{criando ? 'Criando…' : 'Criar conta'}
+					{criando ? t('common.creating') : t('account.create_button')}
 				</Button>
 			</Dialog.Footer>
 		</form>

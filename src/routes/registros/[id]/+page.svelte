@@ -20,7 +20,8 @@
 	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
 	import { exportarComoArquivo, exportarRelatorioComoArquivo } from '$lib/client/exportar-importar';
 	import * as dados from '$lib/client/dados';
-	import { TIPO_ATIVIDADE_LABEL, type Agente, type Atividade, type Entidade } from '$lib/types';
+	import type { Agente, Atividade, Entidade } from '$lib/types';
+	import { idiomaAtual, t, msgErro } from '$lib/i18n/estado.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -42,12 +43,18 @@
 
 	onMount(() => {
 		if (!detalheInicial) {
-			toast.error('Registro não encontrado.');
+			toast.error(t('error.record_not_found'));
 			goto(resolve('/registros'));
 		}
 	});
 
-	const diagrama = $derived(gerarDiagramaMermaid({ entidades, atividades, agentesEnvolvidos }));
+	let direcaoDiagrama = $state<'LR' | 'TD'>('LR'); // ponytail: estado local; persistir em cookie só se o usuário pedir.
+	const diagrama = $derived(
+		gerarDiagramaMermaid(
+			{ entidades, atividades, agentesEnvolvidos },
+			{ direcao: direcaoDiagrama, locale: idiomaAtual.valor }
+		)
+	);
 	const nomeEntidade = $derived(new Map(entidades.map((e) => [e.id, e.nome])));
 	const nomeAgente = $derived(new Map(agentesEnvolvidos.map((a) => [a.id, a.nome])));
 
@@ -78,10 +85,10 @@
 				titulo: tituloEmEdicao,
 				descricao: descricaoEmEdicao || null
 			});
-			toast.success('Registro atualizado.');
+			toast.success(t('success.record_updated'));
 			dialogEdicaoRegistroAberto = false;
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Erro ao atualizar Registro.');
+			toast.error(msgErro(err, 'error.update_record_failed'));
 		} finally {
 			salvandoRegistro = false;
 		}
@@ -136,12 +143,7 @@
 	}
 
 	async function excluirAtividade(atividade: Atividade) {
-		if (
-			!confirm(
-				'Excluir esta Atividade? As Entidades geradas por ela tambem serao removidas (se nao estiverem em uso por outra Atividade).'
-			)
-		)
-			return;
+		if (!confirm(t('confirm.delete_activity'))) return;
 		if (!registro) return;
 		try {
 			await dados.excluirAtividade(registro.id, atividade.id);
@@ -149,9 +151,9 @@
 			entidades = entidades.filter((e) => e.geradaPorAtividadeId !== atividade.id);
 			const idsEmUso = new Set(atividades.map((a) => a.agenteId));
 			agentesEnvolvidos = agentesEnvolvidos.filter((a) => idsEmUso.has(a.id));
-			toast.success('Atividade excluida.');
+			toast.success(t('success.activity_deleted'));
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Erro ao excluir Atividade.');
+			toast.error(msgErro(err, 'error.delete_activity_failed'));
 		}
 	}
 
@@ -160,9 +162,9 @@
 		finalizando = true;
 		try {
 			registro = await dados.finalizarRegistro(registro.id);
-			toast.success('Registro finalizado.');
+			toast.success(t('success.record_finalized'));
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Erro ao finalizar Registro.');
+			toast.error(msgErro(err, 'error.finalize_record_failed'));
 		} finally {
 			finalizando = false;
 		}
@@ -170,18 +172,13 @@
 
 	async function excluirRegistro() {
 		if (!registro) return;
-		if (
-			!confirm(
-				`Excluir o Registro "${registro.titulo}"? Esta acao remove todas as Entidades e Atividades.`
-			)
-		)
-			return;
+		if (!confirm(t('confirm.delete_record', { titulo: registro.titulo }))) return;
 		try {
 			await dados.excluirRegistro(registro.id);
-			toast.success('Registro excluido.');
+			toast.success(t('success.record_deleted'));
 			goto(resolve('/registros'));
 		} catch {
-			toast.error('Erro ao excluir Registro.');
+			toast.error(t('error.delete_record_failed'));
 		}
 	}
 
@@ -190,9 +187,7 @@
 	async function exportarJson() {
 		if (!registro) return;
 		if (registro.status === 'rascunho') {
-			const confirmado = confirm(
-				'Exportar o JSON finaliza o Registro — o historico existente nao podera mais ser editado depois disso. Continuar?'
-			);
+			const confirmado = confirm(t('confirm.export_finalizes'));
 			if (!confirmado) return;
 		}
 		exportandoJson = true;
@@ -201,7 +196,7 @@
 				const idAtual = registro.id;
 				const resposta = await fetch(`/registros/${idAtual}/export.json`);
 				if (!resposta.ok) {
-					toast.error('Erro ao exportar JSON.');
+					toast.error(t('error.export_json_failed'));
 					return;
 				}
 				const texto = await resposta.text();
@@ -218,7 +213,7 @@
 				if (registro.status === 'rascunho') registro = sessaoAnonima.finalizarRegistro(registro.id);
 				exportarComoArquivo(sessaoAnonima.obterRegistroDetalhado(registro.id)!);
 			}
-			toast.success('JSON exportado.');
+			toast.success(t('success.json_exported'));
 		} finally {
 			exportandoJson = false;
 		}
@@ -226,11 +221,14 @@
 
 	function exportarMd() {
 		if (!registro || usuarioAtual.valor) return; // autenticado usa o <a href> direto abaixo
-		exportarRelatorioComoArquivo(sessaoAnonima.obterRegistroDetalhado(registro.id)!);
+		exportarRelatorioComoArquivo(
+			sessaoAnonima.obterRegistroDetalhado(registro.id)!,
+			idiomaAtual.valor
+		);
 	}
 </script>
 
-<svelte:head><title>{registro?.titulo ?? 'Registro'} — MyProvenance</title></svelte:head>
+<svelte:head><title>{registro?.titulo ?? t('records.singular')} — MyProvenance</title></svelte:head>
 
 {#if registro}
 	<div class="flex flex-col gap-8">
@@ -239,10 +237,12 @@
 				<div class="flex items-center gap-2">
 					<h1 class="text-2xl font-semibold tracking-tight">{registro.titulo}</h1>
 					<Badge variant={registro.status === 'finalizado' ? 'default' : 'secondary'}>
-						{registro.status === 'finalizado' ? 'Finalizado' : 'Rascunho'}
+						{t('status.' + registro.status)}
 					</Badge>
 				</div>
-				<p class="text-muted-foreground text-xs">Criado em {formatarData(registro.criadoEm)}</p>
+				<p class="text-muted-foreground text-xs">
+					{t('common.created_at', { data: formatarData(registro.criadoEm, idiomaAtual.valor) })}
+				</p>
 				{#if registro.descricao}
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitizado antes de persistir (sanitizarHtmlRico, allowlist fixo — server e cliente). -->
 					<div class="prose prose-sm dark:prose-invert max-w-none">{@html registro.descricao}</div>
@@ -253,29 +253,30 @@
 					<Dialog.Trigger>
 						{#snippet child({ props })}
 							<Button variant="outline" {...props} onclick={abrirEdicaoRegistro}>
-								<i class="bx bx-edit-alt"></i> Editar
+								<i class="bx bx-edit-alt"></i>
+								{t('common.edit')}
 							</Button>
 						{/snippet}
 					</Dialog.Trigger>
 					<Dialog.Content class="sm:max-w-lg">
 						<Dialog.Header>
-							<Dialog.Title>Editar Registro de Proveniência</Dialog.Title>
+							<Dialog.Title>{t('records.dialog.edit_title')}</Dialog.Title>
 							<Dialog.Description>
-								Titulo e descricao sao metadados do Registro — editaveis mesmo apos finalizado.
+								{t('records.dialog.edit_description')}
 							</Dialog.Description>
 						</Dialog.Header>
 						<form class="flex flex-col gap-4" onsubmit={salvarEdicaoRegistro}>
 							<div class="flex flex-col gap-1.5">
-								<Label for="titulo-edicao">Titulo</Label>
+								<Label for="titulo-edicao">{t('common.title_label')}</Label>
 								<Input id="titulo-edicao" bind:value={tituloEmEdicao} required maxlength={300} />
 							</div>
 							<div class="flex flex-col gap-1.5">
-								<Label for="descricao-edicao">Descricao</Label>
+								<Label for="descricao-edicao">{t('common.description_label')}</Label>
 								<RichTextEditor bind:value={descricaoEmEdicao} />
 							</div>
 							<Dialog.Footer>
 								<Button type="submit" disabled={salvandoRegistro || !tituloEmEdicao.trim()}>
-									{salvandoRegistro ? 'Salvando…' : 'Salvar alterações'}
+									{salvandoRegistro ? t('common.saving') : t('common.save_changes')}
 								</Button>
 							</Dialog.Footer>
 						</form>
@@ -284,33 +285,50 @@
 				{#if registro.status === 'rascunho'}
 					<Button variant="outline" onclick={finalizar} disabled={finalizando}>
 						<i class="bx bx-check-circle"></i>
-						{finalizando ? 'Finalizando…' : 'Finalizar'}
+						{finalizando ? t('records.finalizing') : t('records.finalize')}
 					</Button>
 				{/if}
 				<Button variant="outline" onclick={exportarJson} disabled={exportandoJson}>
 					<i class="bx bx-download"></i>
-					{exportandoJson ? 'Exportando…' : 'Exportar JSON'}
+					{exportandoJson ? t('common.exporting') : t('records.export_json')}
 				</Button>
 				{#if usuarioAtual.valor}
 					<Button variant="outline" href="/registros/{registro.id}/export.md">
-						<i class="bx bx-file"></i> Exportar relatório .md
+						<i class="bx bx-file"></i>
+						{t('records.export_report')}
 					</Button>
 				{:else}
 					<Button variant="outline" onclick={exportarMd}>
-						<i class="bx bx-file"></i> Exportar relatório .md
+						<i class="bx bx-file"></i>
+						{t('records.export_report')}
 					</Button>
 				{/if}
 				<Button variant="destructive" onclick={excluirRegistro}>
-					<i class="bx bx-trash"></i> Excluir Registro
+					<i class="bx bx-trash"></i>
+					{t('records.delete')}
 				</Button>
 			</div>
 		</div>
 
 		<section class="flex flex-col gap-3">
-			<h2 class="text-lg font-medium">Diagrama de proveniência</h2>
+			<div class="flex items-center justify-between">
+				<h2 class="text-lg font-medium">{t('records.diagram.title')}</h2>
+				{#if entidades.length > 0}
+					<Button
+						variant="outline"
+						size="sm"
+						aria-label={t('diagram.layout_toggle')}
+						onclick={() => (direcaoDiagrama = direcaoDiagrama === 'LR' ? 'TD' : 'LR')}
+					>
+						{direcaoDiagrama === 'LR'
+							? t('diagram.layout.horizontal')
+							: t('diagram.layout.vertical')}
+					</Button>
+				{/if}
+			</div>
 			{#if entidades.length === 0}
 				<p class="text-muted-foreground text-sm">
-					Adicione a primeira Atividade (Criação) para iniciar a linhagem.
+					{t('records.diagram.empty')}
 				</p>
 			{:else}
 				<MermaidDiagram codigo={diagrama} />
@@ -319,26 +337,26 @@
 
 		<section class="flex flex-col gap-3">
 			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-medium">Atividades</h2>
+				<h2 class="text-lg font-medium">{t('activities.heading')}</h2>
 				<Dialog.Root bind:open={dialogAtividadeAberto}>
 					<Dialog.Trigger>
 						{#snippet child({ props })}
-							<Button {...props}><i class="bx bx-plus"></i> Adicionar Atividade</Button>
+							<Button {...props}><i class="bx bx-plus"></i> {t('activities.add')}</Button>
 						{/snippet}
 					</Dialog.Trigger>
 					<Dialog.Content class="max-h-[85vh] overflow-y-auto sm:max-w-xl">
 						<Dialog.Header>
-							<Dialog.Title>Adicionar Atividade</Dialog.Title>
+							<Dialog.Title>{t('activities.add')}</Dialog.Title>
 							<Dialog.Description>
-								Criação gera 1 Entidade nova. Transformação usa 1+ e gera 1. Análise usa 1+ e gera 0
-								ou 1.
+								{t('activities.dialog.create_description')}
 							</Dialog.Description>
 						</Dialog.Header>
 						<Tabs.Root bind:value={abaAtiva}>
 							<Tabs.List class="grid w-full grid-cols-3">
-								<Tabs.Trigger value="criacao">Criação</Tabs.Trigger>
-								<Tabs.Trigger value="transformacao">Transformação</Tabs.Trigger>
-								<Tabs.Trigger value="analise">Análise</Tabs.Trigger>
+								<Tabs.Trigger value="criacao">{t('activity.type.criacao')}</Tabs.Trigger>
+								<Tabs.Trigger value="transformacao">{t('activity.type.transformacao')}</Tabs.Trigger
+								>
+								<Tabs.Trigger value="analise">{t('activity.type.analise')}</Tabs.Trigger>
 							</Tabs.List>
 							<Tabs.Content value="criacao">
 								<ActivityForm
@@ -370,19 +388,19 @@
 			</div>
 
 			{#if atividades.length === 0}
-				<p class="text-muted-foreground text-sm">Nenhuma Atividade ainda.</p>
+				<p class="text-muted-foreground text-sm">{t('activities.empty')}</p>
 			{:else}
 				<ul class="flex flex-col gap-2">
 					{#each atividades as atividade (atividade.id)}
 						<li class="border-border bg-card flex flex-col gap-1 rounded-lg border p-3 text-sm">
 							<div class="flex flex-wrap items-center justify-between gap-2">
 								<div class="flex flex-wrap items-center gap-2">
-									<Badge variant="outline">{TIPO_ATIVIDADE_LABEL[atividade.tipo]}</Badge>
+									<Badge variant="outline">{t('activity.type.' + atividade.tipo)}</Badge>
 									<span class="text-muted-foreground text-xs"
-										>{formatarData(atividade.dataHora)}</span
+										>{formatarData(atividade.dataHora, idiomaAtual.valor)}</span
 									>
 									<span class="text-muted-foreground text-xs"
-										>· {nomeAgente.get(atividade.agenteId) ?? 'Agente'}</span
+										>· {nomeAgente.get(atividade.agenteId) ?? t('agents.singular')}</span
 									>
 								</div>
 								{#if registro.status === 'rascunho'}
@@ -391,7 +409,7 @@
 											variant="ghost"
 											size="icon-sm"
 											onclick={() => abrirEdicaoAtividade(atividade)}
-											aria-label="Editar Atividade"
+											aria-label={t('activities.edit_aria')}
 										>
 											<i class="bx bx-edit-alt"></i>
 										</Button>
@@ -399,7 +417,7 @@
 											variant="ghost"
 											size="icon-sm"
 											onclick={() => excluirAtividade(atividade)}
-											aria-label="Excluir Atividade"
+											aria-label={t('activities.delete_aria')}
 										>
 											<i class="bx bx-trash text-destructive"></i>
 										</Button>
@@ -414,7 +432,7 @@
 								{/if}
 								{atividade.entidadesGeradas.length > 0
 									? atividade.entidadesGeradas.map((id) => nomeEntidade.get(id) ?? id).join(', ')
-									: '(sem Entidade gerada)'}
+									: t('activities.no_output')}
 							</p>
 							{#if atividade.local || atividade.instrumento}
 								<p class="text-muted-foreground text-xs">
@@ -436,9 +454,11 @@
 				<Dialog.Root bind:open={dialogEdicaoAberto}>
 					<Dialog.Content class="max-h-[85vh] overflow-y-auto sm:max-w-xl">
 						<Dialog.Header>
-							<Dialog.Title>Editar Atividade</Dialog.Title>
+							<Dialog.Title>{t('activities.dialog.edit_title')}</Dialog.Title>
 							<Dialog.Description>
-								O tipo ({TIPO_ATIVIDADE_LABEL[atividadeEmEdicao.tipo]}) nao pode ser alterado.
+								{t('activities.dialog.edit_description', {
+									tipo: t('activity.type.' + atividadeEmEdicao.tipo)
+								})}
 							</Dialog.Description>
 						</Dialog.Header>
 						<ActivityForm
@@ -457,17 +477,17 @@
 		{/if}
 
 		<section class="flex flex-col gap-3">
-			<h2 class="text-lg font-medium">Entidades</h2>
+			<h2 class="text-lg font-medium">{t('entities.heading')}</h2>
 			{#if entidades.length === 0}
-				<p class="text-muted-foreground text-sm">Nenhuma Entidade ainda.</p>
+				<p class="text-muted-foreground text-sm">{t('entities.empty')}</p>
 			{:else}
 				<Table.Root>
 					<Table.Header>
 						<Table.Row>
-							<Table.Head>Nome</Table.Head>
-							<Table.Head>Formato</Table.Head>
-							<Table.Head>Localização</Table.Head>
-							<Table.Head>Licença</Table.Head>
+							<Table.Head>{t('report.th.name')}</Table.Head>
+							<Table.Head>{t('report.th.format')}</Table.Head>
+							<Table.Head>{t('report.th.location')}</Table.Head>
+							<Table.Head>{t('report.th.license')}</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
@@ -485,23 +505,23 @@
 		</section>
 
 		<section class="flex flex-col gap-3">
-			<h2 class="text-lg font-medium">Agentes envolvidos</h2>
+			<h2 class="text-lg font-medium">{t('report.section.agents')}</h2>
 			{#if agentesEnvolvidos.length === 0}
-				<p class="text-muted-foreground text-sm">Nenhum Agente ainda.</p>
+				<p class="text-muted-foreground text-sm">{t('agents.empty')}</p>
 			{:else}
 				<Table.Root>
 					<Table.Header>
 						<Table.Row>
-							<Table.Head>Nome</Table.Head>
-							<Table.Head>Tipo</Table.Head>
-							<Table.Head>Afiliação</Table.Head>
+							<Table.Head>{t('report.th.name')}</Table.Head>
+							<Table.Head>{t('report.th.type')}</Table.Head>
+							<Table.Head>{t('report.th.affiliation')}</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
 						{#each agentesEnvolvidos as agente (agente.id)}
 							<Table.Row>
 								<Table.Cell>{agente.nome}</Table.Cell>
-								<Table.Cell class="capitalize">{agente.tipo}</Table.Cell>
+								<Table.Cell>{t('agent.type.' + agente.tipo)}</Table.Cell>
 								<Table.Cell>{agente.afiliacao ?? '—'}</Table.Cell>
 							</Table.Row>
 						{/each}

@@ -96,13 +96,6 @@ export const FORMATOS_SUGERIDOS = [
 	'GeoJSON'
 ] as const;
 
-/** Rotulo de exibicao por tipo de Atividade — usado no diagrama Mermaid, relatorio .md e telas. */
-export const TIPO_ATIVIDADE_LABEL: Record<TipoAtividade, string> = {
-	criacao: 'Criação',
-	transformacao: 'Transformação',
-	analise: 'Análise'
-};
-
 /** Registro + grafo completo — retornado por obterRegistroDetalhado (servidor e sessao anonima). */
 export interface RegistroDetalhado {
 	registro: RegistroProvenencia;

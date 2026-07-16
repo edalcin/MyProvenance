@@ -122,14 +122,14 @@ const verificarRegistroDoUsuarioStmt = db.prepare(
 const criarAtividadeTx = db.transaction(
 	(usuarioId: string, registroId: string, input: CriarAtividadeInput) => {
 		if (!verificarRegistroDoUsuarioStmt.get({ registroId, usuarioId })) {
-			throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+			throw new RegistroNaoEncontradoError('error.record_not_found');
 		}
 		validarCardinalidade(input);
 
 		const entidadesDoRegistro = new Set(listarEntidadesPorRegistro(registroId).map((e) => e.id));
 		for (const entidadeId of input.entidadesUsadas) {
 			if (!entidadesDoRegistro.has(entidadeId)) {
-				throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
 
@@ -213,14 +213,14 @@ const atualizarAtividadeTx = db.transaction(
 	(usuarioId: string, registroId: string, atividadeId: string, input: AtualizarAtividadeInput) => {
 		const registro = obterStatusRegistroDoUsuarioStmt.get({ registroId, usuarioId }) as
 			{ status: string } | undefined;
-		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		if (registro.status === 'finalizado') {
-			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+			throw new RegistroJaFinalizadoError('error.record_read_only');
 		}
 
 		const atual = obterAtividade(atividadeId);
 		if (!atual || atual.registroId !== registroId) {
-			throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+			throw new RegistroNaoEncontradoError('error.activity_not_found');
 		}
 
 		validarCardinalidade({
@@ -232,7 +232,7 @@ const atualizarAtividadeTx = db.transaction(
 		const entidadesDoRegistro = new Set(listarEntidadesPorRegistro(registroId).map((e) => e.id));
 		for (const entidadeId of input.entidadesUsadas) {
 			if (!entidadesDoRegistro.has(entidadeId)) {
-				throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
 
@@ -262,7 +262,7 @@ const atualizarAtividadeTx = db.transaction(
 		for (const nova of input.entidadesGeradas ?? []) {
 			if (nova.id) {
 				if (!geradasAntesIds.has(nova.id)) {
-					throw new RegraCardinalidadeError(`Entidade ${nova.id} nao pertence a esta Atividade.`);
+					throw new RegraCardinalidadeError('error.entity_not_in_activity');
 				}
 				atualizarEntidade(nova.id, nova);
 				mantidas.add(nova.id);
@@ -309,14 +309,14 @@ const excluirAtividadeTx = db.transaction(
 	(usuarioId: string, registroId: string, atividadeId: string) => {
 		const registro = obterStatusRegistroDoUsuarioStmt.get({ registroId, usuarioId }) as
 			{ status: string } | undefined;
-		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		if (registro.status === 'finalizado') {
-			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+			throw new RegistroJaFinalizadoError('error.record_read_only');
 		}
 
 		const atual = obterAtividade(atividadeId);
 		if (!atual || atual.registroId !== registroId) {
-			throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+			throw new RegistroNaoEncontradoError('error.activity_not_found');
 		}
 
 		for (const entidadeId of entidadesGeradasPor(atividadeId)) {

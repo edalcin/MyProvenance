@@ -6,13 +6,13 @@ import { parseBody, parsePaginationParams } from '$lib/server/api-utils';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = ({ url, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	const { busca, offset, limit } = parsePaginationParams(url);
 	return json(listarRegistros(locals.usuario.id, { busca, offset, limit }));
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	const input = await parseBody(request, registroInputSchema);
 	const registro = criarRegistro(locals.usuario.id, {
 		titulo: input.titulo,

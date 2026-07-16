@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { mode } from 'mode-watcher';
+	import { t } from '$lib/i18n/estado.svelte';
 
 	// mermaid so e importado no client (dentro do $effect, que nunca roda no SSR) — mantem
 	// o pacote (e seus layouts pesados de diagramas nao usados aqui) fora do runtime do servidor.
@@ -22,7 +23,7 @@
 					erro = '';
 				})
 				.catch((e: unknown) => {
-					erro = e instanceof Error ? e.message : 'Erro ao renderizar diagrama.';
+					erro = e instanceof Error ? e.message : t('diagram.render_error');
 				});
 		});
 	});

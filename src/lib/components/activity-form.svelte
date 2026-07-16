@@ -10,6 +10,7 @@
 	import DynamicPairList from '$lib/components/dynamic-pair-list.svelte';
 	import type { Agente, Atividade, Entidade, TipoAtividade } from '$lib/types';
 	import * as dados from '$lib/client/dados';
+	import { t, msgErro } from '$lib/i18n/estado.svelte';
 
 	let {
 		tipo,
@@ -213,22 +214,22 @@
 				const resultado = await dados
 					.atualizarAtividade(registroId, atividadeParaEditar.id, camposComuns)
 					.catch((err) => {
-						toast.error(err instanceof Error ? err.message : 'Erro ao atualizar Atividade.');
+						toast.error(msgErro(err, 'error.update_activity_failed'));
 						return null;
 					});
 				if (!resultado) return;
 				onAtualizada?.({ ...resultado, agente: agenteSelecionado });
-				toast.success('Atividade atualizada.');
+				toast.success(t('success.activity_updated'));
 			} else {
 				const resultado = await dados
 					.criarAtividade(registroId, { tipo, ...camposComuns })
 					.catch((err) => {
-						toast.error(err instanceof Error ? err.message : 'Erro ao criar Atividade.');
+						toast.error(msgErro(err, 'error.create_activity_failed'));
 						return null;
 					});
 				if (!resultado) return;
 				onCriada?.({ ...resultado, agente: agenteSelecionado });
-				toast.success('Atividade adicionada.');
+				toast.success(t('success.activity_added'));
 				limparFormulario();
 			}
 		} finally {
@@ -240,7 +241,7 @@
 <form class="flex flex-col gap-4" onsubmit={enviar}>
 	<div class="grid grid-cols-2 gap-4">
 		<div class="flex flex-col gap-1.5">
-			<Label>Agente</Label>
+			<Label>{t('common.agent_label')}</Label>
 			<AgentPicker
 				bind:value={agenteId}
 				inicial={agenteAtual}
@@ -248,17 +249,17 @@
 			/>
 		</div>
 		<div class="flex flex-col gap-1.5">
-			<Label for="dataHora-{tipo}">Data</Label>
+			<Label for="dataHora-{tipo}">{t('report.th.date')}</Label>
 			<Input id="dataHora-{tipo}" type="date" bind:value={dataHora} required />
 		</div>
 	</div>
 
 	<div class="flex flex-col gap-1.5">
-		<Label for="descricao-{tipo}">Descricao</Label>
+		<Label for="descricao-{tipo}">{t('common.description_label')}</Label>
 		<Textarea
 			id="descricao-{tipo}"
 			bind:value={descricao}
-			placeholder="O que aconteceu…"
+			placeholder={t('activities.description_placeholder')}
 			rows={2}
 		/>
 	</div>
@@ -266,24 +267,28 @@
 	{#if tipo === 'criacao'}
 		<div class="grid grid-cols-2 gap-4">
 			<div class="flex flex-col gap-1.5">
-				<Label for="local-{tipo}">Local</Label>
-				<Input id="local-{tipo}" bind:value={local} placeholder="Coordenadas ou local" />
+				<Label for="local-{tipo}">{t('report.detail.location')}</Label>
+				<Input
+					id="local-{tipo}"
+					bind:value={local}
+					placeholder={t('activities.location_placeholder')}
+				/>
 			</div>
 			<div class="flex flex-col gap-1.5">
-				<Label for="instrumento-{tipo}">Ferramenta ou Software</Label>
+				<Label for="instrumento-{tipo}">{t('report.detail.tool')}</Label>
 				<Input
 					id="instrumento-{tipo}"
 					bind:value={instrumento}
-					placeholder="Marca/modelo ou nome do software"
+					placeholder={t('activities.tool_placeholder')}
 				/>
 			</div>
 		</div>
 	{:else}
 		<div class="flex flex-col gap-1.5">
-			<Label>Entidades usadas</Label>
+			<Label>{t('activities.entities_used_label')}</Label>
 			{#if entidadesParaUsar.length === 0}
 				<p class="text-muted-foreground text-xs">
-					Nenhuma Entidade disponivel ainda — crie uma via Criacao primeiro.
+					{t('activities.no_entities_available')}
 				</p>
 			{:else}
 				<div
@@ -305,67 +310,67 @@
 		</div>
 
 		<div class="flex flex-col gap-1.5">
-			<Label for="processo-{tipo}">Processo</Label>
+			<Label for="processo-{tipo}">{t('report.detail.process')}</Label>
 			<Textarea
 				id="processo-{tipo}"
 				bind:value={processo}
-				placeholder="Script, codigo, passos…"
+				placeholder={t('activities.process_placeholder')}
 				rows={3}
 			/>
 		</div>
 
 		<div class="flex flex-col gap-1.5">
-			<Label>Parametros</Label>
+			<Label>{t('report.detail.params')}</Label>
 			<DynamicPairList
 				bind:itens={parametros}
-				rotuloA="Chave"
-				rotuloB="Valor"
-				rotuloAdicionar="Adicionar parametro"
+				rotuloA={t('activities.param_key')}
+				rotuloB={t('activities.param_value')}
+				rotuloAdicionar={t('activities.add_param')}
 			/>
 		</div>
 
 		<div class="flex flex-col gap-1.5">
-			<Label for="sistemaOperacional-{tipo}">Ambiente de execucao — sistema operacional</Label>
+			<Label for="sistemaOperacional-{tipo}">{t('activities.os_label')}</Label>
 			<Input
 				id="sistemaOperacional-{tipo}"
 				bind:value={sistemaOperacional}
-				placeholder="Ex.: Ubuntu 24.04"
+				placeholder={t('activities.os_placeholder')}
 			/>
 		</div>
 		<div class="flex flex-col gap-1.5">
-			<Label>Pacotes</Label>
+			<Label>{t('report.detail.packages')}</Label>
 			<DynamicPairList
 				bind:itens={pacotes}
-				rotuloA="Nome"
-				rotuloB="Versao"
-				rotuloAdicionar="Adicionar pacote"
+				rotuloA={t('common.name_label')}
+				rotuloB={t('activities.package_version')}
+				rotuloAdicionar={t('activities.add_package')}
 			/>
 		</div>
 	{/if}
 
 	<div class="flex flex-col gap-2">
 		<Label>
-			Entidades geradas
+			{t('activities.entities_generated_label')}
 			{#if tipo === 'analise'}
-				<span class="text-muted-foreground font-normal">(opcional)</span>
+				<span class="text-muted-foreground font-normal">{t('common.optional')}</span>
 			{/if}
 		</Label>
 		{#each entidadesGeradas as entidadeGerada, indice (indice)}
 			<div class="border-input flex flex-col gap-4 rounded-md border p-3">
 				<div class="flex items-center justify-between">
-					<p class="text-sm font-medium">Entidade gerada {indice + 1}</p>
+					<p class="text-sm font-medium">{t('activities.generated_entity_n', { n: indice + 1 })}</p>
 					<Button
 						type="button"
 						variant="ghost"
 						size="icon-sm"
 						onclick={() => removerEntidadeGerada(indice)}
-						aria-label="Remover Entidade gerada"
+						aria-label={t('activities.remove_generated_entity_aria')}
 					>
 						<i class="bx bx-trash"></i>
 					</Button>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="nomeGerada-{tipo}-{indice}">Nome</Label>
+					<Label for="nomeGerada-{tipo}-{indice}">{t('common.name_label')}</Label>
 					<Input
 						id="nomeGerada-{tipo}-{indice}"
 						bind:value={entidadeGerada.nome}
@@ -375,32 +380,32 @@
 				</div>
 				<div class="grid grid-cols-2 gap-4">
 					<div class="flex flex-col gap-1.5">
-						<Label for="formatoGerada-{tipo}-{indice}">Formato</Label>
+						<Label for="formatoGerada-{tipo}-{indice}">{t('report.th.format')}</Label>
 						<Input
 							id="formatoGerada-{tipo}-{indice}"
 							bind:value={entidadeGerada.formato}
-							placeholder="CSV, JSON…"
+							placeholder={t('activities.format_placeholder')}
 						/>
 					</div>
 					<div class="flex flex-col gap-1.5">
-						<Label for="licencaGerada-{tipo}-{indice}">Licenca</Label>
+						<Label for="licencaGerada-{tipo}-{indice}">{t('report.th.license')}</Label>
 						<Input
 							id="licencaGerada-{tipo}-{indice}"
 							bind:value={entidadeGerada.licenca}
-							placeholder="CC-BY 4.0…"
+							placeholder={t('activities.license_placeholder')}
 						/>
 					</div>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="localizacaoGerada-{tipo}-{indice}">Localizacao</Label>
+					<Label for="localizacaoGerada-{tipo}-{indice}">{t('report.th.location')}</Label>
 					<Input
 						id="localizacaoGerada-{tipo}-{indice}"
 						bind:value={entidadeGerada.localizacao}
-						placeholder="URL ou caminho"
+						placeholder={t('activities.location_url_placeholder')}
 					/>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="descricaoGerada-{tipo}-{indice}">Descricao</Label>
+					<Label for="descricaoGerada-{tipo}-{indice}">{t('common.description_label')}</Label>
 					<Textarea
 						id="descricaoGerada-{tipo}-{indice}"
 						bind:value={entidadeGerada.descricao}
@@ -410,16 +415,21 @@
 			</div>
 		{/each}
 		<Button type="button" variant="outline" size="sm" onclick={adicionarEntidadeGerada}>
-			<i class="bx bx-plus"></i> Adicionar Entidade gerada
+			<i class="bx bx-plus"></i>
+			{t('activities.add_generated_entity')}
 		</Button>
 	</div>
 
 	<div class="flex gap-2">
 		<Button type="submit" disabled={!valido || salvando}>
-			{salvando ? 'Salvando…' : atividadeParaEditar ? 'Salvar alterações' : 'Adicionar Atividade'}
+			{salvando
+				? t('common.saving')
+				: atividadeParaEditar
+					? t('common.save_changes')
+					: t('activities.add')}
 		</Button>
 		{#if atividadeParaEditar}
-			<Button type="button" variant="outline" onclick={onCancelar}>Cancelar</Button>
+			<Button type="button" variant="outline" onclick={onCancelar}>{t('common.cancel')}</Button>
 		{/if}
 	</div>
 </form>

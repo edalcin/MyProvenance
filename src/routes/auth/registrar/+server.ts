@@ -10,7 +10,7 @@ import type { RequestHandler } from './$types';
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const input = await parseBody(request, registrarUsuarioSchema);
 	if (obterUsuarioPorUsername(input.username)) {
-		error(409, 'Nome de usuario ja esta em uso.');
+		error(409, 'error.username_taken');
 	}
 	const usuario = criarUsuario(input);
 	const { token, expiraEm } = criarSessao(usuario.id);

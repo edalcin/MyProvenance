@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { Editor as EditorInstance } from '@tiptap/core';
 	import { Button } from '$lib/components/ui/button';
+	import { t } from '$lib/i18n/estado.svelte';
 
 	/**
 	 * Niveis de heading e marcas aqui DEVEM bater com o allowlist de
@@ -13,7 +14,7 @@
 	 */
 	let {
 		value = $bindable(''),
-		placeholder = 'Descricao (opcional)…'
+		placeholder = t('activities.rich_text_placeholder')
 	}: { value?: string; placeholder?: string } = $props();
 
 	let elemento: HTMLDivElement;
@@ -54,56 +55,56 @@
 		};
 	});
 
-	const botoes = [
+	const botoes = $derived([
 		{
-			label: 'Negrito',
+			label: t('editor.bold'),
 			icon: 'bx-bold',
 			run: () => editor?.chain().focus().toggleBold().run(),
 			ativo: () => editor?.isActive('bold')
 		},
 		{
-			label: 'Italico',
+			label: t('editor.italic'),
 			icon: 'bx-italic',
 			run: () => editor?.chain().focus().toggleItalic().run(),
 			ativo: () => editor?.isActive('italic')
 		},
 		{
-			label: 'Riscado',
+			label: t('editor.strike'),
 			icon: 'bx-strikethrough',
 			run: () => editor?.chain().focus().toggleStrike().run(),
 			ativo: () => editor?.isActive('strike')
 		},
 		{
-			label: 'Titulo',
+			label: t('editor.heading'),
 			icon: 'bx-heading',
 			run: () => editor?.chain().focus().toggleHeading({ level: 2 }).run(),
 			ativo: () => editor?.isActive('heading', { level: 2 })
 		},
 		{
-			label: 'Lista',
+			label: t('editor.bullet_list'),
 			icon: 'bx-list-ul',
 			run: () => editor?.chain().focus().toggleBulletList().run(),
 			ativo: () => editor?.isActive('bulletList')
 		},
 		{
-			label: 'Lista numerada',
+			label: t('editor.ordered_list'),
 			icon: 'bx-list-ol',
 			run: () => editor?.chain().focus().toggleOrderedList().run(),
 			ativo: () => editor?.isActive('orderedList')
 		},
 		{
-			label: 'Citacao',
+			label: t('editor.blockquote'),
 			icon: 'bx-comment-detail',
 			run: () => editor?.chain().focus().toggleBlockquote().run(),
 			ativo: () => editor?.isActive('blockquote')
 		},
 		{
-			label: 'Codigo',
+			label: t('editor.code_block'),
 			icon: 'bx-code-alt',
 			run: () => editor?.chain().focus().toggleCodeBlock().run(),
 			ativo: () => editor?.isActive('codeBlock')
 		}
-	];
+	]);
 </script>
 
 <div class="border-input rounded-md border">

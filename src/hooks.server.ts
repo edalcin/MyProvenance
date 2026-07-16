@@ -1,5 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
 import { obterUsuarioPorToken } from '$lib/server/db/repositories/sessoes';
+import { COOKIE_IDIOMA, IDIOMA_PADRAO, idiomaValido } from '$lib/i18n';
 
 export const COOKIE_SESSAO = 'sessao';
 
@@ -15,7 +16,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get(COOKIE_SESSAO);
 	event.locals.usuario = token ? obterUsuarioPorToken(token) : null;
 
-	const response = await resolve(event);
+	const idiomaCookie = event.cookies.get(COOKIE_IDIOMA);
+	event.locals.idioma = idiomaValido(idiomaCookie) ? idiomaCookie : IDIOMA_PADRAO;
+
+	const bcp47 = event.locals.idioma === 'en' ? 'en' : 'pt-BR';
+	const response = await resolve(event, {
+		transformPageChunk: ({ html }) => html.replace('lang="pt-BR"', `lang="${bcp47}"`)
+	});
 	response.headers.set('X-Content-Type-Options', 'nosniff');
 	response.headers.set('X-Frame-Options', 'DENY');
 	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');

@@ -17,14 +17,15 @@ export function validarCardinalidade(input: {
 	const usadas = input.entidadesUsadas.length;
 	const geradas = input.entidadesGeradas?.length ?? 0;
 	if (input.tipo === 'criacao') {
-		if (usadas !== 0) throw new RegraCardinalidadeError('Criacao nao usa Entidades existentes.');
-		if (geradas < 1) throw new RegraCardinalidadeError('Criacao deve gerar 1 ou mais Entidades.');
+		if (usadas !== 0) throw new RegraCardinalidadeError('error.cardinality.creation_uses_entities');
+		if (geradas < 1) throw new RegraCardinalidadeError('error.cardinality.creation_needs_output');
 	} else if (input.tipo === 'transformacao') {
-		if (usadas < 1) throw new RegraCardinalidadeError('Transformacao usa 1 ou mais Entidades.');
+		if (usadas < 1)
+			throw new RegraCardinalidadeError('error.cardinality.transformation_needs_input');
 		if (geradas < 1) {
-			throw new RegraCardinalidadeError('Transformacao deve gerar 1 ou mais Entidades.');
+			throw new RegraCardinalidadeError('error.cardinality.transformation_needs_output');
 		}
 	} else if (usadas < 1) {
-		throw new RegraCardinalidadeError('Analise usa 1 ou mais Entidades.');
+		throw new RegraCardinalidadeError('error.cardinality.analysis_needs_input');
 	}
 }

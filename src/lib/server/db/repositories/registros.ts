@@ -84,8 +84,7 @@ export function atualizarRegistro(
 	usuarioId: string,
 	input: { titulo: string; descricao?: string | null }
 ): RegistroProvenencia {
-	if (!obterRegistro(id, usuarioId))
-		throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
+	if (!obterRegistro(id, usuarioId)) throw new RegistroNaoEncontradoError('error.record_not_found');
 	db.prepare(
 		`UPDATE registros SET titulo = @titulo, descricao = @descricao
 		 WHERE id = @id AND usuario_id = @usuarioId`
@@ -98,9 +97,9 @@ export class RegistroNaoEncontradoError extends Error {}
 
 export function finalizarRegistro(id: string, usuarioId: string): RegistroProvenencia {
 	const atual = obterRegistro(id, usuarioId);
-	if (!atual) throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
+	if (!atual) throw new RegistroNaoEncontradoError('error.record_not_found');
 	if (atual.status === 'finalizado')
-		throw new RegistroJaFinalizadoError('Registro ja esta finalizado.');
+		throw new RegistroJaFinalizadoError('error.record_already_finalized');
 	const finalizadoEm = new Date().toISOString();
 	db.prepare(
 		`UPDATE registros SET status = 'finalizado', finalizado_em = @finalizadoEm

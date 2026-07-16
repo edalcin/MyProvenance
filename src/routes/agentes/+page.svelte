@@ -13,14 +13,16 @@
 	import * as dados from '$lib/client/dados';
 	import type { Agente, TipoAgente } from '$lib/types';
 	import type { PageData } from './$types';
+	import { t, msgErro } from '$lib/i18n/estado.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	const TIPO_LABEL: Record<TipoAgente, string> = {
-		pessoa: 'Pessoa',
-		instituicao: 'Instituição',
-		software: 'Software'
-	};
+	const tiposAgente = $derived(
+		(['pessoa', 'instituicao', 'software'] as const).map((valor) => ({
+			valor,
+			rotulo: t('agent.type.' + valor)
+		}))
+	);
 
 	// untrack: seed unica na montagem — autenticado vem do load do servidor, anonimo da sessao local.
 	let itens = $state(
@@ -100,82 +102,86 @@
 			itens = editandoId
 				? itens.map((item) => (item.id === agente.id ? agente : item))
 				: [agente, ...itens];
-			toast.success(editandoId ? 'Agente atualizado.' : 'Agente criado.');
+			toast.success(editandoId ? t('success.agent_updated') : t('success.agent_created'));
 			dialogAberto = false;
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Erro ao salvar Agente.');
+			toast.error(msgErro(err, 'error.save_agent_failed'));
 		} finally {
 			salvando = false;
 		}
 	}
 
 	async function excluir(agente: Agente) {
-		if (!confirm(`Excluir o Agente "${agente.nome}"?`)) return;
+		if (!confirm(t('confirm.delete_agent', { nome: agente.nome }))) return;
 		try {
 			await dados.excluirAgente(agente.id);
 			itens = itens.filter((item) => item.id !== agente.id);
-			toast.success('Agente excluido.');
+			toast.success(t('success.agent_deleted'));
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Erro ao excluir Agente.');
+			toast.error(msgErro(err, 'error.delete_agent_failed'));
 		}
 	}
 </script>
 
-<svelte:head><title>Agentes — MyProvenance</title></svelte:head>
+<svelte:head><title>{t('agents.page_title')}</title></svelte:head>
 
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-center justify-between gap-3">
-		<h1 class="text-2xl font-semibold tracking-tight">Agentes</h1>
+		<h1 class="text-2xl font-semibold tracking-tight">{t('agents.heading')}</h1>
 		<Dialog.Root bind:open={dialogAberto}>
 			<Dialog.Trigger>
 				{#snippet child({ props })}
-					<Button {...props} onclick={abrirNovo}><i class="bx bx-plus"></i> Novo Agente</Button>
+					<Button {...props} onclick={abrirNovo}
+						><i class="bx bx-plus"></i> {t('agents.new')}</Button
+					>
 				{/snippet}
 			</Dialog.Trigger>
 			<Dialog.Content class="sm:max-w-md">
 				<Dialog.Header>
-					<Dialog.Title>{editandoId ? 'Editar Agente' : 'Novo Agente'}</Dialog.Title>
-					<Dialog.Description
-						>Cadastro da sua conta, reutilizavel entre Registros.</Dialog.Description
-					>
+					<Dialog.Title>{editandoId ? t('agents.edit_title') : t('agents.new')}</Dialog.Title>
+					<Dialog.Description>{t('agents.dialog.description')}</Dialog.Description>
 				</Dialog.Header>
 				<form class="flex flex-col gap-4" onsubmit={salvar}>
 					<div class="flex flex-col gap-1.5">
-						<Label for="nome">Nome</Label>
+						<Label for="nome">{t('common.name_label')}</Label>
 						<Input id="nome" bind:value={formNome} required maxlength={200} />
 					</div>
 					<div class="flex flex-col gap-1.5">
-						<Label for="tipo">Tipo</Label>
+						<Label for="tipo">{t('common.type_label')}</Label>
 						<Select.Root type="single" bind:value={formTipo}>
-							<Select.Trigger id="tipo">{TIPO_LABEL[formTipo]}</Select.Trigger>
+							<Select.Trigger id="tipo">{t('agent.type.' + formTipo)}</Select.Trigger>
 							<Select.Content>
-								{#each Object.entries(TIPO_LABEL) as [valor, rotulo] (valor)}
+								{#each tiposAgente as { valor, rotulo } (valor)}
 									<Select.Item value={valor} label={rotulo} />
 								{/each}
 							</Select.Content>
 						</Select.Root>
 					</div>
 					<div class="flex flex-col gap-1.5">
-						<Label for="afiliacao">Afiliacao</Label>
+						<Label for="afiliacao">{t('report.th.affiliation')}</Label>
 						<Input
 							id="afiliacao"
 							bind:value={formAfiliacao}
 							maxlength={300}
-							placeholder="Ex.: UFRJ"
+							placeholder={t('agents.affiliation_placeholder')}
 						/>
 					</div>
 					<div class="flex flex-col gap-1.5">
-						<Label for="identificador">Identificador externo</Label>
+						<Label for="identificador">{t('agents.external_id_label')}</Label>
 						<Input
 							id="identificador"
 							bind:value={formIdentificador}
 							maxlength={200}
-							placeholder="ORCID, RRID…"
+							placeholder={t('agents.external_id_placeholder')}
 						/>
 					</div>
 					<Dialog.Footer>
 						<Button type="submit" disabled={salvando || !formNome.trim()}>
-							{salvando ? 'Salvando…' : editandoId ? 'Salvar alteracoes' : 'Criar Agente'}
+							{salvando
+								? t('common.saving')
+								: editandoId
+									? t('common.save_changes')
+									: t('agents.create_button')}
 						</Button>
 					</Dialog.Footer>
 				</form>
@@ -184,14 +190,14 @@
 	</div>
 
 	<Input
-		placeholder="Buscar por nome…"
+		placeholder={t('agents.search_placeholder')}
 		bind:value={busca}
 		oninput={aoDigitarBusca}
 		class="max-w-sm"
 	/>
 
 	{#if itens.length === 0 && !carregandoBusca}
-		<p class="text-muted-foreground py-12 text-center text-sm">Nenhum Agente cadastrado ainda.</p>
+		<p class="text-muted-foreground py-12 text-center text-sm">{t('agents.empty_list')}</p>
 	{/if}
 
 	<ul class="flex flex-col gap-2">
@@ -207,12 +213,12 @@
 					</span>
 				</div>
 				<div class="flex items-center gap-2">
-					<Badge variant="outline">{TIPO_LABEL[agente.tipo]}</Badge>
+					<Badge variant="outline">{t('agent.type.' + agente.tipo)}</Badge>
 					<Button
 						variant="ghost"
 						size="icon-sm"
 						onclick={() => abrirEdicao(agente)}
-						aria-label="Editar Agente"
+						aria-label={t('agents.edit_title')}
 					>
 						<i class="bx bx-edit-alt"></i>
 					</Button>
@@ -220,7 +226,7 @@
 						variant="ghost"
 						size="icon-sm"
 						onclick={() => excluir(agente)}
-						aria-label="Excluir Agente"
+						aria-label={t('agents.delete_aria')}
 					>
 						<i class="bx bx-trash text-destructive"></i>
 					</Button>
@@ -231,7 +237,7 @@
 
 	{#if proximoOffset !== null}
 		<div use:onVisible={carregarMais} class="text-muted-foreground py-4 text-center text-xs">
-			{carregandoMais ? 'Carregando…' : ''}
+			{carregandoMais ? t('common.loading') : ''}
 		</div>
 	{/if}
 </div>

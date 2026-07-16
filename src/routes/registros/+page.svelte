@@ -4,6 +4,7 @@
 	import { toast } from 'svelte-sonner';
 	import { onVisible } from '$lib/actions/on-visible';
 	import { formatarData } from '$lib/format';
+	import { idiomaAtual, t, msgErro } from '$lib/i18n/estado.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -12,7 +13,7 @@
 	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
 	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
 	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
-	import { importarDeArquivo, ArquivoInvalidoError } from '$lib/client/exportar-importar';
+	import { importarDeArquivo } from '$lib/client/exportar-importar';
 	import * as dados from '$lib/client/dados';
 	import type { RegistroProvenencia } from '$lib/types';
 	import type { PageData } from './$types';
@@ -71,12 +72,12 @@
 				descricao: novaDescricao || null
 			});
 			itens = [registro, ...itens];
-			toast.success('Registro criado.');
+			toast.success(t('success.record_created'));
 			dialogAberto = false;
 			novoTitulo = '';
 			novaDescricao = '';
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Erro ao criar Registro.');
+			toast.error(msgErro(err, 'error.create_record_failed'));
 		} finally {
 			salvando = false;
 		}
@@ -97,15 +98,9 @@
 			itens = existe
 				? itens.map((i) => (i.id === registro.id ? registro : i))
 				: [registro, ...itens];
-			toast.success('Registro importado.');
+			toast.success(t('success.record_imported'));
 		} catch (err) {
-			const mensagem =
-				err instanceof ArquivoInvalidoError
-					? err.message
-					: err instanceof Error
-						? err.message
-						: 'Erro ao importar Registro.';
-			toast.error(mensagem);
+			toast.error(msgErro(err, 'error.import_record_failed'));
 		} finally {
 			importando = false;
 			input.value = '';
@@ -113,11 +108,11 @@
 	}
 </script>
 
-<svelte:head><title>Registros — MyProvenance</title></svelte:head>
+<svelte:head><title>{t('records.page_title')}</title></svelte:head>
 
 <div class="flex flex-col gap-6">
 	<div class="flex flex-wrap items-center justify-between gap-3">
-		<h1 class="text-2xl font-semibold tracking-tight">Registros de Proveniência</h1>
+		<h1 class="text-2xl font-semibold tracking-tight">{t('records.heading')}</h1>
 		<div class="flex flex-wrap gap-2">
 			<input
 				bind:this={inputImportacao}
@@ -128,39 +123,39 @@
 			/>
 			<Button variant="outline" onclick={() => inputImportacao.click()} disabled={importando}>
 				<i class="bx bx-upload"></i>
-				{importando ? 'Importando…' : 'Importar'}
+				{importando ? t('common.importing') : t('common.import')}
 			</Button>
 			<Dialog.Root bind:open={dialogAberto}>
 				<Dialog.Trigger>
 					{#snippet child({ props })}
-						<Button {...props}><i class="bx bx-plus"></i> Novo Registro</Button>
+						<Button {...props}><i class="bx bx-plus"></i> {t('records.new')}</Button>
 					{/snippet}
 				</Dialog.Trigger>
 				<Dialog.Content class="sm:max-w-lg">
 					<Dialog.Header>
-						<Dialog.Title>Novo Registro de Proveniência</Dialog.Title>
+						<Dialog.Title>{t('records.dialog.create_title')}</Dialog.Title>
 						<Dialog.Description>
-							Cria um Registro em rascunho — Entidades e Atividades sao adicionadas depois.
+							{t('records.dialog.create_description')}
 						</Dialog.Description>
 					</Dialog.Header>
 					<form class="flex flex-col gap-4" onsubmit={criarRegistro}>
 						<div class="flex flex-col gap-1.5">
-							<Label for="titulo">Titulo</Label>
+							<Label for="titulo">{t('common.title_label')}</Label>
 							<Input
 								id="titulo"
 								bind:value={novoTitulo}
 								required
 								maxlength={300}
-								placeholder="Ex.: Levantamento de especies — Trilha do Ouro"
+								placeholder={t('records.title_placeholder')}
 							/>
 						</div>
 						<div class="flex flex-col gap-1.5">
-							<Label for="descricao">Descricao</Label>
+							<Label for="descricao">{t('common.description_label')}</Label>
 							<RichTextEditor bind:value={novaDescricao} />
 						</div>
 						<Dialog.Footer>
 							<Button type="submit" disabled={salvando || !novoTitulo.trim()}>
-								{salvando ? 'Criando…' : 'Criar Registro'}
+								{salvando ? t('common.creating') : t('records.create_button')}
 							</Button>
 						</Dialog.Footer>
 					</form>
@@ -170,7 +165,7 @@
 	</div>
 
 	<Input
-		placeholder="Buscar por titulo…"
+		placeholder={t('records.search_placeholder')}
 		bind:value={busca}
 		oninput={aoDigitarBusca}
 		class="max-w-sm"
@@ -178,7 +173,7 @@
 
 	{#if itens.length === 0 && !carregandoBusca}
 		<p class="text-muted-foreground py-12 text-center text-sm">
-			Nenhum Registro ainda. Crie o primeiro acima.
+			{t('records.empty')}
 		</p>
 	{/if}
 
@@ -192,11 +187,13 @@
 					<div class="flex flex-col gap-0.5">
 						<span class="font-medium">{registro.titulo}</span>
 						<span class="text-muted-foreground text-xs"
-							>Criado em {formatarData(registro.criadoEm)}</span
+							>{t('common.created_at', {
+								data: formatarData(registro.criadoEm, idiomaAtual.valor)
+							})}</span
 						>
 					</div>
 					<Badge variant={registro.status === 'finalizado' ? 'default' : 'secondary'}>
-						{registro.status === 'finalizado' ? 'Finalizado' : 'Rascunho'}
+						{t('status.' + registro.status)}
 					</Badge>
 				</a>
 			</li>
@@ -205,7 +202,7 @@
 
 	{#if proximoOffset !== null}
 		<div use:onVisible={carregarMais} class="text-muted-foreground py-4 text-center text-xs">
-			{carregandoMais ? 'Carregando…' : ''}
+			{carregandoMais ? t('common.loading') : ''}
 		</div>
 	{/if}
 </div>

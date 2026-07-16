@@ -10,16 +10,16 @@ export const tipoAtividadeSchema = z.enum(['criacao', 'transformacao', 'analise'
 export const usernameSchema = z
 	.string()
 	.trim()
-	.min(3, 'Usuario deve ter ao menos 3 caracteres.')
-	.max(30, 'Usuario deve ter no maximo 30 caracteres.')
-	.regex(/^[a-zA-Z0-9_]+$/, 'Usuario aceita apenas letras, numeros e underscore.');
-export const pinSchema = z.string().regex(/^\d{6}$/, 'PIN deve ter exatamente 6 digitos.');
+	.min(3, 'validation.username.min')
+	.max(30, 'validation.username.max')
+	.regex(/^[a-zA-Z0-9_]+$/, 'validation.username.pattern');
+export const pinSchema = z.string().regex(/^\d{6}$/, 'validation.pin.format');
 
 export const registrarUsuarioSchema = z.object({ username: usernameSchema, pin: pinSchema });
 export const entrarSchema = z.object({ username: usernameSchema, pin: pinSchema });
 
 export const agenteInputSchema = z.object({
-	nome: z.string().trim().min(1, 'Nome e obrigatorio.').max(200),
+	nome: z.string().trim().min(1, 'validation.name.required').max(200),
 	tipo: tipoAgenteSchema,
 	afiliacao: z.string().trim().max(300).nullable().optional(),
 	identificadorExterno: z.string().trim().max(200).nullable().optional()
@@ -27,13 +27,13 @@ export const agenteInputSchema = z.object({
 export type AgenteInput = z.infer<typeof agenteInputSchema>;
 
 export const registroInputSchema = z.object({
-	titulo: z.string().trim().min(1, 'Titulo e obrigatorio.').max(300),
+	titulo: z.string().trim().min(1, 'validation.title.required').max(300),
 	descricao: z.string().trim().max(20000).nullable().optional()
 });
 export type RegistroInput = z.infer<typeof registroInputSchema>;
 
 export const novaEntidadeInputSchema = z.object({
-	nome: z.string().trim().min(1, 'Nome e obrigatorio.').max(300),
+	nome: z.string().trim().min(1, 'validation.name.required').max(300),
 	descricao: z.string().trim().max(5000).nullable().optional(),
 	formato: z.string().trim().max(100).nullable().optional(),
 	localizacao: z.string().trim().max(2000).nullable().optional(),

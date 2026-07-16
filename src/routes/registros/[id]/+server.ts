@@ -10,14 +10,14 @@ import { parseBody, toApiError } from '$lib/server/api-utils';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = ({ params, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	const detalhe = obterRegistroDetalhado(params.id, locals.usuario.id);
-	if (!detalhe) error(404, 'Registro nao encontrado.');
+	if (!detalhe) error(404, 'error.record_not_found');
 	return json(detalhe);
 };
 
 export const PATCH: RequestHandler = async ({ params, request, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	const input = await parseBody(request, registroInputSchema);
 	try {
 		const registro = atualizarRegistro(params.id, locals.usuario.id, {
@@ -32,8 +32,8 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 
 /** Cascata sempre permitida, em qualquer status (rascunho ou finalizado) — especificacao.md §3. */
 export const DELETE: RequestHandler = ({ params, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
-	if (!obterRegistroDetalhado(params.id, locals.usuario.id)) error(404, 'Registro nao encontrado.');
+	if (!locals.usuario) error(401, 'error.auth_required');
+	if (!obterRegistroDetalhado(params.id, locals.usuario.id)) error(404, 'error.record_not_found');
 	excluirRegistro(params.id, locals.usuario.id);
 	return new Response(null, { status: 204 });
 };

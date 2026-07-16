@@ -5,7 +5,7 @@ import type { RequestHandler } from './$types';
 
 /** Rascunho -> Finalizado (ADR-0003). A partir daqui o historico existente vira imutavel. */
 export const POST: RequestHandler = ({ params, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	try {
 		return json(finalizarRegistro(params.id, locals.usuario.id));
 	} catch (err) {

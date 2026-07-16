@@ -79,7 +79,7 @@ export const sessaoAnonima = {
 		input: { titulo: string; descricao?: string | null }
 	): RegistroProvenencia {
 		const registro = this.obterRegistro(id);
-		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
+		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		const atualizado: RegistroProvenencia = {
 			...registro,
 			titulo: input.titulo,
@@ -126,9 +126,9 @@ export const sessaoAnonima = {
 
 	finalizarRegistro(id: string): RegistroProvenencia {
 		const registro = this.obterRegistro(id);
-		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${id} nao encontrado.`);
+		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		if (registro.status === 'finalizado') {
-			throw new RegistroJaFinalizadoError('Registro ja esta finalizado.');
+			throw new RegistroJaFinalizadoError('error.record_already_finalized');
 		}
 		const atualizado: RegistroProvenencia = {
 			...registro,
@@ -182,7 +182,7 @@ export const sessaoAnonima = {
 		}
 	): { atividade: Atividade; entidadesGeradas: Entidade[] } {
 		if (!this.obterRegistro(registroId)) {
-			throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+			throw new RegistroNaoEncontradoError('error.record_not_found');
 		}
 		validarCardinalidade(input);
 
@@ -192,7 +192,7 @@ export const sessaoAnonima = {
 		);
 		for (const entidadeId of input.entidadesUsadas) {
 			if (!entidadesDoRegistro.has(entidadeId)) {
-				throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
 
@@ -255,14 +255,14 @@ export const sessaoAnonima = {
 		}
 	): { atividade: Atividade; entidadesGeradas: Entidade[] } {
 		const registro = this.obterRegistro(registroId);
-		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		if (registro.status === 'finalizado') {
-			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+			throw new RegistroJaFinalizadoError('error.record_read_only');
 		}
 		const atual = estado.atividades.find(
 			(a) => a.id === atividadeId && a.registroId === registroId
 		);
-		if (!atual) throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+		if (!atual) throw new RegistroNaoEncontradoError('error.activity_not_found');
 
 		validarCardinalidade({
 			tipo: atual.tipo,
@@ -276,7 +276,7 @@ export const sessaoAnonima = {
 		);
 		for (const entidadeId of input.entidadesUsadas) {
 			if (!entidadesDoRegistro.has(entidadeId)) {
-				throw new RegraCardinalidadeError(`Entidade ${entidadeId} nao pertence a este Registro.`);
+				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
 
@@ -292,7 +292,7 @@ export const sessaoAnonima = {
 		for (const nova of input.entidadesGeradas ?? []) {
 			if (nova.id) {
 				if (!geradasAntesIds.has(nova.id)) {
-					throw new RegraCardinalidadeError(`Entidade ${nova.id} nao pertence a esta Atividade.`);
+					throw new RegraCardinalidadeError('error.entity_not_in_activity');
 				}
 				const editada: Entidade = {
 					id: nova.id,
@@ -329,7 +329,7 @@ export const sessaoAnonima = {
 				(a) => a.id !== atividadeId && a.entidadesUsadas.includes(idAntiga)
 			);
 			if (emUso) {
-				throw new EntidadeEmUsoError('Entidade em uso por outra Atividade como entrada.');
+				throw new EntidadeEmUsoError('error.entity_in_use');
 			}
 			entidades = entidades.filter((e) => e.id !== idAntiga);
 		}
@@ -360,14 +360,14 @@ export const sessaoAnonima = {
 	 * alguma delas estiver em uso como entrada de outra Atividade. */
 	excluirAtividade(registroId: string, atividadeId: string): void {
 		const registro = this.obterRegistro(registroId);
-		if (!registro) throw new RegistroNaoEncontradoError(`Registro ${registroId} nao encontrado.`);
+		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		if (registro.status === 'finalizado') {
-			throw new RegistroJaFinalizadoError('Registro finalizado e somente leitura (ADR-0003).');
+			throw new RegistroJaFinalizadoError('error.record_read_only');
 		}
 		const atual = estado.atividades.find(
 			(a) => a.id === atividadeId && a.registroId === registroId
 		);
-		if (!atual) throw new RegistroNaoEncontradoError(`Atividade ${atividadeId} nao encontrada.`);
+		if (!atual) throw new RegistroNaoEncontradoError('error.activity_not_found');
 
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- lookup local, descartado no fim da funcao.
 		const geradasIds = new Set(
@@ -378,7 +378,7 @@ export const sessaoAnonima = {
 				(a) => a.id !== atividadeId && a.entidadesUsadas.includes(entidadeId)
 			);
 			if (emUso) {
-				throw new EntidadeEmUsoError('Entidade em uso por outra Atividade como entrada.');
+				throw new EntidadeEmUsoError('error.entity_in_use');
 			}
 		}
 
@@ -436,7 +436,7 @@ export const sessaoAnonima = {
 
 	excluirAgente(id: string): void {
 		const emUso = estado.atividades.some((a) => a.agenteId === id);
-		if (emUso) throw new AgenteEmUsoError('Agente em uso por uma Atividade.');
+		if (emUso) throw new AgenteEmUsoError('error.agent_in_use');
 		estado.agentes = estado.agentes.filter((a) => a.id !== id);
 	}
 };

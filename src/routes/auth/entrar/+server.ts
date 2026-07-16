@@ -8,13 +8,13 @@ import { estaBloqueado, registrarFalha, limparTentativas } from '$lib/server/rat
 import { COOKIE_SESSAO } from '../../../hooks.server';
 import type { RequestHandler } from './$types';
 
-const MENSAGEM_INVALIDA = 'Usuario ou PIN invalidos.';
+const MENSAGEM_INVALIDA = 'error.invalid_credentials';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const input = await parseBody(request, entrarSchema);
 
 	if (estaBloqueado(input.username)) {
-		error(429, 'Muitas tentativas. Tente novamente em alguns minutos.');
+		error(429, 'error.too_many_attempts');
 	}
 
 	const usuario = autenticar(input.username, input.pin);

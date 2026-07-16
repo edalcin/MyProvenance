@@ -1,6 +1,6 @@
 import { gerarDiagramaMermaid } from '$lib/mermaid';
 import { formatarData, formatarDataSemHora } from '$lib/format';
-import { TIPO_ATIVIDADE_LABEL } from '$lib/types';
+import { traduzir, type Idioma } from '$lib/i18n';
 import type { RegistroDetalhado } from './types';
 
 function escaparCelula(texto: string): string {
@@ -8,32 +8,40 @@ function escaparCelula(texto: string): string {
 }
 
 /** Relatorio .md — cabecalho, diagrama, Entidades, linha do tempo, Agentes — docs/especificacao.md §6. */
-export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: string): string {
+export function gerarRelatorioMarkdown(
+	detalhe: RegistroDetalhado,
+	exportadoEm: string,
+	locale: Idioma = 'pt'
+): string {
 	const { registro, entidades, atividades, agentesEnvolvidos } = detalhe;
 	const nomeEntidade = new Map(entidades.map((e) => [e.id, e.nome]));
 	const nomeAgente = new Map(agentesEnvolvidos.map((a) => [a.id, a.nome]));
+	const t = (chave: string) => traduzir(locale, chave);
 
 	const linhas: string[] = [];
 
 	linhas.push(`# ${registro.titulo}`, '');
 	if (registro.descricao) linhas.push(registro.descricao, '');
-	linhas.push(`**Status:** ${registro.status === 'finalizado' ? 'Finalizado' : 'Rascunho'}`);
-	linhas.push(`**Exportado em:** ${formatarData(exportadoEm)}`, '');
+	linhas.push(`**${t('report.status_label')}:** ${t('status.' + registro.status)}`);
+	linhas.push(`**${t('report.exported_at')}:** ${formatarData(exportadoEm, locale)}`, '');
 
 	linhas.push(
-		'## Diagrama',
+		`## ${t('report.section.diagram')}`,
 		'',
 		'```mermaid',
-		gerarDiagramaMermaid({ entidades, atividades, agentesEnvolvidos }),
+		gerarDiagramaMermaid({ entidades, atividades, agentesEnvolvidos }, { locale }),
 		'```',
 		''
 	);
 
-	linhas.push('## Entidades', '');
+	linhas.push(`## ${t('report.section.entities')}`, '');
 	if (entidades.length === 0) {
-		linhas.push('_Nenhuma Entidade._', '');
+		linhas.push(t('report.empty.entities'), '');
 	} else {
-		linhas.push('| Nome | Formato | Localização | Licença |', '|---|---|---|---|');
+		linhas.push(
+			`| ${t('report.th.name')} | ${t('report.th.format')} | ${t('report.th.location')} | ${t('report.th.license')} |`,
+			'|---|---|---|---|'
+		);
 		for (const e of entidades) {
 			linhas.push(
 				`| ${escaparCelula(e.nome)} | ${e.formato ?? '—'} | ${e.localizacao ?? '—'} | ${e.licenca ?? '—'} |`
@@ -42,53 +50,59 @@ export function gerarRelatorioMarkdown(detalhe: RegistroDetalhado, exportadoEm: 
 		linhas.push('');
 	}
 
-	linhas.push('## Linha do tempo de Atividades', '');
+	linhas.push(`## ${t('report.section.timeline')}`, '');
 	if (atividades.length === 0) {
-		linhas.push('_Nenhuma Atividade._', '');
+		linhas.push(t('report.empty.activities'), '');
 	} else {
 		linhas.push(
-			'| Tipo | Data | Agente | Entidades usadas → Entidades geradas | Detalhes |',
+			`| ${t('report.th.type')} | ${t('report.th.date')} | ${t('report.th.agent')} | ${t('report.th.flow')} | ${t('report.th.details')} |`,
 			'|---|---|---|---|---|'
 		);
 		for (const a of atividades) {
 			const usadas = a.entidadesUsadas.map((id) => nomeEntidade.get(id) ?? id).join(', ');
 			const geradas = a.entidadesGeradas.length
 				? a.entidadesGeradas.map((id) => nomeEntidade.get(id) ?? id).join(', ')
-				: '(sem saída)';
+				: t('report.no_output');
 			const fluxo = usadas ? `${usadas} → ${geradas}` : geradas;
 
 			const detalhesPartes: string[] = [];
 			if (a.descricao) detalhesPartes.push(a.descricao);
-			if (a.local) detalhesPartes.push(`Local: ${a.local}`);
-			if (a.instrumento) detalhesPartes.push(`Ferramenta ou Software: ${a.instrumento}`);
-			if (a.processo) detalhesPartes.push(`Processo: ${a.processo}`);
+			if (a.local) detalhesPartes.push(`${t('report.detail.location')}: ${a.local}`);
+			if (a.instrumento) detalhesPartes.push(`${t('report.detail.tool')}: ${a.instrumento}`);
+			if (a.processo) detalhesPartes.push(`${t('report.detail.process')}: ${a.processo}`);
 			if (a.parametros?.length) {
 				detalhesPartes.push(
-					`Parâmetros: ${a.parametros.map((p) => `${p.chave}=${p.valor}`).join(', ')}`
+					`${t('report.detail.params')}: ${a.parametros.map((p) => `${p.chave}=${p.valor}`).join(', ')}`
 				);
 			}
-			if (a.ambienteExecucao?.sistemaOperacional)
-				detalhesPartes.push(`SO: ${a.ambienteExecucao.sistemaOperacional}`);
+			if (a.ambienteExecucao?.sistemaOperacional) {
+				detalhesPartes.push(`${t('report.detail.os')}: ${a.ambienteExecucao.sistemaOperacional}`);
+			}
 			if (a.ambienteExecucao?.pacotes?.length) {
 				detalhesPartes.push(
-					`Pacotes: ${a.ambienteExecucao.pacotes.map((p) => `${p.nome}@${p.versao}`).join(', ')}`
+					`${t('report.detail.packages')}: ${a.ambienteExecucao.pacotes.map((p) => `${p.nome}@${p.versao}`).join(', ')}`
 				);
 			}
 
 			linhas.push(
-				`| ${TIPO_ATIVIDADE_LABEL[a.tipo]} | ${formatarDataSemHora(a.dataHora)} | ${nomeAgente.get(a.agenteId) ?? '—'} | ${escaparCelula(fluxo)} | ${escaparCelula(detalhesPartes.join('; ') || '—')} |`
+				`| ${t('activity.type.' + a.tipo)} | ${formatarDataSemHora(a.dataHora, locale)} | ${nomeAgente.get(a.agenteId) ?? '—'} | ${escaparCelula(fluxo)} | ${escaparCelula(detalhesPartes.join('; ') || '—')} |`
 			);
 		}
 		linhas.push('');
 	}
 
-	linhas.push('## Agentes envolvidos', '');
+	linhas.push(`## ${t('report.section.agents')}`, '');
 	if (agentesEnvolvidos.length === 0) {
-		linhas.push('_Nenhum Agente._', '');
+		linhas.push(t('report.empty.agents'), '');
 	} else {
-		linhas.push('| Nome | Tipo | Afiliação |', '|---|---|---|');
+		linhas.push(
+			`| ${t('report.th.name')} | ${t('report.th.type')} | ${t('report.th.affiliation')} |`,
+			'|---|---|---|'
+		);
 		for (const ag of agentesEnvolvidos) {
-			linhas.push(`| ${escaparCelula(ag.nome)} | ${ag.tipo} | ${ag.afiliacao ?? '—'} |`);
+			linhas.push(
+				`| ${escaparCelula(ag.nome)} | ${t('agent.type.' + ag.tipo)} | ${ag.afiliacao ?? '—'} |`
+			);
 		}
 		linhas.push('');
 	}

@@ -6,6 +6,7 @@
 import { SCHEMA_VERSION, type RegistroDetalhado } from '$lib/types';
 import { gerarJsonExportado } from '$lib/export';
 import { gerarRelatorioMarkdown } from '$lib/report';
+import type { Idioma } from '$lib/i18n';
 import { registroExportadoSchema, type RegistroExportadoValidado } from '$lib/schemas';
 import { slugify } from '$lib/slug';
 
@@ -28,8 +29,8 @@ export function exportarComoArquivo(detalhe: RegistroDetalhado): void {
 }
 
 /** Dispara o download do relatorio .md — mesmo gerador usado pela conta autenticada. */
-export function exportarRelatorioComoArquivo(detalhe: RegistroDetalhado): void {
-	const conteudo = gerarRelatorioMarkdown(detalhe, new Date().toISOString());
+export function exportarRelatorioComoArquivo(detalhe: RegistroDetalhado, locale: Idioma): void {
+	const conteudo = gerarRelatorioMarkdown(detalhe, new Date().toISOString(), locale);
 	baixarArquivo(conteudo, 'text/markdown', `${slugify(detalhe.registro.titulo)}-provenance.md`);
 }
 
@@ -42,18 +43,14 @@ export async function importarDeArquivo(file: File): Promise<RegistroExportadoVa
 	try {
 		bruto = JSON.parse(texto);
 	} catch {
-		throw new ArquivoInvalidoError('Arquivo nao e um JSON valido.');
+		throw new ArquivoInvalidoError('error.invalid_json_file');
 	}
 	const resultado = registroExportadoSchema.safeParse(bruto);
 	if (!resultado.success) {
-		throw new ArquivoInvalidoError(
-			resultado.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')
-		);
+		throw new ArquivoInvalidoError('error.invalid_file_format');
 	}
 	if (resultado.data.schemaVersion < 1 || resultado.data.schemaVersion > SCHEMA_VERSION) {
-		throw new ArquivoInvalidoError(
-			`schemaVersion ${resultado.data.schemaVersion} nao suportado (maximo ${SCHEMA_VERSION}).`
-		);
+		throw new ArquivoInvalidoError('error.schema_version_unsupported');
 	}
 	return resultado.data;
 }

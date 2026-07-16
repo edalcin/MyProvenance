@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
+	import { t } from '$lib/i18n/estado.svelte';
 
 	interface Par {
 		a: string;
@@ -33,7 +34,7 @@
 				variant="ghost"
 				size="icon-sm"
 				onclick={() => remover(indice)}
-				aria-label="Remover"
+				aria-label={t('common.remove')}
 			>
 				<i class="bx bx-x"></i>
 			</Button>

@@ -83,6 +83,43 @@ describe('gerarDiagramaMermaid', () => {
 		expect(saida).toContain('E1 -->|"Transformação: limpeza (Fulana, 2026-03-05)"| E2');
 	});
 
+	it('opts.direcao "TD" muda a primeira linha do diagrama', () => {
+		const e1 = entidade('e1', 'bruto.csv', 'a1');
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1']
+		});
+		const saida = gerarDiagramaMermaid(
+			{ entidades: [e1], atividades: [a1], agentesEnvolvidos: [agente] },
+			{ direcao: 'TD' }
+		);
+		expect(saida.startsWith('flowchart TD')).toBe(true);
+	});
+
+	it('opts.locale "en" traduz o rotulo do tipo de Atividade', () => {
+		const e1 = entidade('e1', 'bruto.csv', 'a1');
+		const e2 = entidade('e2', 'limpo.csv', 'a2');
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1']
+		});
+		const a2 = atividade({
+			id: 'a2',
+			tipo: 'transformacao',
+			entidadesUsadas: ['e1'],
+			entidadesGeradas: ['e2']
+		});
+		const saida = gerarDiagramaMermaid(
+			{ entidades: [e1, e2], atividades: [a1, a2], agentesEnvolvidos: [agente] },
+			{ locale: 'en' }
+		);
+		expect(saida).toContain('Transformation');
+	});
+
 	it('fusao de duas Entidades repete a seta em cada entrada convergindo no mesmo no', () => {
 		const e1 = entidade('e1', 'a.csv', 'a1');
 		const e2 = entidade('e2', 'b.csv', 'a2');

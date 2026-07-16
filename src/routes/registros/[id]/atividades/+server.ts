@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
 
 /** Sempre permitido, mesmo com Registro finalizado — finalizado so bloqueia editar/excluir historico (ADR-0003). */
 export const POST: RequestHandler = async ({ params, request, locals }) => {
-	if (!locals.usuario) error(401, 'Autenticacao necessaria.');
+	if (!locals.usuario) error(401, 'error.auth_required');
 	const input = await parseBody(request, criarAtividadeInputSchema);
 	try {
 		const resultado = criarAtividade(locals.usuario.id, params.id, input);

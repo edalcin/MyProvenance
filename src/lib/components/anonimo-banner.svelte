@@ -4,10 +4,11 @@
 	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
 	import { exportarComoArquivo } from '$lib/client/exportar-importar';
 	import CriarContaDialog from './criar-conta-dialog.svelte';
+	import { t } from '$lib/i18n/estado.svelte';
 
 	function exportarTudo() {
 		if (sessaoAnonima.registros.length === 0) {
-			toast.error('Nenhum Registro para exportar ainda.');
+			toast.error(t('error.nothing_to_export'));
 			return;
 		}
 		for (const registro of sessaoAnonima.registros) {
@@ -22,12 +23,12 @@
 >
 	<p class="flex items-center gap-2">
 		<i class="bx bx-info-circle shrink-0 text-base"></i>
-		Você está sem conta — os dados só existem neste navegador. Exporte o JSON antes de sair, ou crie uma
-		conta para salvar automaticamente.
+		{t('account.anonymous_banner')}
 	</p>
 	<div class="flex shrink-0 gap-2">
 		<Button variant="outline" size="sm" onclick={exportarTudo}>
-			<i class="bx bx-download"></i> Exportar JSON
+			<i class="bx bx-download"></i>
+			{t('records.export_json')}
 		</Button>
 		<CriarContaDialog />
 	</div>

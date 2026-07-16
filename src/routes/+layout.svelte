@@ -8,13 +8,17 @@
 	import AppNav from '$lib/components/app-nav.svelte';
 	import AnonimoBanner from '$lib/components/anonimo-banner.svelte';
 	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
+	import { idiomaAtual } from '$lib/i18n/estado.svelte';
 	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: import('svelte').Snippet } = $props();
 
 	// untrack: seed unica na montagem — sair()/entrar() forcam reload da pagina, nao precisa reagir.
-	untrack(() => usuarioAtual.definir(data.usuario));
+	untrack(() => {
+		usuarioAtual.definir(data.usuario);
+		idiomaAtual.definir(data.idioma);
+	});
 
 	// PWA offline-leitura (ADR-0006): adapter-node nao tem HTML unico para o plugin injetar
 	// registro automatico, entao registra manualmente. manifest.webmanifest ja linkado no app.html.

@@ -65,7 +65,7 @@ export async function criarRegistro(input: {
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(input)
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao criar Registro.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.create_record_failed');
 	return resposta.json();
 }
 
@@ -79,20 +79,20 @@ export async function atualizarRegistro(
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(input)
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao atualizar Registro.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_record_failed');
 	return resposta.json();
 }
 
 export async function excluirRegistro(id: string): Promise<void> {
 	if (!autenticado()) return sessaoAnonima.excluirRegistro(id);
 	const resposta = await fetch(`/registros/${id}`, { method: 'DELETE' });
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao excluir Registro.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.delete_record_failed');
 }
 
 export async function finalizarRegistro(id: string): Promise<RegistroProvenencia> {
 	if (!autenticado()) return sessaoAnonima.finalizarRegistro(id);
 	const resposta = await fetch(`/registros/${id}/finalizar`, { method: 'POST' });
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao finalizar Registro.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.finalize_record_failed');
 	return resposta.json();
 }
 
@@ -100,7 +100,7 @@ export async function obterRegistroDetalhado(id: string): Promise<RegistroDetalh
 	if (!autenticado()) return sessaoAnonima.obterRegistroDetalhado(id);
 	const resposta = await fetch(`/registros/${id}`);
 	if (resposta.status === 404) return null;
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao carregar Registro.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.load_record_failed');
 	return resposta.json();
 }
 
@@ -114,7 +114,7 @@ export async function importarRegistro(
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(dados)
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao importar Registro.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.import_record_failed');
 	const detalhe: { registro: RegistroProvenencia } = await resposta.json();
 	return detalhe.registro;
 }
@@ -131,7 +131,7 @@ export async function criarAtividade(
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(input)
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao criar Atividade.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.create_activity_failed');
 	return resposta.json();
 }
 
@@ -146,7 +146,7 @@ export async function atualizarAtividade(
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(input)
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao atualizar Atividade.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_activity_failed');
 	return resposta.json();
 }
 
@@ -155,7 +155,7 @@ export async function excluirAtividade(registroId: string, atividadeId: string):
 	const resposta = await fetch(`/registros/${registroId}/atividades/${atividadeId}`, {
 		method: 'DELETE'
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao excluir Atividade.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.delete_activity_failed');
 }
 
 // --- Agentes -------------------------------------------------------------
@@ -191,7 +191,7 @@ export async function criarAgente(input: {
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(input)
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao criar Agente.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.create_agent_failed');
 	return resposta.json();
 }
 
@@ -206,7 +206,7 @@ export async function atualizarAgente(
 ): Promise<Agente> {
 	if (!autenticado()) {
 		const atualizado = sessaoAnonima.atualizarAgente(id, input);
-		if (!atualizado) throw new Error('Agente nao encontrado.');
+		if (!atualizado) throw new Error('error.agent_not_found');
 		return atualizado;
 	}
 	const resposta = await fetch(`/agentes/${id}`, {
@@ -214,12 +214,12 @@ export async function atualizarAgente(
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(input)
 	});
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao salvar Agente.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.save_agent_failed');
 	return resposta.json();
 }
 
 export async function excluirAgente(id: string): Promise<void> {
 	if (!autenticado()) return sessaoAnonima.excluirAgente(id);
 	const resposta = await fetch(`/agentes/${id}`, { method: 'DELETE' });
-	if (!resposta.ok) throw await extrairErro(resposta, 'Erro ao excluir Agente.');
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.delete_agent_failed');
 }
