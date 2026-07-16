@@ -22,9 +22,10 @@ Documentar proveniência não é burocracia — é o que transforma um arquivo s
 ## O que o MyProvenance faz por você
 
 - **Registra o ciclo de vida completo** de um conjunto de dados através de três tipos de evento — Criação, Transformação e Análise — cada um com seus próprios campos (instrumento, script, parâmetros, ambiente de execução).
-- **Desenha o diagrama de linhagem automaticamente**, ao vivo, à medida que você registra as etapas — sem precisar desenhar nada à mão.
+- **Desenha o diagrama de linhagem automaticamente**, ao vivo, à medida que você registra as etapas — sem precisar desenhar nada à mão. Alterne a orientação horizontal/vertical com um clique.
 - **Gera um relatório `.md` portátil** com o diagrama e todas as tabelas, pronto para anexar a um artigo, repositório ou submissão.
 - **Exporta um JSON completo** do registro para backup, compartilhamento entre colegas ou migração para outra instância.
+- **Interface bilíngue** — português (padrão) ou inglês, com troca instantânea pelo seletor no cabeçalho, sem recarregar a página.
 - **Não guarda o dado em si** — só a documentação sobre ele. Seus arquivos de pesquisa continuam onde estão.
 - É **grátis, self-hosted, instalável como app (PWA) e não exige cadastro** — use direto no navegador, sem criar conta.
 
@@ -34,9 +35,13 @@ Por padrão, o MyProvenance **não salva nada no servidor**: todo o trabalho fic
 
 Se quiser continuidade automática entre visitas, **crie uma conta** (usuário + PIN de 6 dígitos, sem e-mail) — o botão aparece depois que você já tem o primeiro Registro ou Agente na sessão. Ao criar a conta, tudo que você já tinha feito é migrado automaticamente; a partir daí seus Registros e Agentes ficam salvos no servidor, isolados de qualquer outra conta na mesma instância. Perdeu o PIN? Sem recuperação — self-hosted sem e-mail — basta criar outra conta.
 
-Comece registrando a primeira Criação do seu conjunto de dados e deixe a linhagem crescer com o seu projeto.
+Comece registrando a primeira Criação do seu conjunto de dados e deixe a linhagem crescer com o seu projeto. Um guia passo a passo, com exemplo prático de planilha de biodiversidade, está disponível em **Como usar** no menu do app.
 
 Ver `CONTEXT.md`, `docs/especificacao.md` e `docs/adr/` para o modelo de domínio e as decisões arquiteturais.
+
+## Idioma
+
+A interface, o relatório `.md` exportado e as mensagens de erro estão disponíveis em **português (padrão)** e **inglês** — alterne pelo seletor **PT/EN** no cabeçalho. A troca é instantânea (sem recarregar a página) e fica salva num cookie para a próxima visita; o SSR já renderiza no idioma correto, sem piscar. O **JSON exportado** permanece sempre em português: é o formato de dados/intercâmbio da ferramenta, não uma tela.
 
 ## Stack
 
