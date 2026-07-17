@@ -42,12 +42,12 @@ export function gerarRelatorioMarkdown(
 		linhas.push(t('report.empty.entities'), '');
 	} else {
 		linhas.push(
-			`| ${t('report.th.name')} | ${t('report.th.format')} | ${t('report.th.location')} | ${t('report.th.license')} |`,
-			'|---|---|---|---|'
+			`| ${t('report.th.name')} | ${t('common.description_label')} | ${t('report.th.license')} |`,
+			'|---|---|---|'
 		);
 		for (const e of entidades) {
 			linhas.push(
-				`| ${escaparCelula(e.nome)} | ${e.formato ?? '—'} | ${e.localizacao ?? '—'} | ${e.licenca ?? '—'} |`
+				`| ${escaparCelula(e.nome)} | ${e.descricao ? escaparCelula(e.descricao) : '—'} | ${e.licenca ?? '—'} |`
 			);
 		}
 		linhas.push('');

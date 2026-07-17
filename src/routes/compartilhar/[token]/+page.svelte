@@ -137,8 +137,7 @@
 				<Table.Header>
 					<Table.Row>
 						<Table.Head>{t('report.th.name')}</Table.Head>
-						<Table.Head>{t('report.th.format')}</Table.Head>
-						<Table.Head>{t('report.th.location')}</Table.Head>
+						<Table.Head>{t('common.description_label')}</Table.Head>
 						<Table.Head>{t('report.th.license')}</Table.Head>
 					</Table.Row>
 				</Table.Header>
@@ -146,8 +145,7 @@
 					{#each entidades as entidade (entidade.id)}
 						<Table.Row>
 							<Table.Cell>{entidade.nome}</Table.Cell>
-							<Table.Cell>{entidade.formato ?? '—'}</Table.Cell>
-							<Table.Cell>{entidade.localizacao ?? '—'}</Table.Cell>
+							<Table.Cell>{entidade.descricao ?? '—'}</Table.Cell>
 							<Table.Cell>{entidade.licenca ?? '—'}</Table.Cell>
 						</Table.Row>
 					{/each}
