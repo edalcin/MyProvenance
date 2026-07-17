@@ -4,7 +4,11 @@
  * como JSON). Espelha 1:1 as regras de negocio dos repositories do servidor.
  */
 import { uuidv7 } from 'uuidv7';
-import { RegraCardinalidadeError, validarCardinalidade } from '$lib/cardinalidade';
+import {
+	RegraCardinalidadeError,
+	validarCardinalidade,
+	validarRelacoesGeradas
+} from '$lib/cardinalidade';
 import { sanitizarHtmlRico } from '$lib/sanitize';
 import type { RegistroExportadoValidado } from '$lib/schemas';
 import type {
@@ -194,6 +198,8 @@ export const sessaoAnonima = {
 				formato?: string | null;
 				localizacao?: string | null;
 				licenca?: string | null;
+				tipoRelacaoOrigem?: 'derivacao' | 'revisao' | null;
+				revisaoDeId?: string | null;
 			}[];
 		}
 	): { atividade: Atividade; entidadesGeradas: Entidade[] } {
@@ -211,6 +217,7 @@ export const sessaoAnonima = {
 				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
+		validarRelacoesGeradas(input);
 
 		const atividadeId = uuidv7();
 		const entidadesGeradas: Entidade[] = (input.entidadesGeradas ?? []).map((nova) => ({
@@ -221,7 +228,9 @@ export const sessaoAnonima = {
 			formato: nova.formato ?? null,
 			localizacao: nova.localizacao ?? null,
 			licenca: nova.licenca ?? null,
-			geradaPorAtividadeId: atividadeId
+			geradaPorAtividadeId: atividadeId,
+			tipoRelacaoOrigem: nova.tipoRelacaoOrigem ?? null,
+			revisaoDeId: nova.tipoRelacaoOrigem === 'revisao' ? (nova.revisaoDeId ?? null) : null
 		}));
 
 		const atividade: Atividade = {
@@ -267,6 +276,8 @@ export const sessaoAnonima = {
 				formato?: string | null;
 				localizacao?: string | null;
 				licenca?: string | null;
+				tipoRelacaoOrigem?: 'derivacao' | 'revisao' | null;
+				revisaoDeId?: string | null;
 			}[];
 		}
 	): { atividade: Atividade; entidadesGeradas: Entidade[] } {
@@ -295,6 +306,10 @@ export const sessaoAnonima = {
 				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
+		validarRelacoesGeradas({
+			entidadesUsadas: input.entidadesUsadas,
+			entidadesGeradas: input.entidadesGeradas
+		});
 
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- lookup local, descartado no fim da funcao.
 		const geradasAntesIds = new Set(
@@ -318,7 +333,9 @@ export const sessaoAnonima = {
 					formato: nova.formato ?? null,
 					localizacao: nova.localizacao ?? null,
 					licenca: nova.licenca ?? null,
-					geradaPorAtividadeId: atividadeId
+					geradaPorAtividadeId: atividadeId,
+					tipoRelacaoOrigem: nova.tipoRelacaoOrigem ?? null,
+					revisaoDeId: nova.tipoRelacaoOrigem === 'revisao' ? (nova.revisaoDeId ?? null) : null
 				};
 				entidades = entidades.map((e) => (e.id === nova.id ? editada : e));
 				mantidas.add(nova.id);
@@ -332,7 +349,9 @@ export const sessaoAnonima = {
 					formato: nova.formato ?? null,
 					localizacao: nova.localizacao ?? null,
 					licenca: nova.licenca ?? null,
-					geradaPorAtividadeId: atividadeId
+					geradaPorAtividadeId: atividadeId,
+					tipoRelacaoOrigem: nova.tipoRelacaoOrigem ?? null,
+					revisaoDeId: nova.tipoRelacaoOrigem === 'revisao' ? (nova.revisaoDeId ?? null) : null
 				};
 				entidades = [...entidades, criada];
 				entidadesGeradas.push(criada);

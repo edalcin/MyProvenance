@@ -6,6 +6,7 @@
 export type StatusRegistro = 'rascunho' | 'finalizado';
 export type TipoAtividade = 'criacao' | 'transformacao' | 'analise';
 export type TipoAgente = 'pessoa' | 'instituicao' | 'software';
+export type TipoRelacaoOrigem = 'derivacao' | 'revisao';
 
 export interface Agente {
 	id: string;
@@ -44,6 +45,10 @@ export interface Entidade {
 	localizacao: string | null;
 	licenca: string | null;
 	geradaPorAtividadeId: string;
+	/** Relação PROV desta Entidade com sua origem: derivação (wasDerivedFrom) ou revisão (wasRevisionOf). null = sem relação explícita. */
+	tipoRelacaoOrigem: TipoRelacaoOrigem | null;
+	/** Entidade de entrada revisada (só quando tipoRelacaoOrigem === 'revisao'); precisa estar entre as entidadesUsadas da Atividade geradora. */
+	revisaoDeId: string | null;
 }
 
 export interface PacoteAmbiente {
@@ -95,7 +100,7 @@ export interface RegistroExportado {
 	atividades: Atividade[];
 }
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const FORMATOS_SUGERIDOS = [
 	'CSV',

@@ -1,6 +1,7 @@
 import { gerarDiagramaMermaid } from '$lib/mermaid';
 import { formatarData, formatarDataSemHora } from '$lib/format';
 import { traduzir, type Idioma } from '$lib/i18n';
+import { sufixoRelacaoOrigem } from '$lib/relacao';
 import type { RegistroDetalhado } from './types';
 
 function escaparCelula(texto: string): string {
@@ -15,6 +16,7 @@ export function gerarRelatorioMarkdown(
 ): string {
 	const { registro, entidades, atividades, agentesEnvolvidos } = detalhe;
 	const nomeEntidade = new Map(entidades.map((e) => [e.id, e.nome]));
+	const entidadePorId = new Map(entidades.map((e) => [e.id, e]));
 	const nomeAgente = new Map(agentesEnvolvidos.map((a) => [a.id, a.nome]));
 	const t = (chave: string) => traduzir(locale, chave);
 
@@ -64,7 +66,13 @@ export function gerarRelatorioMarkdown(
 		for (const a of atividades) {
 			const usadas = a.entidadesUsadas.map((id) => nomeEntidade.get(id) ?? id).join(', ');
 			const geradas = a.entidadesGeradas.length
-				? a.entidadesGeradas.map((id) => nomeEntidade.get(id) ?? id).join(', ')
+				? a.entidadesGeradas
+						.map((id) => {
+							const e = entidadePorId.get(id);
+							const nome = nomeEntidade.get(id) ?? id;
+							return e ? nome + sufixoRelacaoOrigem(e, (x) => nomeEntidade.get(x), locale) : nome;
+						})
+						.join(', ')
 				: t('report.no_output');
 			const fluxo = usadas ? `${usadas} → ${geradas}` : geradas;
 

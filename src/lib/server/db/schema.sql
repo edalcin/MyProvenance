@@ -62,7 +62,10 @@ CREATE TABLE IF NOT EXISTS entidades (
   formato TEXT,
   localizacao TEXT,
   licenca TEXT,
-  gerada_por_atividade_id TEXT NOT NULL REFERENCES atividades(id)
+  gerada_por_atividade_id TEXT NOT NULL REFERENCES atividades(id),
+  -- Relação PROV da Entidade com sua origem (docs: Derivação/Revisão).
+  tipo_relacao_origem TEXT CHECK (tipo_relacao_origem IS NULL OR tipo_relacao_origem IN ('derivacao','revisao')),
+  revisao_de_id TEXT
 );
 
 -- entidades usadas como entrada de uma atividade (N:N)

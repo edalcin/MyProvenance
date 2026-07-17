@@ -44,6 +44,14 @@ if (!colunaExiste('registros', 'direcao_diagrama')) {
 if (!colunaExiste('registros', 'token_compartilhamento')) {
 	db.exec('ALTER TABLE registros ADD COLUMN token_compartilhamento TEXT');
 }
+if (!colunaExiste('entidades', 'tipo_relacao_origem')) {
+	db.exec(
+		`ALTER TABLE entidades ADD COLUMN tipo_relacao_origem TEXT CHECK (tipo_relacao_origem IS NULL OR tipo_relacao_origem IN ('derivacao','revisao'))`
+	);
+}
+if (!colunaExiste('entidades', 'revisao_de_id')) {
+	db.exec('ALTER TABLE entidades ADD COLUMN revisao_de_id TEXT');
+}
 // Indice fora do `if`: precisa existir tanto em banco novo (coluna ja veio do CREATE TABLE,
 // nunca entra no if acima) quanto em banco migrado (coluna acabou de ser adicionada).
 db.exec(

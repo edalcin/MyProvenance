@@ -63,6 +63,10 @@ export const pt = {
 	'error.cardinality.transformation_needs_input': 'Transformação usa 1 ou mais Entidades.',
 	'error.cardinality.transformation_needs_output': 'Transformação deve gerar 1 ou mais Entidades.',
 	'error.cardinality.analysis_needs_input': 'Análise usa 1 ou mais Entidades.',
+	'error.revision_needs_source':
+		'Revisão precisa indicar de qual Entidade de entrada é uma nova versão.',
+	'error.revision_source_not_used':
+		'A Entidade revisada precisa estar entre as Entidades usadas pela Atividade.',
 	'validation.name.required': 'Nome é obrigatório.',
 	'validation.title.required': 'Título é obrigatório.',
 	'validation.username.min': 'Usuário deve ter ao menos 3 caracteres.',
@@ -219,6 +223,12 @@ export const pt = {
 	'activities.location_url_placeholder': 'URL ou caminho',
 	'activities.add_generated_entity': 'Adicionar Entidade gerada',
 	'activities.rich_text_placeholder': 'Descrição (opcional)…',
+	'activities.relation_label': 'Relação com a origem',
+	'activities.relation.none': 'Nenhuma',
+	'activities.relation.derivation': 'Derivação',
+	'activities.relation.revision': 'Revisão',
+	'activities.revision_of_label': 'Revisão de',
+	'activities.revision_source_placeholder': 'Selecionar Entidade de entrada…',
 	// Agentes
 	'agents.singular': 'Agente',
 	'agents.page_title': 'Agentes — MyProvenance',
@@ -256,5 +266,9 @@ export const pt = {
 	'editor.bullet_list': 'Lista',
 	'editor.ordered_list': 'Lista numerada',
 	'editor.blockquote': 'Citação',
-	'editor.code_block': 'Código'
+	'editor.code_block': 'Código',
+	// Relação de origem (diagrama/relatório/listas)
+	'relation.derivation': 'derivação',
+	'relation.revision': 'revisão',
+	'relation.revision_of': 'revisão de {nome}'
 } as const;

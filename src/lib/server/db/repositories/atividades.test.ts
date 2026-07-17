@@ -91,6 +91,51 @@ describe('regra de cardinalidade de Atividade', () => {
 		expect(entidadesGeradas[0].nome).toBe('campo_limpo.csv');
 	});
 
+	it('Transformacao gerando revisao persiste tipoRelacaoOrigem e revisaoDeId', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro revisao' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
+		});
+		const { entidadesGeradas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'transformacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [
+				{ nome: 'campo_limpo.csv', tipoRelacaoOrigem: 'revisao', revisaoDeId: brutas[0].id }
+			]
+		});
+		const persistida = obterEntidade(entidadesGeradas[0].id)!;
+		expect(persistida.tipoRelacaoOrigem).toBe('revisao');
+		expect(persistida.revisaoDeId).toBe(brutas[0].id);
+	});
+
+	it('Revisao com revisaoDeId fora de entidadesUsadas e rejeitada', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro revisao invalida' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
+		});
+		expect(() =>
+			criarAtividade(usuarioId, registro.id, {
+				tipo: 'transformacao',
+				agenteId: agente.id,
+				dataHora: new Date().toISOString(),
+				entidadesUsadas: [brutas[0].id],
+				entidadesGeradas: [
+					{ nome: 'campo_limpo.csv', tipoRelacaoOrigem: 'revisao', revisaoDeId: 'outro-id' }
+				]
+			})
+		).toThrow(RegraCardinalidadeError);
+	});
+
 	it('Transformacao pode gerar mais de uma Entidade', () => {
 		const registro = criarRegistro(usuarioId, { titulo: 'Registro transformacao multipla' });
 		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {

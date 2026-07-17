@@ -14,6 +14,7 @@ export function gerarDiagramaMermaid(
 	const { direcao = 'LR', locale = 'pt' } = opts;
 	const nomeAgente = new Map(dados.agentesEnvolvidos.map((a) => [a.id, a.nome]));
 	const idDoNo = new Map(dados.entidades.map((e, i) => [e.id, `E${i + 1}`]));
+	const entidadePorId = new Map(dados.entidades.map((e) => [e.id, e]));
 
 	const linhas: string[] = [`flowchart ${direcao}`];
 
@@ -37,10 +38,21 @@ export function gerarDiagramaMermaid(
 		for (const geradaId of atividade.entidadesGeradas) {
 			const destino = idDoNo.get(geradaId);
 			if (!destino) continue;
+			const gerada = entidadePorId.get(geradaId);
 			for (const usadaId of atividade.entidadesUsadas) {
 				const origem = idDoNo.get(usadaId);
 				if (!origem) continue;
-				linhas.push(`  ${origem} -->|"${rotulo}"| ${destino}`);
+				if (gerada?.tipoRelacaoOrigem === 'revisao' && gerada.revisaoDeId === usadaId) {
+					linhas.push(
+						`  ${origem} -.->|"${rotulo} (${traduzir(locale, 'relation.revision')})"| ${destino}`
+					);
+				} else if (gerada?.tipoRelacaoOrigem === 'derivacao') {
+					linhas.push(
+						`  ${origem} -->|"${rotulo} (${traduzir(locale, 'relation.derivation')})"| ${destino}`
+					);
+				} else {
+					linhas.push(`  ${origem} -->|"${rotulo}"| ${destino}`);
+				}
 			}
 		}
 	}

@@ -19,7 +19,9 @@ function entidade(id: string, nome: string, geradaPor: string): Entidade {
 		formato: 'CSV',
 		localizacao: null,
 		licenca: null,
-		geradaPorAtividadeId: geradaPor
+		geradaPorAtividadeId: geradaPor,
+		tipoRelacaoOrigem: null,
+		revisaoDeId: null
 	};
 }
 
@@ -81,6 +83,62 @@ describe('gerarDiagramaMermaid', () => {
 			agentesEnvolvidos: [agente]
 		});
 		expect(saida).toContain('E1 -->|"Transformação: limpeza (Fulana, 2026-03-05)"| E2');
+	});
+
+	it('Entidade gerada em revisao desenha seta pontilhada rotulada "revisão"', () => {
+		const e1 = entidade('e1', 'bruto.csv', 'a1');
+		const e2 = {
+			...entidade('e2', 'bruto_v2.csv', 'a2'),
+			tipoRelacaoOrigem: 'revisao' as const,
+			revisaoDeId: 'e1'
+		};
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1']
+		});
+		const a2 = atividade({
+			id: 'a2',
+			tipo: 'transformacao',
+			entidadesUsadas: ['e1'],
+			entidadesGeradas: ['e2'],
+			descricao: 'nova versao'
+		});
+		const saida = gerarDiagramaMermaid({
+			entidades: [e1, e2],
+			atividades: [a1, a2],
+			agentesEnvolvidos: [agente]
+		});
+		expect(saida).toContain(
+			'E1 -.->|"Transformação: nova versao (Fulana, 2026-03-05) (revisão)"| E2'
+		);
+	});
+
+	it('Entidade gerada em derivacao desenha seta solida rotulada "derivação"', () => {
+		const e1 = entidade('e1', 'bruto.csv', 'a1');
+		const e2 = { ...entidade('e2', 'derivado.csv', 'a2'), tipoRelacaoOrigem: 'derivacao' as const };
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1']
+		});
+		const a2 = atividade({
+			id: 'a2',
+			tipo: 'transformacao',
+			entidadesUsadas: ['e1'],
+			entidadesGeradas: ['e2'],
+			descricao: 'derivado'
+		});
+		const saida = gerarDiagramaMermaid({
+			entidades: [e1, e2],
+			atividades: [a1, a2],
+			agentesEnvolvidos: [agente]
+		});
+		expect(saida).toContain(
+			'E1 -->|"Transformação: derivado (Fulana, 2026-03-05) (derivação)"| E2'
+		);
 	});
 
 	it('opts.direcao "TD" muda a primeira linha do diagrama', () => {

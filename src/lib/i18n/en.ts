@@ -65,6 +65,10 @@ export const en: Record<keyof typeof pt, string> = {
 	'error.cardinality.transformation_needs_output':
 		'Transformation must generate 1 or more Entities.',
 	'error.cardinality.analysis_needs_input': 'Analysis uses 1 or more Entities.',
+	'error.revision_needs_source':
+		'A revision must indicate which input entity it is a new version of.',
+	'error.revision_source_not_used':
+		'The revised entity must be among the entities used by the activity.',
 	'validation.name.required': 'Name is required.',
 	'validation.title.required': 'Title is required.',
 	'validation.username.min': 'Username must be at least 3 characters.',
@@ -219,6 +223,12 @@ export const en: Record<keyof typeof pt, string> = {
 	'activities.location_url_placeholder': 'URL or path',
 	'activities.add_generated_entity': 'Add generated entity',
 	'activities.rich_text_placeholder': 'Description (optional)…',
+	'activities.relation_label': 'Relationship to source',
+	'activities.relation.none': 'None',
+	'activities.relation.derivation': 'Derivation',
+	'activities.relation.revision': 'Revision',
+	'activities.revision_of_label': 'Revision of',
+	'activities.revision_source_placeholder': 'Select input entity…',
 	// Agentes
 	'agents.singular': 'Agent',
 	'agents.page_title': 'Agents — MyProvenance',
@@ -256,5 +266,9 @@ export const en: Record<keyof typeof pt, string> = {
 	'editor.bullet_list': 'Bullet list',
 	'editor.ordered_list': 'Numbered list',
 	'editor.blockquote': 'Quote',
-	'editor.code_block': 'Code block'
+	'editor.code_block': 'Code block',
+	// Origin relation (diagram/report/lists)
+	'relation.derivation': 'derivation',
+	'relation.revision': 'revision',
+	'relation.revision_of': 'revision of {nome}'
 };

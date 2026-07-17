@@ -40,7 +40,9 @@ export const novaEntidadeInputSchema = z.object({
 	descricao: z.string().trim().max(5000).nullable().optional(),
 	formato: z.string().trim().max(100).nullable().optional(),
 	localizacao: z.string().trim().max(2000).nullable().optional(),
-	licenca: z.string().trim().max(300).nullable().optional()
+	licenca: z.string().trim().max(300).nullable().optional(),
+	tipoRelacaoOrigem: z.enum(['derivacao', 'revisao']).nullable().optional(),
+	revisaoDeId: z.uuid().nullable().optional()
 });
 
 export const parametroAtividadeSchema = z.object({
@@ -111,7 +113,9 @@ export const entidadeExportadaSchema = z.object({
 	formato: z.string().trim().max(100).nullable(),
 	localizacao: z.string().trim().max(2000).nullable(),
 	licenca: z.string().trim().max(300).nullable(),
-	geradaPorAtividadeId: z.uuid()
+	geradaPorAtividadeId: z.uuid(),
+	tipoRelacaoOrigem: z.enum(['derivacao', 'revisao']).nullable().optional().default(null),
+	revisaoDeId: z.uuid().nullable().optional().default(null)
 });
 
 export const atividadeExportadaSchema = z.object({

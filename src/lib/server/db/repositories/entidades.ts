@@ -10,6 +10,8 @@ interface EntidadeRow {
 	localizacao: string | null;
 	licenca: string | null;
 	gerada_por_atividade_id: string;
+	tipo_relacao_origem: string | null;
+	revisao_de_id: string | null;
 }
 
 function mapRow(row: EntidadeRow): Entidade {
@@ -21,7 +23,9 @@ function mapRow(row: EntidadeRow): Entidade {
 		formato: row.formato,
 		localizacao: row.localizacao,
 		licenca: row.licenca,
-		geradaPorAtividadeId: row.gerada_por_atividade_id
+		geradaPorAtividadeId: row.gerada_por_atividade_id,
+		tipoRelacaoOrigem: row.tipo_relacao_origem as 'derivacao' | 'revisao' | null,
+		revisaoDeId: row.revisao_de_id
 	};
 }
 
@@ -41,8 +45,8 @@ export function obterEntidade(id: string): Entidade | null {
 /** Uso interno — Entidade so nasce como efeito de criarAtividade() (ver repositories/atividades.ts). */
 export function inserirEntidade(entidade: Entidade): void {
 	db.prepare(
-		`INSERT INTO entidades (id, registro_id, nome, descricao, formato, localizacao, licenca, gerada_por_atividade_id)
-		 VALUES (@id, @registroId, @nome, @descricao, @formato, @localizacao, @licenca, @geradaPorAtividadeId)`
+		`INSERT INTO entidades (id, registro_id, nome, descricao, formato, localizacao, licenca, gerada_por_atividade_id, tipo_relacao_origem, revisao_de_id)
+		 VALUES (@id, @registroId, @nome, @descricao, @formato, @localizacao, @licenca, @geradaPorAtividadeId, @tipoRelacaoOrigem, @revisaoDeId)`
 	).run(entidade);
 }
 
@@ -52,20 +56,25 @@ export interface EntidadeEditInput {
 	formato?: string | null;
 	localizacao?: string | null;
 	licenca?: string | null;
+	tipoRelacaoOrigem?: 'derivacao' | 'revisao' | null;
+	revisaoDeId?: string | null;
 }
 
 /** Uso interno — Entidade so e' editada como efeito de atualizarAtividade() (ver repositories/atividades.ts). */
 export function atualizarEntidade(id: string, input: EntidadeEditInput): void {
 	db.prepare(
 		`UPDATE entidades SET nome = @nome, descricao = @descricao, formato = @formato,
-		 localizacao = @localizacao, licenca = @licenca WHERE id = @id`
+		 localizacao = @localizacao, licenca = @licenca, tipo_relacao_origem = @tipoRelacaoOrigem,
+		 revisao_de_id = @revisaoDeId WHERE id = @id`
 	).run({
 		id,
 		nome: input.nome,
 		descricao: input.descricao ?? null,
 		formato: input.formato ?? null,
 		localizacao: input.localizacao ?? null,
-		licenca: input.licenca ?? null
+		licenca: input.licenca ?? null,
+		tipoRelacaoOrigem: input.tipoRelacaoOrigem ?? null,
+		revisaoDeId: input.tipoRelacaoOrigem === 'revisao' ? (input.revisaoDeId ?? null) : null
 	});
 }
 

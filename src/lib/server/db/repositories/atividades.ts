@@ -8,7 +8,11 @@ import type {
 	TipoAtividade
 } from '$lib/types';
 import { RegistroNaoEncontradoError, RegistroJaFinalizadoError } from './registros';
-import { RegraCardinalidadeError, validarCardinalidade } from '$lib/cardinalidade';
+import {
+	RegraCardinalidadeError,
+	validarCardinalidade,
+	validarRelacoesGeradas
+} from '$lib/cardinalidade';
 import {
 	inserirEntidade,
 	listarEntidadesPorRegistro,
@@ -90,6 +94,8 @@ export interface NovaEntidadeInput {
 	formato?: string | null;
 	localizacao?: string | null;
 	licenca?: string | null;
+	tipoRelacaoOrigem?: 'derivacao' | 'revisao' | null;
+	revisaoDeId?: string | null;
 }
 
 export interface CriarAtividadeInput {
@@ -132,6 +138,7 @@ const criarAtividadeTx = db.transaction(
 				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
+		validarRelacoesGeradas(input);
 
 		const atividadeId = uuidv7();
 		inserirAtividadeStmt.run({
@@ -161,7 +168,9 @@ const criarAtividadeTx = db.transaction(
 				formato: nova.formato ?? null,
 				localizacao: nova.localizacao ?? null,
 				licenca: nova.licenca ?? null,
-				geradaPorAtividadeId: atividadeId
+				geradaPorAtividadeId: atividadeId,
+				tipoRelacaoOrigem: nova.tipoRelacaoOrigem ?? null,
+				revisaoDeId: nova.tipoRelacaoOrigem === 'revisao' ? (nova.revisaoDeId ?? null) : null
 			};
 			inserirEntidade(entidade);
 			return entidade;
@@ -235,6 +244,10 @@ const atualizarAtividadeTx = db.transaction(
 				throw new RegraCardinalidadeError('error.entity_not_in_record');
 			}
 		}
+		validarRelacoesGeradas({
+			entidadesUsadas: input.entidadesUsadas,
+			entidadesGeradas: input.entidadesGeradas
+		});
 
 		atualizarAtividadeStmt.run({
 			id: atividadeId,
@@ -276,7 +289,9 @@ const atualizarAtividadeTx = db.transaction(
 					formato: nova.formato ?? null,
 					localizacao: nova.localizacao ?? null,
 					licenca: nova.licenca ?? null,
-					geradaPorAtividadeId: atividadeId
+					geradaPorAtividadeId: atividadeId,
+					tipoRelacaoOrigem: nova.tipoRelacaoOrigem ?? null,
+					revisaoDeId: nova.tipoRelacaoOrigem === 'revisao' ? (nova.revisaoDeId ?? null) : null
 				};
 				inserirEntidade(entidade);
 				entidadesGeradas.push(entidade);

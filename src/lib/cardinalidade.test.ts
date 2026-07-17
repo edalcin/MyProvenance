@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { RegraCardinalidadeError, validarCardinalidade } from './cardinalidade';
+import {
+	RegraCardinalidadeError,
+	validarCardinalidade,
+	validarRelacoesGeradas
+} from './cardinalidade';
 
 // ponytail: pura, sem DB — roda tanto pro repository do servidor quanto pra sessao anonima do cliente.
 
@@ -64,5 +68,46 @@ describe('validarCardinalidade', () => {
 		expect(() =>
 			validarCardinalidade({ tipo: 'analise', entidadesUsadas: [], entidadesGeradas: [] })
 		).toThrow(RegraCardinalidadeError);
+	});
+});
+
+describe('validarRelacoesGeradas', () => {
+	it('Revisao com revisaoDeId entre as entidadesUsadas nao lanca', () => {
+		expect(() =>
+			validarRelacoesGeradas({
+				entidadesUsadas: ['e1'],
+				entidadesGeradas: [{ tipoRelacaoOrigem: 'revisao', revisaoDeId: 'e1' }]
+			})
+		).not.toThrow();
+	});
+
+	it('Revisao sem revisaoDeId e rejeitada', () => {
+		expect(() =>
+			validarRelacoesGeradas({
+				entidadesUsadas: ['e1'],
+				entidadesGeradas: [{ tipoRelacaoOrigem: 'revisao', revisaoDeId: null }]
+			})
+		).toThrow('error.revision_needs_source');
+	});
+
+	it('Revisao com fonte fora de entidadesUsadas e rejeitada', () => {
+		expect(() =>
+			validarRelacoesGeradas({
+				entidadesUsadas: ['e1'],
+				entidadesGeradas: [{ tipoRelacaoOrigem: 'revisao', revisaoDeId: 'e2' }]
+			})
+		).toThrow('error.revision_source_not_used');
+	});
+
+	it('Derivacao ou null ignoram revisaoDeId', () => {
+		expect(() =>
+			validarRelacoesGeradas({
+				entidadesUsadas: ['e1'],
+				entidadesGeradas: [
+					{ tipoRelacaoOrigem: 'derivacao', revisaoDeId: null },
+					{ tipoRelacaoOrigem: null, revisaoDeId: null }
+				]
+			})
+		).not.toThrow();
 	});
 });

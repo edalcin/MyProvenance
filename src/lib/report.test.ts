@@ -55,7 +55,9 @@ describe('gerarRelatorioMarkdown', () => {
 					formato: 'CSV',
 					localizacao: null,
 					licenca: null,
-					geradaPorAtividadeId: 'a1'
+					geradaPorAtividadeId: 'a1',
+					tipoRelacaoOrigem: null,
+					revisaoDeId: null
 				}
 			]
 		};
@@ -68,5 +70,74 @@ describe('gerarRelatorioMarkdown', () => {
 		expect(md).toContain('**Status:** Draft');
 		expect(md).toContain('## Entities');
 		expect(md).toContain('_No entities._');
+	});
+
+	it('linha do tempo mostra "revisão de X" para Entidade gerada como revisao', () => {
+		const detalhe: RegistroDetalhado = {
+			...detalheVazio,
+			entidades: [
+				{
+					id: 'e1',
+					registroId: 'r1',
+					nome: 'bruto.csv',
+					descricao: null,
+					formato: 'CSV',
+					localizacao: null,
+					licenca: null,
+					geradaPorAtividadeId: 'a1',
+					tipoRelacaoOrigem: null,
+					revisaoDeId: null
+				},
+				{
+					id: 'e2',
+					registroId: 'r1',
+					nome: 'bruto_v2.csv',
+					descricao: null,
+					formato: 'CSV',
+					localizacao: null,
+					licenca: null,
+					geradaPorAtividadeId: 'a2',
+					tipoRelacaoOrigem: 'revisao',
+					revisaoDeId: 'e1'
+				}
+			],
+			atividades: [
+				{
+					id: 'a1',
+					registroId: 'r1',
+					tipo: 'criacao',
+					agenteId: 'ag1',
+					dataHora: '2026-03-05T10:00:00.000Z',
+					descricao: null,
+					entidadesUsadas: [],
+					entidadesGeradas: ['e1'],
+					local: null,
+					instrumento: null,
+					processo: null,
+					parametros: null,
+					ambienteExecucao: null
+				},
+				{
+					id: 'a2',
+					registroId: 'r1',
+					tipo: 'transformacao',
+					agenteId: 'ag1',
+					dataHora: '2026-03-06T10:00:00.000Z',
+					descricao: null,
+					entidadesUsadas: ['e1'],
+					entidadesGeradas: ['e2'],
+					local: null,
+					instrumento: null,
+					processo: null,
+					parametros: null,
+					ambienteExecucao: null
+				}
+			],
+			agentesEnvolvidos: [
+				{ id: 'ag1', nome: 'Fulana', tipo: 'pessoa', afiliacao: null, identificadorExterno: null }
+			]
+		};
+		const md = gerarRelatorioMarkdown(detalhe, '2026-03-15T18:00:00.000Z');
+		expect(md).toContain('bruto_v2.csv (revisão de bruto.csv)');
 	});
 });

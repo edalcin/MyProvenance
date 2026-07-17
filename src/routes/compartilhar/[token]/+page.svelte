@@ -2,6 +2,7 @@
 	import { untrack } from 'svelte';
 	import { formatarData } from '$lib/format';
 	import { gerarDiagramaMermaid } from '$lib/mermaid';
+	import { sufixoRelacaoOrigem } from '$lib/relacao';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import * as Table from '$lib/components/ui/table';
@@ -24,6 +25,7 @@
 		)
 	);
 	const nomeEntidade = $derived(new Map(entidades.map((e) => [e.id, e.nome])));
+	const entidadePorId = $derived(new Map(entidades.map((e) => [e.id, e])));
 	const nomeAgente = $derived(new Map(agentesEnvolvidos.map((a) => [a.id, a.nome])));
 </script>
 
@@ -110,7 +112,16 @@
 								<i class="bx bx-right-arrow-alt"></i>
 							{/if}
 							{atividade.entidadesGeradas.length > 0
-								? atividade.entidadesGeradas.map((id) => nomeEntidade.get(id) ?? id).join(', ')
+								? atividade.entidadesGeradas
+										.map((id) => {
+											const nome = nomeEntidade.get(id) ?? id;
+											const e = entidadePorId.get(id);
+											return e
+												? nome +
+														sufixoRelacaoOrigem(e, (x) => nomeEntidade.get(x), idiomaAtual.valor)
+												: nome;
+										})
+										.join(', ')
 								: t('activities.no_output')}
 						</p>
 						{#if atividade.local || atividade.instrumento}

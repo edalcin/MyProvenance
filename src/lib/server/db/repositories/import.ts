@@ -37,12 +37,12 @@ const upsertAtividadeStmt = db.prepare(`
 `);
 
 const upsertEntidadeStmt = db.prepare(`
-	INSERT INTO entidades (id, registro_id, nome, descricao, formato, localizacao, licenca, gerada_por_atividade_id)
-	VALUES (@id, @registroId, @nome, @descricao, @formato, @localizacao, @licenca, @geradaPorAtividadeId)
+	INSERT INTO entidades (id, registro_id, nome, descricao, formato, localizacao, licenca, gerada_por_atividade_id, tipo_relacao_origem, revisao_de_id)
+	VALUES (@id, @registroId, @nome, @descricao, @formato, @localizacao, @licenca, @geradaPorAtividadeId, @tipoRelacaoOrigem, @revisaoDeId)
 	ON CONFLICT(id) DO UPDATE SET
 		registro_id = excluded.registro_id, nome = excluded.nome, descricao = excluded.descricao,
 		formato = excluded.formato, localizacao = excluded.localizacao, licenca = excluded.licenca,
-		gerada_por_atividade_id = excluded.gerada_por_atividade_id
+		gerada_por_atividade_id = excluded.gerada_por_atividade_id, tipo_relacao_origem = excluded.tipo_relacao_origem, revisao_de_id = excluded.revisao_de_id
 `);
 
 const limparUsoStmt = db.prepare(

@@ -7,6 +7,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import AgentPicker from '$lib/components/agent-picker.svelte';
+	import * as Select from '$lib/components/ui/select';
 	import DynamicPairList from '$lib/components/dynamic-pair-list.svelte';
 	import type { Agente, Atividade, Entidade, TipoAtividade } from '$lib/types';
 	import * as dados from '$lib/client/dados';
@@ -68,10 +69,20 @@
 		formato: string;
 		localizacao: string;
 		licenca: string;
+		tipoRelacaoOrigem: '' | 'derivacao' | 'revisao';
+		revisaoDeId: string;
 	}
 
 	function entidadeGeradaVazia(): EntidadeGeradaForm {
-		return { nome: '', descricao: '', formato: '', localizacao: '', licenca: '' };
+		return {
+			nome: '',
+			descricao: '',
+			formato: '',
+			localizacao: '',
+			licenca: '',
+			tipoRelacaoOrigem: '',
+			revisaoDeId: ''
+		};
 	}
 
 	/** Criacao/Transformacao exigem 1+; Analise comeca vazia (saida opcional). */
@@ -97,13 +108,15 @@
 			entidadesGeradas: atividadeParaEditar
 				? entidadesDisponiveis
 						.filter((e) => e.geradaPorAtividadeId === atividadeParaEditar!.id)
-						.map((e) => ({
+						.map((e): EntidadeGeradaForm => ({
 							id: e.id,
 							nome: e.nome,
 							descricao: e.descricao ?? '',
 							formato: e.formato ?? '',
 							localizacao: e.localizacao ?? '',
-							licenca: e.licenca ?? ''
+							licenca: e.licenca ?? '',
+							tipoRelacaoOrigem: e.tipoRelacaoOrigem ?? '',
+							revisaoDeId: e.revisaoDeId ?? ''
 						}))
 				: entidadesGeradasIniciais()
 		};
@@ -135,7 +148,12 @@
 			dataHora &&
 			(tipo === 'criacao' || entidadesUsadas.length > 0) &&
 			entidadesGeradas.every((e) => e.nome.trim()) &&
-			(tipo === 'analise' || entidadesGeradas.length > 0)
+			(tipo === 'analise' || entidadesGeradas.length > 0) &&
+			entidadesGeradas.every(
+				(e) =>
+					e.tipoRelacaoOrigem !== 'revisao' ||
+					(e.revisaoDeId && entidadesUsadas.includes(e.revisaoDeId))
+			)
 	);
 
 	/** Em edicao, uma Atividade nao pode usar como entrada uma Entidade que ela mesma gera. */
@@ -147,6 +165,10 @@
 
 	function alternarEntidade(id: string, marcado: boolean) {
 		entidadesUsadas = marcado ? [...entidadesUsadas, id] : entidadesUsadas.filter((e) => e !== id);
+		if (!marcado)
+			entidadesGeradas = entidadesGeradas.map((e) =>
+				e.revisaoDeId === id ? { ...e, revisaoDeId: '' } : e
+			);
 	}
 
 	function adicionarEntidadeGerada() {
@@ -206,7 +228,9 @@
 						descricao: e.descricao || null,
 						formato: e.formato || null,
 						localizacao: e.localizacao || null,
-						licenca: e.licenca || null
+						licenca: e.licenca || null,
+						tipoRelacaoOrigem: e.tipoRelacaoOrigem || null,
+						revisaoDeId: e.tipoRelacaoOrigem === 'revisao' ? e.revisaoDeId || null : null
 					}))
 			};
 
@@ -412,6 +436,44 @@
 						rows={2}
 					/>
 				</div>
+				{#if tipo !== 'criacao'}
+					<div class="flex flex-col gap-1.5">
+						<Label for="relacao-{tipo}-{indice}">{t('activities.relation_label')}</Label>
+						<Select.Root type="single" bind:value={entidadeGerada.tipoRelacaoOrigem}>
+							<Select.Trigger id="relacao-{tipo}-{indice}">
+								{entidadeGerada.tipoRelacaoOrigem
+									? t('activities.relation.' + entidadeGerada.tipoRelacaoOrigem)
+									: t('activities.relation.none')}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="" label={t('activities.relation.none')} />
+								<Select.Item value="derivacao" label={t('activities.relation.derivation')} />
+								<Select.Item value="revisao" label={t('activities.relation.revision')} />
+							</Select.Content>
+						</Select.Root>
+					</div>
+					{#if entidadeGerada.tipoRelacaoOrigem === 'revisao'}
+						<div class="flex flex-col gap-1.5">
+							<Label for="revisaoDe-{tipo}-{indice}">{t('activities.revision_of_label')}</Label>
+							<Select.Root type="single" bind:value={entidadeGerada.revisaoDeId}>
+								<Select.Trigger id="revisaoDe-{tipo}-{indice}">
+									{entidadeGerada.revisaoDeId
+										? (entidadesDisponiveis.find((e) => e.id === entidadeGerada.revisaoDeId)
+												?.nome ?? entidadeGerada.revisaoDeId)
+										: t('activities.revision_source_placeholder')}
+								</Select.Trigger>
+								<Select.Content>
+									{#each entidadesUsadas as usadaId (usadaId)}
+										<Select.Item
+											value={usadaId}
+											label={entidadesDisponiveis.find((e) => e.id === usadaId)?.nome ?? usadaId}
+										/>
+									{/each}
+								</Select.Content>
+							</Select.Root>
+						</div>
+					{/if}
+				{/if}
 			</div>
 		{/each}
 		<Button type="button" variant="outline" size="sm" onclick={adicionarEntidadeGerada}>
