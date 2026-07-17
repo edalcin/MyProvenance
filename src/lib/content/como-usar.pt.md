@@ -16,3 +16,10 @@ Veja como documentar a proveniência de uma planilha de dados de biodiversidade,
 
 - **Exportar JSON** baixa uma cópia completa do Registro a qualquer momento, em qualquer status (Rascunho ou Finalizado) — serve de backup ou arquivo temporário. Não muda nada no Registro. Sem Conta, é a sua única forma de continuar o trabalho depois: como nada é salvo no servidor, exporte o JSON antes de sair e faça upload dele na próxima visita para retomar de onde parou.
 - **Finalizar** é uma decisão deliberada e sem volta: trava as Entidades e Atividades já registradas — nenhuma delas pode mais ser editada ou excluída, mas você ainda pode adicionar novas. Use quando o Registro estiver pronto para ser tratado como documento oficial e auditável. Título e descrição continuam editáveis mesmo depois de finalizado.
+
+## Compartilhar
+
+O botão **Compartilhar**, no Detalhe do Registro, tem duas abas independentes:
+
+- **Link público** — gera um link de leitura, sem sessão: quem recebe vê o diagrama e as tabelas, exporta `.md`/JSON, mas não edita nem exclui nada. Revogável a qualquer momento.
+- **Compartilhar com usuário** — convida outra Conta registrada, pelo nome de usuário, para editar o Registro junto com você. Escolha o papel: **Editor** edita título, descrição e Atividades/Entidades; **Administrador** tem paridade total, inclusive Finalizar, Excluir e convidar/remover outras Contas. Compartilhar de novo com quem já tem acesso só atualiza o papel. Cada pessoa convidada pode sair do compartilhamento quando quiser, na mesma aba.

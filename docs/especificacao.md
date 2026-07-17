@@ -323,6 +323,6 @@ Validação e sanitização de toda entrada segue `Desenvolvimento.md` §5. `UPD
 ## 9. Referências
 
 - `CONTEXT.md` — glossário (linguagem ubíqua).
-- `docs/adr/0001` a `0009` — decisões arquiteturais e seus porquês.
+- `docs/adr/0001` a `0011` — decisões arquiteturais e seus porquês.
 - `docs/definicoes.md` — base conceitual (W3C PROV, FAIR).
 - `docs/Desenvolvimento.md` — stack, empacotamento, segurança (não repetido aqui).

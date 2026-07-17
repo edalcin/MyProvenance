@@ -30,8 +30,12 @@ Container de nível mais alto: um grafo de Entidades e Atividades, com título (
 _Avoid_: Projeto (reservado ao projeto de pesquisa externo, maior que a ferramenta), Sessão
 
 **Conta**:
-Cadastro opcional de acesso (username + PIN numérico de 6 dígitos) que faz os Registros e Agentes de um usuário persistirem automaticamente entre visitas, isolados de outras contas na mesma instância. Sem conta (modo padrão, "anônimo"), nada é salvo no servidor — o usuário exporta/importa JSON manualmente para continuar depois.
+Cadastro opcional de acesso (username + PIN numérico de 6 dígitos) que faz os Registros e Agentes de um usuário persistirem automaticamente entre visitas. Agentes ficam sempre isolados por Conta. Registros também são isolados por padrão, mas podem ser compartilhados para edição com outras Contas — ver **Papel de Acesso**. Sem conta (modo padrão, "anônimo"), nada é salvo no servidor — o usuário exporta/importa JSON manualmente para continuar depois.
 _Avoid_: Usuário (usar "Conta" para o cadastro de acesso; "Agente" continua sendo quem realizou a Atividade, mesmo com Conta ativa), Login
+
+**Papel de Acesso**:
+Nível de permissão de uma Conta sobre um Registro de Proveniência compartilhado, hierarquia Dono > Administrador > Editor (docs/especificacao.md §2.6). Dono é sempre quem criou o Registro. Administrador tem paridade total com o Dono, exceto ser removido. Editor edita título/descrição e Atividades/Entidades, mas não finaliza, exclui, nem gerencia compartilhamento. Distinto do link público de leitura (compartilhamento sem Conta, sem edição).
+_Avoid_: Permissão, Role, Nível de acesso
 
 **Rascunho / Finalizado**:
 Os dois estados de um Registro de Proveniência. Rascunho: edição livre de Entidades e Atividades. Finalizado: atingido só por ação explícita do usuário (botão "Finalizar"); a partir daí o histórico existente é imutável, só é possível adicionar novas Entidades/Atividades. Exportar o JSON não finaliza (ADR-0010) — serve de backup/arquivo portátil, inclusive para quem usa sem Conta.
