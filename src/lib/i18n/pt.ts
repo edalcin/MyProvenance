@@ -172,8 +172,6 @@ export const pt = {
 	// Paginas estaticas (conteudo editavel em src/lib/content/*.md)
 	'about.page_title': 'Sobre — MyProvenance',
 	'howto.page_title': 'Como usar — MyProvenance',
-	'manual.index': 'Índice',
-	'error.page_not_found': 'Página não encontrada.',
 	// Comuns / reutilizados entre formularios
 	'common.title_label': 'Título',
 	'common.description_label': 'Descrição',
