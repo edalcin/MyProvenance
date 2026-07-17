@@ -149,7 +149,6 @@
 					<Table.Row>
 						<Table.Head>{t('report.th.name')}</Table.Head>
 						<Table.Head>{t('common.description_label')}</Table.Head>
-						<Table.Head>{t('report.th.license')}</Table.Head>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
@@ -157,7 +156,6 @@
 						<Table.Row>
 							<Table.Cell>{entidade.nome}</Table.Cell>
 							<Table.Cell>{entidade.descricao ?? '—'}</Table.Cell>
-							<Table.Cell>{entidade.licenca ?? '—'}</Table.Cell>
 						</Table.Row>
 					{/each}
 				</Table.Body>

@@ -43,13 +43,10 @@ export function gerarRelatorioMarkdown(
 	if (entidades.length === 0) {
 		linhas.push(t('report.empty.entities'), '');
 	} else {
-		linhas.push(
-			`| ${t('report.th.name')} | ${t('common.description_label')} | ${t('report.th.license')} |`,
-			'|---|---|---|'
-		);
+		linhas.push(`| ${t('report.th.name')} | ${t('common.description_label')} |`, '|---|---|');
 		for (const e of entidades) {
 			linhas.push(
-				`| ${escaparCelula(e.nome)} | ${e.descricao ? escaparCelula(e.descricao) : '—'} | ${e.licenca ?? '—'} |`
+				`| ${escaparCelula(e.nome)} | ${e.descricao ? escaparCelula(e.descricao) : '—'} |`
 			);
 		}
 		linhas.push('');
