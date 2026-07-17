@@ -67,10 +67,21 @@ export const sessaoAnonima = {
 			status: 'rascunho',
 			// eslint-disable-next-line svelte/prefer-svelte-reactivity -- valor transiente (string), nunca fica em $state.
 			criadoEm: new Date().toISOString(),
-			finalizadoEm: null
+			finalizadoEm: null,
+			direcaoDiagrama: 'LR',
+			tokenCompartilhamento: null
 		};
 		estado.registros = [registro, ...estado.registros];
 		return registro;
+	},
+
+	/** Orientacao do diagrama Mermaid — respeitada no relatorio .md exportado (docs/especificacao.md §5-6). */
+	alterarDirecaoDiagrama(id: string, direcao: 'LR' | 'TD'): RegistroProvenencia {
+		const registro = this.obterRegistro(id);
+		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
+		const atualizado: RegistroProvenencia = { ...registro, direcaoDiagrama: direcao };
+		estado.registros = estado.registros.map((r) => (r.id === id ? atualizado : r));
+		return atualizado;
 	},
 
 	/** Titulo/descricao sao metadados do container — editaveis em qualquer status (§3). */
@@ -97,9 +108,14 @@ export const sessaoAnonima = {
 				: [...estado.agentes, agente];
 		}
 
+		// Preserva a orientacao do diagrama de um Registro local ja existente (upsert nao deve resetar
+		// preferencia de UI); token de compartilhamento nunca existe no modo anonimo (sem servidor).
+		const existente = this.obterRegistro(dados.registro.id);
 		const registro: RegistroProvenencia = {
 			...dados.registro,
-			descricao: dados.registro.descricao ? sanitizarHtmlRico(dados.registro.descricao) : null
+			descricao: dados.registro.descricao ? sanitizarHtmlRico(dados.registro.descricao) : null,
+			direcaoDiagrama: existente?.direcaoDiagrama ?? 'LR',
+			tokenCompartilhamento: null
 		};
 		estado.registros = estado.registros.some((r) => r.id === registro.id)
 			? estado.registros.map((r) => (r.id === registro.id ? registro : r))

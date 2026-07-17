@@ -48,7 +48,7 @@
 		}
 	});
 
-	let direcaoDiagrama = $state<'LR' | 'TD'>('LR'); // ponytail: estado local; persistir em cookie só se o usuário pedir.
+	let direcaoDiagrama = $state<'LR' | 'TD'>(detalheInicial?.registro.direcaoDiagrama ?? 'LR');
 	const diagrama = $derived(
 		gerarDiagramaMermaid(
 			{ entidades, atividades, agentesEnvolvidos },
@@ -57,6 +57,57 @@
 	);
 	const nomeEntidade = $derived(new Map(entidades.map((e) => [e.id, e.nome])));
 	const nomeAgente = $derived(new Map(agentesEnvolvidos.map((a) => [a.id, a.nome])));
+
+	async function alternarDirecaoDiagrama() {
+		if (!registro) return;
+		const anterior = direcaoDiagrama;
+		const nova = anterior === 'LR' ? 'TD' : 'LR';
+		direcaoDiagrama = nova; // resposta visual imediata
+		try {
+			registro = await dados.alterarDirecaoDiagrama(registro.id, nova);
+		} catch (err) {
+			direcaoDiagrama = anterior;
+			toast.error(msgErro(err, 'error.update_record_failed'));
+		}
+	}
+
+	let dialogCompartilharAberto = $state(false);
+	let compartilhando = $state(false);
+	const urlPublica = $derived(
+		registro?.tokenCompartilhamento
+			? `${data.urlBase}${resolve('/compartilhar/[token]', { token: registro.tokenCompartilhamento })}`
+			: ''
+	);
+
+	async function ativarCompartilhamento() {
+		if (!registro) return;
+		compartilhando = true;
+		try {
+			registro = await dados.ativarCompartilhamento(registro.id);
+		} catch (err) {
+			toast.error(msgErro(err, 'error.update_record_failed'));
+		} finally {
+			compartilhando = false;
+		}
+	}
+
+	async function desativarCompartilhamento() {
+		if (!registro) return;
+		compartilhando = true;
+		try {
+			registro = await dados.desativarCompartilhamento(registro.id);
+			toast.success(t('share.deactivated'));
+		} catch (err) {
+			toast.error(msgErro(err, 'error.update_record_failed'));
+		} finally {
+			compartilhando = false;
+		}
+	}
+
+	function copiarUrlPublica() {
+		navigator.clipboard.writeText(urlPublica);
+		toast.success(t('share.copied'));
+	}
 
 	let dialogAtividadeAberto = $state(false);
 	let abaAtiva = $state('criacao');
@@ -303,6 +354,47 @@
 						{t('records.export_report')}
 					</Button>
 				{/if}
+				{#if usuarioAtual.valor}
+					<Dialog.Root bind:open={dialogCompartilharAberto}>
+						<Dialog.Trigger>
+							{#snippet child({ props })}
+								<Button variant="outline" {...props}>
+									<i class="bx bx-share-alt"></i>
+									{t('records.share')}
+								</Button>
+							{/snippet}
+						</Dialog.Trigger>
+						<Dialog.Content class="sm:max-w-lg">
+							<Dialog.Header>
+								<Dialog.Title>{t('share.dialog_title')}</Dialog.Title>
+								<Dialog.Description>{t('share.dialog_description')}</Dialog.Description>
+							</Dialog.Header>
+							{#if registro.tokenCompartilhamento}
+								<div class="flex flex-col gap-3">
+									<div class="flex gap-2">
+										<Input readonly value={urlPublica} onclick={(e) => e.currentTarget.select()} />
+										<Button variant="outline" onclick={copiarUrlPublica}>
+											<i class="bx bx-copy"></i>
+											{t('share.copy')}
+										</Button>
+									</div>
+									<Button
+										variant="destructive"
+										onclick={desativarCompartilhamento}
+										disabled={compartilhando}
+									>
+										<i class="bx bx-link-external"></i>
+										{t('share.deactivate')}
+									</Button>
+								</div>
+							{:else}
+								<Button onclick={ativarCompartilhamento} disabled={compartilhando}>
+									{compartilhando ? t('common.saving') : t('share.activate')}
+								</Button>
+							{/if}
+						</Dialog.Content>
+					</Dialog.Root>
+				{/if}
 				<Button variant="destructive" onclick={excluirRegistro}>
 					<i class="bx bx-trash"></i>
 					{t('records.delete')}
@@ -318,7 +410,7 @@
 						variant="outline"
 						size="sm"
 						aria-label={t('diagram.layout_toggle')}
-						onclick={() => (direcaoDiagrama = direcaoDiagrama === 'LR' ? 'TD' : 'LR')}
+						onclick={alternarDirecaoDiagrama}
 					>
 						{direcaoDiagrama === 'LR'
 							? t('diagram.layout.horizontal')

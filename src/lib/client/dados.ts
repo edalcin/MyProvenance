@@ -83,6 +83,33 @@ export async function atualizarRegistro(
 	return resposta.json();
 }
 
+export async function alterarDirecaoDiagrama(
+	id: string,
+	direcao: 'LR' | 'TD'
+): Promise<RegistroProvenencia> {
+	if (!autenticado()) return sessaoAnonima.alterarDirecaoDiagrama(id, direcao);
+	const resposta = await fetch(`/registros/${id}/diagrama`, {
+		method: 'PATCH',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ direcao })
+	});
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_record_failed');
+	return resposta.json();
+}
+
+/** Compartilhamento so existe para Conta (link publico exige Registro persistido no servidor). */
+export async function ativarCompartilhamento(id: string): Promise<RegistroProvenencia> {
+	const resposta = await fetch(`/registros/${id}/compartilhar`, { method: 'POST' });
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_record_failed');
+	return resposta.json();
+}
+
+export async function desativarCompartilhamento(id: string): Promise<RegistroProvenencia> {
+	const resposta = await fetch(`/registros/${id}/compartilhar`, { method: 'DELETE' });
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_record_failed');
+	return resposta.json();
+}
+
 export async function excluirRegistro(id: string): Promise<void> {
 	if (!autenticado()) return sessaoAnonima.excluirRegistro(id);
 	const resposta = await fetch(`/registros/${id}`, { method: 'DELETE' });

@@ -63,6 +63,7 @@
 	},
 	"dependencies": {
 		"better-sqlite3": "^12.11.1",
+		"marked": "^18.0.6",
 		"sanitize-html": "^2.17.6",
 		"uuidv7": "^1.2.1",
 		"zod": "^4.4.3"

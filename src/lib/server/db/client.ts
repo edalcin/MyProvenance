@@ -28,3 +28,24 @@ for (const tabela of ['registros', 'agentes']) {
 		db.exec(`ALTER TABLE ${tabela} ADD COLUMN usuario_id TEXT REFERENCES usuarios(id)`);
 	}
 }
+// Indices fora do `if`: idx_registros_usuario/idx_agentes_usuario precisam ser criados aqui (nao
+// no schema.sql estatico) porque um exec incondicional sobre registros(usuario_id)/agentes(usuario_id)
+// quebraria com "no such column" num banco legado antes da migracao acima rodar.
+db.exec('CREATE INDEX IF NOT EXISTS idx_registros_usuario ON registros(usuario_id)');
+db.exec('CREATE INDEX IF NOT EXISTS idx_agentes_usuario ON agentes(usuario_id)');
+
+// Migracao idempotente: bancos criados antes da orientacao de diagrama persistida e do
+// compartilhamento publico nao tem essas colunas em registros.
+if (!colunaExiste('registros', 'direcao_diagrama')) {
+	db.exec(
+		`ALTER TABLE registros ADD COLUMN direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'LR'`
+	);
+}
+if (!colunaExiste('registros', 'token_compartilhamento')) {
+	db.exec('ALTER TABLE registros ADD COLUMN token_compartilhamento TEXT');
+}
+// Indice fora do `if`: precisa existir tanto em banco novo (coluna ja veio do CREATE TABLE,
+// nunca entra no if acima) quanto em banco migrado (coluna acabou de ser adicionada).
+db.exec(
+	'CREATE UNIQUE INDEX IF NOT EXISTS idx_registros_token_compartilhamento ON registros(token_compartilhamento)'
+);

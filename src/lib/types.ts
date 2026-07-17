@@ -20,6 +20,8 @@ export interface Usuario {
 	username: string;
 }
 
+export type DirecaoDiagrama = 'LR' | 'TD';
+
 export interface RegistroProvenencia {
 	id: string;
 	titulo: string;
@@ -27,6 +29,10 @@ export interface RegistroProvenencia {
 	status: StatusRegistro;
 	criadoEm: string;
 	finalizadoEm: string | null;
+	/** Orientacao do diagrama Mermaid — persistida para o relatorio .md respeitar a escolha (docs/especificacao.md §5-6). */
+	direcaoDiagrama: DirecaoDiagrama;
+	/** Token do link publico de leitura (compartilhamento); null = nao compartilhado. Nunca sai no JSON exportado. */
+	tokenCompartilhamento: string | null;
 }
 
 export interface Entidade {
@@ -73,10 +79,17 @@ export interface Atividade {
 	ambienteExecucao: AmbienteExecucao | null;
 }
 
-/** Formato do JSON exportado/importado — docs/especificacao.md §4. */
+/**
+ * Formato do JSON exportado/importado — docs/especificacao.md §4. Whitelist explicito (nao deriva
+ * de RegistroProvenencia): direcaoDiagrama/tokenCompartilhamento sao metadados de UI/compartilhamento,
+ * nunca fazem parte do snapshot portatil.
+ */
 export interface RegistroExportado {
 	schemaVersion: number;
-	registro: Omit<RegistroProvenencia, 'id'> & { id: string };
+	registro: Pick<
+		RegistroProvenencia,
+		'id' | 'titulo' | 'descricao' | 'status' | 'criadoEm' | 'finalizadoEm'
+	>;
 	agentes: Agente[];
 	entidades: Entidade[];
 	atividades: Atividade[];

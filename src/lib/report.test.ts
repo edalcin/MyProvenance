@@ -23,7 +23,9 @@ describe('gerarRelatorioMarkdown', () => {
 			descricao: null,
 			status: 'rascunho',
 			criadoEm: '2026-03-01T10:00:00.000Z',
-			finalizadoEm: null
+			finalizadoEm: null,
+			direcaoDiagrama: 'LR',
+			tokenCompartilhamento: null
 		},
 		entidades: [],
 		atividades: [],

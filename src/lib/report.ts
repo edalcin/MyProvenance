@@ -29,7 +29,10 @@ export function gerarRelatorioMarkdown(
 		`## ${t('report.section.diagram')}`,
 		'',
 		'```mermaid',
-		gerarDiagramaMermaid({ entidades, atividades, agentesEnvolvidos }, { locale }),
+		gerarDiagramaMermaid(
+			{ entidades, atividades, agentesEnvolvidos },
+			{ direcao: registro.direcaoDiagrama, locale }
+		),
 		'```',
 		''
 	);

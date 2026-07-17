@@ -1,17 +1,27 @@
 import { uuidv7 } from 'uuidv7';
 import { db } from '../client';
-import type { Agente, RegistroDetalhado, RegistroProvenencia, StatusRegistro } from '$lib/types';
+import type {
+	Agente,
+	DirecaoDiagrama,
+	RegistroDetalhado,
+	RegistroProvenencia,
+	StatusRegistro
+} from '$lib/types';
+import { gerarTokenCompartilhamento } from '$lib/server/auth';
 import { obterAgente } from './agentes';
 import { listarEntidadesPorRegistro } from './entidades';
 import { listarAtividadesPorRegistro } from './atividades';
 
 interface RegistroRow {
 	id: string;
+	usuario_id: string | null;
 	titulo: string;
 	descricao: string | null;
 	status: StatusRegistro;
 	criado_em: string;
 	finalizado_em: string | null;
+	direcao_diagrama: DirecaoDiagrama;
+	token_compartilhamento: string | null;
 }
 
 function mapRow(row: RegistroRow): RegistroProvenencia {
@@ -21,7 +31,9 @@ function mapRow(row: RegistroRow): RegistroProvenencia {
 		descricao: row.descricao,
 		status: row.status,
 		criadoEm: row.criado_em,
-		finalizadoEm: row.finalizado_em
+		finalizadoEm: row.finalizado_em,
+		direcaoDiagrama: row.direcao_diagrama,
+		tokenCompartilhamento: row.token_compartilhamento
 	};
 }
 
@@ -78,6 +90,39 @@ export function criarRegistro(
 	return obterRegistro(id, usuarioId)!;
 }
 
+/** Orientacao do diagrama Mermaid — respeitada no relatorio .md exportado (docs/especificacao.md §5-6). */
+export function alterarDirecaoDiagrama(
+	id: string,
+	usuarioId: string,
+	direcao: DirecaoDiagrama
+): RegistroProvenencia {
+	if (!obterRegistro(id, usuarioId)) throw new RegistroNaoEncontradoError('error.record_not_found');
+	db.prepare(
+		'UPDATE registros SET direcao_diagrama = @direcao WHERE id = @id AND usuario_id = @usuarioId'
+	).run({ id, usuarioId, direcao });
+	return obterRegistro(id, usuarioId)!;
+}
+
+/** Idempotente: Registro ja compartilhado mantem o mesmo token (nao rotaciona por engano). */
+export function ativarCompartilhamento(id: string, usuarioId: string): RegistroProvenencia {
+	const registro = obterRegistro(id, usuarioId);
+	if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
+	if (registro.tokenCompartilhamento) return registro;
+	const token = gerarTokenCompartilhamento();
+	db.prepare(
+		'UPDATE registros SET token_compartilhamento = @token WHERE id = @id AND usuario_id = @usuarioId'
+	).run({ id, usuarioId, token });
+	return obterRegistro(id, usuarioId)!;
+}
+
+export function desativarCompartilhamento(id: string, usuarioId: string): RegistroProvenencia {
+	if (!obterRegistro(id, usuarioId)) throw new RegistroNaoEncontradoError('error.record_not_found');
+	db.prepare(
+		'UPDATE registros SET token_compartilhamento = NULL WHERE id = @id AND usuario_id = @usuarioId'
+	).run({ id, usuarioId });
+	return obterRegistro(id, usuarioId)!;
+}
+
 /** Titulo/descricao sao metadados do container, nao "historico" — editaveis em qualquer status (§3). */
 export function atualizarRegistro(
 	id: string,
@@ -130,4 +175,17 @@ export function obterRegistroDetalhado(id: string, usuarioId: string): RegistroD
 		.map((agenteId) => obterAgente(agenteId, usuarioId))
 		.filter((a): a is Agente => a !== null);
 	return { registro, entidades, atividades, agentesEnvolvidos };
+}
+
+/**
+ * Leitura publica pelo token de compartilhamento (sem sessao/usuarioId) — o dono do Registro
+ * ja foi validado quando o token foi gerado; aqui so resolvemos o usuario_id dono a partir da
+ * linha para reaproveitar obterRegistroDetalhado (mesma logica, sem duplicar consultas).
+ */
+export function obterRegistroDetalhadoPorToken(token: string): RegistroDetalhado | null {
+	const row = db
+		.prepare('SELECT * FROM registros WHERE token_compartilhamento = @token')
+		.get({ token }) as RegistroRow | undefined;
+	if (!row || !row.usuario_id) return null;
+	return obterRegistroDetalhado(row.id, row.usuario_id);
 }

@@ -122,7 +122,9 @@ CREATE TABLE registros (
   descricao TEXT,
   status TEXT NOT NULL CHECK (status IN ('rascunho','finalizado')) DEFAULT 'rascunho',
   criado_em TEXT NOT NULL,
-  finalizado_em TEXT
+  finalizado_em TEXT,
+  direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'LR',
+  token_compartilhamento TEXT  -- link publico de leitura; NULL = nao compartilhado; indice unico
 );
 
 CREATE TABLE atividades (
@@ -223,6 +225,7 @@ Gerado a partir do grafo de Entidades/Atividades de um Registro. Regras:
 - Cada Atividade que **gera** Entidades produz uma seta de cada Entidade **usada** para cada Entidade **gerada**, rotulada `tipo: descrição curta (Agente, data)`. Quando a Atividade usa e/ou gera mais de uma Entidade, a mesma seta/rótulo se repete para cada combinação entrada×saída (fan-out completo).
 - **Criação** (sem entrada) aparece como nó sem seta de entrada — raiz da lineage.
 - **Análise sem saída** não gera nó novo; não aparece no diagrama, só na tabela de Atividades do relatório (§6).
+- Orientação (`LR`/`TD`) é uma preferência por Registro (`registros.direcao_diagrama`, padrão `LR`), alternável na tela de detalhe e respeitada tanto na renderização ao vivo quanto no relatório `.md` exportado (§6).
 
 Exemplo:
 
@@ -238,7 +241,7 @@ flowchart LR
 Um único arquivo (`<slug-do-titulo>-provenance.md`), estrutura fixa:
 
 1. **Cabeçalho** — título, descrição, status, data de exportação.
-2. **Diagrama** — bloco ` ```mermaid ` do §5.
+2. **Diagrama** — bloco ` ```mermaid ` do §5, na orientação persistida do Registro (`direcao_diagrama`).
 3. **Entidades** — tabela: nome, formato, localização, licença.
 4. **Linha do tempo de Atividades** — ordenada por `dataHora`: tipo, data/hora, Agente, Entidades usadas → Entidade gerada, campos específicos do tipo (local/instrumento; ou processo/parâmetros/ambiente de execução). Inclui Análises sem saída.
 5. **Agentes envolvidos** — tabela: nome, tipo, afiliação.
@@ -246,17 +249,19 @@ Um único arquivo (`<slug-do-titulo>-provenance.md`), estrutura fixa:
 ## 7. Telas e fluxos
 
 - **Lista de Registros** — rolagem infinita (sem paginação, per `Desenvolvimento.md`), busca por título, botão "Novo Registro", indicador de status (Rascunho/Finalizado). Sem Conta, lista vem da sessão local (sem rolagem infinita real — tudo já em memória).
-- **Detalhe do Registro** — diagrama (renderizado ao vivo, não só no export), lista de Entidades, linha do tempo de Atividades, botões "Editar" (título/descrição — permitido em qualquer status, não é "histórico"), "Adicionar Atividade" (3 formulários — Criação/Transformação/Análise), "Finalizar", "Exportar JSON", "Exportar relatório .md", "Excluir Registro". Cada Atividade tem botões "Editar" e "Excluir" quando o Registro está em Rascunho (tipo é imutável na edição; excluir remove também as Entidades que a Atividade gerou, bloqueado se alguma estiver em uso como entrada de outra Atividade).
+- **Detalhe do Registro** — diagrama (renderizado ao vivo, não só no export, orientação persistida), lista de Entidades, linha do tempo de Atividades, botões "Editar" (título/descrição — permitido em qualquer status, não é "histórico"), "Adicionar Atividade" (3 formulários — Criação/Transformação/Análise), "Compartilhar" (com Conta — gera/revoga o link público de leitura, §8), "Finalizar", "Exportar JSON", "Exportar relatório .md", "Excluir Registro". Cada Atividade tem botões "Editar" e "Excluir" quando o Registro está em Rascunho (tipo é imutável na edição; excluir remove também as Entidades que a Atividade gerou, bloqueado se alguma estiver em uso como entrada de outra Atividade).
 - **Formulário de Atividade** — campos do §2.3; seletor de Entidade(s) usada(s) restrito às Entidades já existentes no Registro; seletor de Agente com autocomplete + atalho "novo Agente" inline.
 - **Cadastro de Agentes** — lista com rolagem infinita, CRUD simples (Agente não pertence a um Registro, então não é afetado pelo status Rascunho/Finalizado do Registro).
 - **Upload** — tela/ação para importar um JSON previamente baixado (upsert, §4) — local (Blob/FileReader) sem Conta, via `/registros/import` com Conta.
+- **Link público de compartilhamento** (`/compartilhar/:token`) — somente leitura, sem sessão: mesmo diagrama/tabelas do Detalhe do Registro (sem botões de edição/exclusão), com export `.md`/JSON próprios. Token opaco de 24 bytes, revogável a qualquer momento pelo dono; só disponível para Registros com Conta (o modo anônimo não persiste no servidor, não há o que apontar um link para).
 - **Entrar** / **Criar conta** — diálogos disponíveis no menu; "Criar conta" só aparece depois do primeiro Registro/Agente criado na sessão anônima. Criar conta migra tudo que estava na sessão local (ADR-0009).
 - Banner fixo + aviso nativo do navegador (`beforeunload`) quando anônimo com dados não exportados.
 - Tema claro/escuro, instalável como PWA (offline só leitura — ADR-0006).
+- **Sobre** / **Como usar** — conteúdo estático, sem dados de domínio; o texto vem de Markdown em `src/lib/content/{sobre,como-usar}.{pt,en}.md`, renderizado para HTML sanitizado — editável direto no repositório, sem tocar em código.
 
 ## 8. Rotas (esboço, SvelteKit)
 
-Todas as rotas de `/registros*` e `/agentes*` exigem sessão válida (cookie) — sem Conta, retornam 401 e o cliente nunca as chama (roda local, ADR-0009). Acesso a recurso de outra Conta retorna 404 (não vaza existência).
+Todas as rotas de `/registros*` e `/agentes*` exigem sessão válida (cookie) — sem Conta, retornam 401 e o cliente nunca as chama (roda local, ADR-0009). Acesso a recurso de outra Conta retorna 404 (não vaza existência). Exceção: `/compartilhar/:token*` é pública (sem sessão) e só aceita `GET` — não há `PATCH`/`DELETE` nesse prefixo, em nenhuma rota.
 
 | Rota                                     | Método       | Ação                                                         |
 | ---------------------------------------- | ------------ | ------------------------------------------------------------ |
@@ -269,12 +274,18 @@ Todas as rotas de `/registros*` e `/agentes*` exigem sessão válida (cookie) �
 | `/registros/:id`                         | PATCH        | edita titulo/descricao (qualquer status, nao e' "historico") |
 | `/registros/:id`                         | DELETE       | exclui Registro (cascata)                                    |
 | `/registros/:id/finalizar`               | POST         | rascunho → finalizado                                        |
+| `/registros/:id/diagrama`                | PATCH        | altera `direcao_diagrama` (LR/TD, qualquer status)           |
+| `/registros/:id/compartilhar`            | POST         | ativa o link público (idempotente, mesmo token se já ativo)  |
+| `/registros/:id/compartilhar`            | DELETE       | desativa o link público (revoga o token)                     |
 | `/registros/:id/atividades`              | POST         | cria Atividade (+ Entidade gerada, se houver)                |
 | `/registros/:id/atividades/:atividadeId` | PATCH        | edita Atividade (so Rascunho, tipo imutavel, ADR-0003)       |
 | `/registros/:id/atividades/:atividadeId` | DELETE       | exclui Atividade + suas Entidades geradas (so Rascunho)      |
 | `/registros/:id/export.json`             | GET          | baixa JSON (§4)                                              |
 | `/registros/:id/export.md`               | GET          | baixa relatório + diagrama (§6)                              |
 | `/registros/import`                      | POST         | upload de JSON (upsert, §4)                                  |
+| `/compartilhar/:token`                   | GET          | pagina publica somente leitura (sem sessão, §7)              |
+| `/compartilhar/:token/export.json`       | GET          | baixa JSON publico (§4), nunca finaliza o Registro           |
+| `/compartilhar/:token/export.md`         | GET          | baixa relatorio publico + diagrama (§6)                      |
 | `/agentes`                               | GET/POST     | lista (rolagem infinita) / cria                              |
 | `/agentes/:id`                           | PATCH/DELETE | edita / remove                                               |
 

@@ -32,6 +32,9 @@ export const registroInputSchema = z.object({
 });
 export type RegistroInput = z.infer<typeof registroInputSchema>;
 
+export const direcaoDiagramaInputSchema = z.object({ direcao: z.enum(['LR', 'TD']) });
+export type DirecaoDiagramaInput = z.infer<typeof direcaoDiagramaInputSchema>;
+
 export const novaEntidadeInputSchema = z.object({
 	nome: z.string().trim().min(1, 'validation.name.required').max(300),
 	descricao: z.string().trim().max(5000).nullable().optional(),

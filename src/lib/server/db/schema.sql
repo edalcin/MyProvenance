@@ -33,7 +33,11 @@ CREATE TABLE IF NOT EXISTS registros (
   descricao TEXT,
   status TEXT NOT NULL CHECK (status IN ('rascunho','finalizado')) DEFAULT 'rascunho',
   criado_em TEXT NOT NULL,
-  finalizado_em TEXT
+  finalizado_em TEXT,
+  -- Orientacao do diagrama Mermaid escolhida pelo usuario — respeitada no relatorio .md exportado.
+  direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'LR',
+  -- Token opaco do link publico de compartilhamento (somente leitura); NULL = nao compartilhado.
+  token_compartilhamento TEXT
 );
 
 CREATE TABLE IF NOT EXISTS atividades (
@@ -73,6 +77,6 @@ CREATE INDEX IF NOT EXISTS idx_entidades_registro ON entidades(registro_id);
 CREATE INDEX IF NOT EXISTS idx_entidades_gerada_por ON entidades(gerada_por_atividade_id);
 CREATE INDEX IF NOT EXISTS idx_registros_titulo ON registros(titulo);
 CREATE INDEX IF NOT EXISTS idx_agentes_nome ON agentes(nome);
-CREATE INDEX IF NOT EXISTS idx_registros_usuario ON registros(usuario_id);
-CREATE INDEX IF NOT EXISTS idx_agentes_usuario ON agentes(usuario_id);
+-- idx_registros_usuario/idx_agentes_usuario: criados em client.ts, apos a migracao idempotente de
+-- usuario_id (bancos legados nao tem essa coluna no momento em que este arquivo e executado).
 CREATE INDEX IF NOT EXISTS idx_sessoes_usuario ON sessoes(usuario_id);

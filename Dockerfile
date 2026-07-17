@@ -31,6 +31,7 @@ COPY --from=build /app/build ./build
 COPY package.json ./
 
 # DB_PATH deve apontar para um volume montado fora do container.
+# URL_BASE deve ser a URL publica externa desta instancia (link de compartilhamento) — obrigatorio via -e.
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000

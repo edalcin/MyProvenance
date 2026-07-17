@@ -25,6 +25,11 @@ export function gerarTokenSessao(): string {
 	return randomBytes(32).toString('hex');
 }
 
+/** Token opaco do link publico de compartilhamento (Registro somente leitura) — 24 bytes, URL-safe. */
+export function gerarTokenCompartilhamento(): string {
+	return randomBytes(24).toString('base64url');
+}
+
 export function hashToken(token: string): string {
 	return createHash('sha256').update(token).digest('hex');
 }

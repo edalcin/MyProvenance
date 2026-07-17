@@ -126,35 +126,21 @@ export const pt = {
 	'diagram.layout_toggle': 'Alternar orientação do diagrama',
 	'diagram.layout.horizontal': 'Horizontal',
 	'diagram.layout.vertical': 'Vertical',
-	// Pagina Sobre
+	// Compartilhamento (link publico somente leitura)
+	'records.share': 'Compartilhar',
+	'share.dialog_title': 'Compartilhar Registro',
+	'share.dialog_description':
+		'Gera um link público de leitura deste Registro — sem direito a edição ou exclusão.',
+	'share.activate': 'Ativar link público',
+	'share.deactivate': 'Desativar link público',
+	'share.deactivated': 'Link público desativado.',
+	'share.copy': 'Copiar',
+	'share.copied': 'Link copiado.',
+	'share.public_view_notice':
+		'Visualização pública — somente leitura, sem direito a edição ou exclusão.',
+	// Paginas estaticas (conteudo editavel em src/lib/content/*.md)
 	'about.page_title': 'Sobre — MyProvenance',
-	'about.title': 'Sobre o MyProvenance',
-	'about.p1':
-		'A proveniência de dados é o registro da origem, das transformações e das análises que um conjunto de dados percorre ao longo do tempo. Na ciência, essa história é o que torna um resultado reproduzível, permite auditar erros, dar o crédito correto a quem produziu cada dado e reutilizar o trabalho com confiança — é o "R" de reusabilidade dos princípios FAIR.',
-	'about.p2':
-		'O MyProvenance é uma ferramenta simples e self-hosted para documentar essa proveniência seguindo o modelo internacional W3C PROV, organizado em três elementos: Entidades (os dados), Atividades (Criação, Transformação e Análise) e Agentes (quem ou o que realizou cada etapa). Ele registra apenas os metadados do processo — quem, quando, como e com quê — nunca o dado em si: seus arquivos continuam onde estão, sob seu controle.',
-	'about.p3':
-		'À medida que você registra as etapas, o MyProvenance desenha automaticamente o diagrama de linhagem e gera relatórios e exportações prontos para anexar a um artigo, repositório ou submissão.',
-	'about.footer': 'Desenvolvido por Eduardo Dalcin - 2006',
-	// Pagina Como usar
 	'howto.page_title': 'Como usar — MyProvenance',
-	'howto.title': 'Como usar',
-	'howto.intro':
-		'Veja como documentar a proveniência de uma planilha de dados de biodiversidade, do dado bruto ao resultado da análise.',
-	'howto.step1':
-		'Crie um Registro de Proveniência com um título — por exemplo, "Ocorrências de Myrcia na Mata Atlântica".',
-	'howto.step2':
-		'Cadastre os Agentes envolvidos: você (Pessoa), sua instituição (Instituição) e os programas usados (Software), como R ou OpenRefine.',
-	'howto.step3':
-		'Registre a primeira Atividade do tipo Criação, que dá início à linhagem. Ex.: a planilha bruta coletada em campo, "ocorrencias_brutas.csv", gerada por você.',
-	'howto.step4':
-		'Adicione uma Transformação: use "ocorrencias_brutas.csv" e gere "ocorrencias_darwincore.csv", descrevendo a limpeza e a padronização das colunas para o padrão Darwin Core (por exemplo, mapeando "espécie" para scientificName e "lat/long" para decimalLatitude/decimalLongitude).',
-	'howto.step5':
-		'Registre uma Análise: use "ocorrencias_darwincore.csv" para gerar um resultado, como "mapa_de_riqueza.png", informando o Software e os parâmetros usados.',
-	'howto.step6':
-		'Acompanhe o diagrama de proveniência sendo desenhado automaticamente e, ao final, exporte o relatório .md ou o JSON completo para arquivar ou compartilhar.',
-	'howto.tip':
-		'Dica: use o botão TD/LR sobre o diagrama para vê-lo na vertical (de cima para baixo) ou na horizontal (da esquerda para a direita).',
 	// Comuns / reutilizados entre formularios
 	'common.title_label': 'Título',
 	'common.description_label': 'Descrição',
