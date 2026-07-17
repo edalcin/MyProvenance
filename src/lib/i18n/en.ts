@@ -173,6 +173,8 @@ export const en: Record<keyof typeof pt, string> = {
 	// Static pages (editable content in src/lib/content/*.md)
 	'about.page_title': 'About — MyProvenance',
 	'howto.page_title': 'How to use — MyProvenance',
+	'manual.index': 'Index',
+	'error.page_not_found': 'Page not found.',
 	// Comuns / reutilizados entre formularios
 	'common.title_label': 'Title',
 	'common.description_label': 'Description',
