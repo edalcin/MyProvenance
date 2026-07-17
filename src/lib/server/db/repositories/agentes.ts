@@ -57,6 +57,17 @@ export function obterAgente(id: string, usuarioId: string): Agente | null {
 	return row ? mapRow(row) : null;
 }
 
+/**
+ * Sem escopo de conta — usada so por obterRegistroDetalhado ao resolver agentesEnvolvidos de um
+ * Registro (o acesso ao Registro ja foi validado; num Registro compartilhado, Atividades de
+ * coeditores diferentes referenciam Agentes de contas diferentes).
+ */
+export function obterAgentePorId(id: string): Agente | null {
+	const row = db.prepare('SELECT * FROM agentes WHERE id = @id').get({ id }) as
+		AgenteRow | undefined;
+	return row ? mapRow(row) : null;
+}
+
 export interface AgenteInput {
 	nome: string;
 	tipo: TipoAgente;

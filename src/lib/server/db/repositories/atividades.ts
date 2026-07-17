@@ -7,7 +7,7 @@ import type {
 	ParametroAtividade,
 	TipoAtividade
 } from '$lib/types';
-import { RegistroNaoEncontradoError, RegistroJaFinalizadoError } from './registros';
+import { RegistroNaoEncontradoError, RegistroJaFinalizadoError, obterRegistro } from './registros';
 import {
 	RegraCardinalidadeError,
 	validarCardinalidade,
@@ -121,13 +121,10 @@ const inserirUsoStmt = db.prepare(
 	'INSERT INTO atividade_entidades_usadas (atividade_id, entidade_id) VALUES (@atividadeId, @entidadeId)'
 );
 
-const verificarRegistroDoUsuarioStmt = db.prepare(
-	'SELECT 1 FROM registros WHERE id = @registroId AND usuario_id = @usuarioId'
-);
-
 const criarAtividadeTx = db.transaction(
 	(usuarioId: string, registroId: string, input: CriarAtividadeInput) => {
-		if (!verificarRegistroDoUsuarioStmt.get({ registroId, usuarioId })) {
+		// editor e' o piso de qualquer papel concedido — obterRegistro ja resolve dono/administrador/editor.
+		if (!obterRegistro(registroId, usuarioId)) {
 			throw new RegistroNaoEncontradoError('error.record_not_found');
 		}
 		validarCardinalidade(input);
@@ -203,10 +200,6 @@ export interface AtualizarAtividadeInput {
 	entidadesGeradas?: EntidadeGeradaEditInput[];
 }
 
-const obterStatusRegistroDoUsuarioStmt = db.prepare(
-	'SELECT status FROM registros WHERE id = @registroId AND usuario_id = @usuarioId'
-);
-
 const atualizarAtividadeStmt = db.prepare(
 	`UPDATE atividades SET agente_id = @agenteId, data_hora = @dataHora, descricao = @descricao,
 	 local = @local, instrumento = @instrumento, processo = @processo, parametros = @parametros,
@@ -220,8 +213,7 @@ const limparUsoStmt = db.prepare(
 /** Edicao so em Registro Rascunho (ADR-0003) — tipo e imutavel, cardinalidade revalidada com o tipo original. */
 const atualizarAtividadeTx = db.transaction(
 	(usuarioId: string, registroId: string, atividadeId: string, input: AtualizarAtividadeInput) => {
-		const registro = obterStatusRegistroDoUsuarioStmt.get({ registroId, usuarioId }) as
-			{ status: string } | undefined;
+		const registro = obterRegistro(registroId, usuarioId);
 		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		if (registro.status === 'finalizado') {
 			throw new RegistroJaFinalizadoError('error.record_read_only');
@@ -322,8 +314,7 @@ const excluirAtividadeStmt = db.prepare('DELETE FROM atividades WHERE id = @id')
  */
 const excluirAtividadeTx = db.transaction(
 	(usuarioId: string, registroId: string, atividadeId: string) => {
-		const registro = obterStatusRegistroDoUsuarioStmt.get({ registroId, usuarioId }) as
-			{ status: string } | undefined;
+		const registro = obterRegistro(registroId, usuarioId);
 		if (!registro) throw new RegistroNaoEncontradoError('error.record_not_found');
 		if (registro.status === 'finalizado') {
 			throw new RegistroJaFinalizadoError('error.record_read_only');

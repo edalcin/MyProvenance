@@ -21,6 +21,30 @@ export interface Usuario {
 	username: string;
 }
 
+/**
+ * Papel de acesso a um Registro compartilhado — hierarquia dono > administrador > editor
+ * (docs/especificacao.md §2.6). Dono nunca aparece em `registro_compartilhamentos` (e' sempre
+ * `registros.usuario_id`); administrador/editor sao concedidos via compartilhamento.
+ */
+export type PapelAcesso = 'dono' | 'administrador' | 'editor';
+
+const RANK_PAPEL_ACESSO: Record<PapelAcesso, number> = { editor: 1, administrador: 2, dono: 3 };
+
+/** true se `papel` atende ou supera `minimo` na hierarquia dono > administrador > editor. */
+export function papelAtendeMinimo(
+	papel: PapelAcesso | null | undefined,
+	minimo: PapelAcesso
+): boolean {
+	return !!papel && RANK_PAPEL_ACESSO[papel] >= RANK_PAPEL_ACESSO[minimo];
+}
+
+/** Usuario com acesso a um Registro compartilhado, para exibir no dialog "Compartilhar". */
+export interface AcessoRegistro {
+	usuarioId: string;
+	username: string;
+	papel: PapelAcesso;
+}
+
 export type DirecaoDiagrama = 'LR' | 'TD';
 
 export interface RegistroProvenencia {
@@ -34,6 +58,14 @@ export interface RegistroProvenencia {
 	direcaoDiagrama: DirecaoDiagrama;
 	/** Token do link publico de leitura (compartilhamento); null = nao compartilhado. Nunca sai no JSON exportado. */
 	tokenCompartilhamento: string | null;
+	/**
+	 * Papel do usuario que fez a consulta (dono/administrador/editor via compartilhamento).
+	 * Ausente (undefined) em contextos sem esse conceito — sessao anonima, fixtures de teste —
+	 * tratado pela UI como 'dono' (acesso total local, comportamento historico preservado).
+	 */
+	meuPapel?: PapelAcesso;
+	/** username do dono, quando meuPapel !== 'dono' (Registro compartilhado comigo); null se sou o dono. */
+	donoUsername?: string | null;
 }
 
 export interface Entidade {

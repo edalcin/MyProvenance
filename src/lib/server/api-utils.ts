@@ -2,6 +2,10 @@ import { error } from '@sveltejs/kit';
 import type { ZodType } from 'zod';
 import { RegraCardinalidadeError } from '$lib/cardinalidade';
 import { RegistroJaFinalizadoError, RegistroNaoEncontradoError } from './db/repositories/registros';
+import {
+	AutoCompartilhamentoError,
+	UsuarioNaoEncontradoError
+} from './db/repositories/compartilhamentos';
 
 export async function parseBody<T>(request: Request, schema: ZodType<T>): Promise<T> {
 	let corpo: unknown;
@@ -30,8 +34,10 @@ export function parsePaginationParams(url: URL): { busca?: string; offset: numbe
 /** Traduz erros de dominio/SQLite para respostas HTTP consistentes nas rotas de API. */
 export function toApiError(err: unknown): never {
 	if (err instanceof RegraCardinalidadeError) error(400, err.message);
+	if (err instanceof AutoCompartilhamentoError) error(400, err.message);
 	if (err instanceof RegistroJaFinalizadoError) error(409, err.message);
 	if (err instanceof RegistroNaoEncontradoError) error(404, err.message);
+	if (err instanceof UsuarioNaoEncontradoError) error(404, err.message);
 	if (err instanceof Error && 'code' in err) {
 		// better-sqlite3 anexa .code do erro nativo do SQLite; sem tipo publico exportado, cast pontual justificado.
 		const codigo = (err as Error & { code: string }).code;

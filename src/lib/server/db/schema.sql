@@ -40,6 +40,17 @@ CREATE TABLE IF NOT EXISTS registros (
   token_compartilhamento TEXT
 );
 
+-- Compartilhamento de edicao entre Contas (docs/especificacao.md §2.6). Dono (registros.usuario_id)
+-- nunca aparece aqui; papel 'administrador' tem paridade com o dono exceto ser removido/substituido,
+-- 'editor' fica restrito a conteudo (titulo/descricao/Atividades/Entidades).
+CREATE TABLE IF NOT EXISTS registro_compartilhamentos (
+  registro_id TEXT NOT NULL REFERENCES registros(id) ON DELETE CASCADE,
+  usuario_id TEXT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  papel TEXT NOT NULL CHECK (papel IN ('editor','administrador')),
+  criado_em TEXT NOT NULL,
+  PRIMARY KEY (registro_id, usuario_id)
+);
+
 CREATE TABLE IF NOT EXISTS atividades (
   id TEXT PRIMARY KEY,
   registro_id TEXT NOT NULL REFERENCES registros(id) ON DELETE CASCADE,
@@ -83,3 +94,4 @@ CREATE INDEX IF NOT EXISTS idx_agentes_nome ON agentes(nome);
 -- idx_registros_usuario/idx_agentes_usuario: criados em client.ts, apos a migracao idempotente de
 -- usuario_id (bancos legados nao tem essa coluna no momento em que este arquivo e executado).
 CREATE INDEX IF NOT EXISTS idx_sessoes_usuario ON sessoes(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_compartilhamentos_usuario ON registro_compartilhamentos(usuario_id);

@@ -18,6 +18,13 @@ export const pinSchema = z.string().regex(/^\d{6}$/, 'validation.pin.format');
 export const registrarUsuarioSchema = z.object({ username: usernameSchema, pin: pinSchema });
 export const entrarSchema = z.object({ username: usernameSchema, pin: pinSchema });
 
+export const papelCompartilhamentoSchema = z.enum(['editor', 'administrador']);
+export const compartilharUsuarioInputSchema = z.object({
+	username: usernameSchema,
+	papel: papelCompartilhamentoSchema
+});
+export type CompartilharUsuarioInput = z.infer<typeof compartilharUsuarioInputSchema>;
+
 export const agenteInputSchema = z.object({
 	nome: z.string().trim().min(1, 'validation.name.required').max(200),
 	tipo: tipoAgenteSchema,

@@ -191,6 +191,12 @@
 								data: formatarData(registro.criadoEm, idiomaAtual.valor)
 							})}</span
 						>
+						{#if registro.meuPapel && registro.meuPapel !== 'dono'}
+							<span class="text-muted-foreground text-xs">
+								{t('records.shared_by', { username: registro.donoUsername ?? '' })}
+								· {t('share.role.' + registro.meuPapel)}
+							</span>
+						{/if}
 					</div>
 					<Badge variant={registro.status === 'finalizado' ? 'default' : 'secondary'}>
 						{t('status.' + registro.status)}

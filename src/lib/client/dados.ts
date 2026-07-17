@@ -8,6 +8,7 @@ import { usuarioAtual } from './usuario-atual.svelte';
 import { sessaoAnonima } from './sessao-anonima.svelte';
 import type {
 	Agente,
+	AcessoRegistro,
 	Atividade,
 	Entidade,
 	RegistroDetalhado,
@@ -16,6 +17,7 @@ import type {
 } from '$lib/types';
 import type {
 	AtualizarAtividadeInput,
+	CompartilharUsuarioInput,
 	CriarAtividadeInput,
 	RegistroExportadoValidado
 } from '$lib/schemas';
@@ -108,6 +110,40 @@ export async function desativarCompartilhamento(id: string): Promise<RegistroPro
 	const resposta = await fetch(`/registros/${id}/compartilhar`, { method: 'DELETE' });
 	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_record_failed');
 	return resposta.json();
+}
+
+/** Quem tem acesso ao Registro (dono + coeditores). So existe para Conta. */
+export async function listarAcessos(registroId: string): Promise<AcessoRegistro[]> {
+	const resposta = await fetch(`/registros/${registroId}/compartilhar-usuario`);
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.load_record_failed');
+	return resposta.json();
+}
+
+/** Idempotente: compartilhar de novo com o mesmo usuario so atualiza o papel. */
+export async function compartilharComUsuario(
+	registroId: string,
+	input: CompartilharUsuarioInput
+): Promise<AcessoRegistro[]> {
+	const resposta = await fetch(`/registros/${registroId}/compartilhar-usuario`, {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify(input)
+	});
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.share_user_failed');
+	return resposta.json();
+}
+
+/** Remove o acesso de `usuarioId`; um coeditor pode chamar com o proprio id para sair sozinho. */
+export async function removerCompartilhamento(
+	registroId: string,
+	usuarioId: string
+): Promise<void> {
+	const resposta = await fetch(`/registros/${registroId}/compartilhar-usuario`, {
+		method: 'DELETE',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ usuarioId })
+	});
+	if (!resposta.ok) throw await extrairErro(resposta, 'error.remove_access_failed');
 }
 
 export async function excluirRegistro(id: string): Promise<void> {

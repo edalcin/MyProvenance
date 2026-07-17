@@ -13,6 +13,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Table from '$lib/components/ui/table';
+	import * as Select from '$lib/components/ui/select';
 	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
 	import MermaidDiagram from '$lib/components/mermaid-diagram.svelte';
 	import ActivityForm from '$lib/components/activity-form.svelte';
@@ -21,7 +22,8 @@
 	import { exportarComoArquivo, exportarRelatorioComoArquivo } from '$lib/client/exportar-importar';
 	import * as dados from '$lib/client/dados';
 	import { sufixoRelacaoOrigem } from '$lib/relacao';
-	import type { Agente, Atividade, Entidade } from '$lib/types';
+	import type { Agente, AcessoRegistro, Atividade, Entidade } from '$lib/types';
+	import { papelAtendeMinimo } from '$lib/types';
 	import { idiomaAtual, t, msgErro } from '$lib/i18n/estado.svelte';
 	import type { PageData } from './$types';
 
@@ -109,6 +111,69 @@
 	function copiarUrlPublica() {
 		navigator.clipboard.writeText(urlPublica);
 		toast.success(t('share.copied'));
+	}
+
+	// meuPapel ausente (sessao anonima, sem esse conceito) = acesso total local, como sempre foi.
+	const meuPapel = $derived(registro?.meuPapel ?? 'dono');
+	const souAdministrador = $derived(papelAtendeMinimo(meuPapel, 'administrador'));
+
+	let abaCompartilhar = $state<'link' | 'usuario'>('link');
+	let acessos = $state<AcessoRegistro[]>([]);
+	let usernameCompartilhar = $state('');
+	let papelCompartilhar = $state<'editor' | 'administrador'>('editor');
+	let compartilhandoUsuario = $state(false);
+
+	async function carregarAcessos() {
+		if (!registro) return;
+		try {
+			acessos = await dados.listarAcessos(registro.id);
+		} catch (err) {
+			toast.error(msgErro(err, 'error.load_record_failed'));
+		}
+	}
+
+	$effect(() => {
+		if (dialogCompartilharAberto && souAdministrador) carregarAcessos();
+	});
+
+	async function compartilharComUsuario(event: SubmitEvent) {
+		event.preventDefault();
+		if (!registro || !usernameCompartilhar.trim()) return;
+		compartilhandoUsuario = true;
+		try {
+			acessos = await dados.compartilharComUsuario(registro.id, {
+				username: usernameCompartilhar.trim(),
+				papel: papelCompartilhar
+			});
+			toast.success(t('share.shared_with_user'));
+			usernameCompartilhar = '';
+		} catch (err) {
+			toast.error(msgErro(err, 'error.share_user_failed'));
+		} finally {
+			compartilhandoUsuario = false;
+		}
+	}
+
+	async function removerAcesso(acesso: AcessoRegistro) {
+		if (!registro) return;
+		const souEu = acesso.usuarioId === usuarioAtual.valor?.id;
+		const mensagem = souEu
+			? t('confirm.leave_share')
+			: t('confirm.remove_access', { username: acesso.username });
+		if (!confirm(mensagem)) return;
+		try {
+			await dados.removerCompartilhamento(registro.id, acesso.usuarioId);
+			if (souEu) {
+				toast.success(t('share.left_share'));
+				dialogCompartilharAberto = false;
+				goto(resolve('/registros'));
+				return;
+			}
+			toast.success(t('share.access_removed'));
+			acessos = acessos.filter((a) => a.usuarioId !== acesso.usuarioId);
+		} catch (err) {
+			toast.error(msgErro(err, 'error.remove_access_failed'));
+		}
 	}
 
 	let dialogAtividadeAberto = $state(false);
@@ -329,7 +394,7 @@
 						</form>
 					</Dialog.Content>
 				</Dialog.Root>
-				{#if registro.status === 'rascunho'}
+				{#if registro.status === 'rascunho' && souAdministrador}
 					<Button variant="outline" onclick={finalizar} disabled={finalizando}>
 						<i class="bx bx-check-circle"></i>
 						{finalizando ? t('records.finalizing') : t('records.finalize')}
@@ -350,7 +415,7 @@
 						{t('records.export_report')}
 					</Button>
 				{/if}
-				{#if usuarioAtual.valor}
+				{#if usuarioAtual.valor && souAdministrador}
 					<Dialog.Root bind:open={dialogCompartilharAberto}>
 						<Dialog.Trigger>
 							{#snippet child({ props })}
@@ -360,41 +425,130 @@
 								</Button>
 							{/snippet}
 						</Dialog.Trigger>
-						<Dialog.Content class="sm:max-w-lg">
+						<Dialog.Content class="max-h-[85vh] overflow-y-auto sm:max-w-lg">
 							<Dialog.Header>
 								<Dialog.Title>{t('share.dialog_title')}</Dialog.Title>
 								<Dialog.Description>{t('share.dialog_description')}</Dialog.Description>
 							</Dialog.Header>
-							{#if registro.tokenCompartilhamento}
-								<div class="flex flex-col gap-3">
-									<div class="flex gap-2">
-										<Input readonly value={urlPublica} onclick={(e) => e.currentTarget.select()} />
-										<Button variant="outline" onclick={copiarUrlPublica}>
-											<i class="bx bx-copy"></i>
-											{t('share.copy')}
+							<Tabs.Root bind:value={abaCompartilhar}>
+								<Tabs.List class="grid w-full grid-cols-2">
+									<Tabs.Trigger value="link">{t('share.tab.link')}</Tabs.Trigger>
+									<Tabs.Trigger value="usuario">{t('share.tab.user')}</Tabs.Trigger>
+								</Tabs.List>
+								<Tabs.Content value="link">
+									{#if registro.tokenCompartilhamento}
+										<div class="flex flex-col gap-3">
+											<div class="flex gap-2">
+												<Input
+													readonly
+													value={urlPublica}
+													onclick={(e) => e.currentTarget.select()}
+												/>
+												<Button variant="outline" onclick={copiarUrlPublica}>
+													<i class="bx bx-copy"></i>
+													{t('share.copy')}
+												</Button>
+											</div>
+											<Button
+												variant="destructive"
+												onclick={desativarCompartilhamento}
+												disabled={compartilhando}
+											>
+												<i class="bx bx-link-external"></i>
+												{t('share.deactivate')}
+											</Button>
+										</div>
+									{:else}
+										<Button onclick={ativarCompartilhamento} disabled={compartilhando}>
+											{compartilhando ? t('common.saving') : t('share.activate')}
 										</Button>
+									{/if}
+								</Tabs.Content>
+								<Tabs.Content value="usuario">
+									<div class="flex flex-col gap-4">
+										<form class="flex flex-col gap-3" onsubmit={compartilharComUsuario}>
+											<div class="flex flex-col gap-1.5">
+												<Label for="username-compartilhar">{t('share.username_label')}</Label>
+												<Input
+													id="username-compartilhar"
+													bind:value={usernameCompartilhar}
+													placeholder={t('share.username_placeholder')}
+													maxlength={30}
+													required
+												/>
+											</div>
+											<div class="flex flex-col gap-1.5">
+												<Label for="papel-compartilhar">{t('share.role_label')}</Label>
+												<Select.Root type="single" bind:value={papelCompartilhar}>
+													<Select.Trigger id="papel-compartilhar">
+														{t('share.role.' + papelCompartilhar)}
+													</Select.Trigger>
+													<Select.Content>
+														<Select.Item value="editor" label={t('share.role.editor')} />
+														<Select.Item
+															value="administrador"
+															label={t('share.role.administrador')}
+														/>
+													</Select.Content>
+												</Select.Root>
+												<p class="text-muted-foreground text-xs">
+													{t('share.role_hint.' + papelCompartilhar)}
+												</p>
+											</div>
+											<Button
+												type="submit"
+												disabled={compartilhandoUsuario || !usernameCompartilhar.trim()}
+											>
+												{compartilhandoUsuario
+													? t('share.sharing')
+													: t('share.share_with_user_button')}
+											</Button>
+										</form>
+										{#if acessos.length > 0}
+											<div class="flex flex-col gap-2">
+												<h3 class="text-sm font-medium">{t('share.access_list_heading')}</h3>
+												<ul class="flex flex-col gap-1.5">
+													{#each acessos as acesso (acesso.usuarioId)}
+														<li class="flex items-center justify-between gap-2 text-sm">
+															<span class="flex items-center gap-2">
+																{acesso.username}
+																<Badge variant="secondary">
+																	{acesso.papel === 'dono'
+																		? t('share.owner_label')
+																		: t('share.role.' + acesso.papel)}
+																</Badge>
+															</span>
+															{#if acesso.papel !== 'dono'}
+																<Button
+																	variant="ghost"
+																	size="sm"
+																	onclick={() => removerAcesso(acesso)}
+																	aria-label={acesso.usuarioId === usuarioAtual.valor?.id
+																		? t('share.leave_aria')
+																		: t('share.remove_access_aria')}
+																>
+																	{acesso.usuarioId === usuarioAtual.valor?.id
+																		? t('share.leave_button')
+																		: t('common.remove')}
+																</Button>
+															{/if}
+														</li>
+													{/each}
+												</ul>
+											</div>
+										{/if}
 									</div>
-									<Button
-										variant="destructive"
-										onclick={desativarCompartilhamento}
-										disabled={compartilhando}
-									>
-										<i class="bx bx-link-external"></i>
-										{t('share.deactivate')}
-									</Button>
-								</div>
-							{:else}
-								<Button onclick={ativarCompartilhamento} disabled={compartilhando}>
-									{compartilhando ? t('common.saving') : t('share.activate')}
-								</Button>
-							{/if}
+								</Tabs.Content>
+							</Tabs.Root>
 						</Dialog.Content>
 					</Dialog.Root>
 				{/if}
-				<Button variant="destructive" onclick={excluirRegistro}>
-					<i class="bx bx-trash"></i>
-					{t('records.delete')}
-				</Button>
+				{#if souAdministrador}
+					<Button variant="destructive" onclick={excluirRegistro}>
+						<i class="bx bx-trash"></i>
+						{t('records.delete')}
+					</Button>
+				{/if}
 			</div>
 		</div>
 
