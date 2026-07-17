@@ -11,3 +11,8 @@ Here is how to document the provenance of a biodiversity data spreadsheet, from 
 7. Watch the provenance diagram being drawn automatically and, at the end, export the .md report or the full JSON to archive or share.
 
 > Tip: use the TD/LR button above the diagram to view it vertically (top-down) or horizontally (left-right).
+
+## "Finalize" and "Export JSON" are different things
+
+- **Export JSON** downloads a full copy of the record at any time, in any status (Draft or Finalized) — it works as a backup or a temporary file. It never changes the record. Without an Account, it's your only way to continue your work later: since nothing is saved on the server, export the JSON before you leave and upload it again on your next visit to pick up where you left off.
+- **Finalize** is a deliberate, irreversible decision: it locks the Entities and Activities already recorded — none of them can be edited or deleted anymore, but you can still add new ones. Use it once the record is ready to be treated as an official, auditable document. Title and description remain editable even after finalization.

@@ -34,5 +34,5 @@ Cadastro opcional de acesso (username + PIN numérico de 6 dígitos) que faz os 
 _Avoid_: Usuário (usar "Conta" para o cadastro de acesso; "Agente" continua sendo quem realizou a Atividade, mesmo com Conta ativa), Login
 
 **Rascunho / Finalizado**:
-Os dois estados de um Registro de Proveniência. Rascunho: edição livre de Entidades e Atividades. Finalizado: atingido na primeira exportação do JSON (ou ação explícita do usuário); a partir daí o histórico existente é imutável, só é possível adicionar novas Entidades/Atividades.
+Os dois estados de um Registro de Proveniência. Rascunho: edição livre de Entidades e Atividades. Finalizado: atingido só por ação explícita do usuário (botão "Finalizar"); a partir daí o histórico existente é imutável, só é possível adicionar novas Entidades/Atividades. Exportar o JSON não finaliza (ADR-0010) — serve de backup/arquivo portátil, inclusive para quem usa sem Conta.
 _Avoid_: Publicado, Bloqueado, Travado

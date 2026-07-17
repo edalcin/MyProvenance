@@ -14,15 +14,15 @@ Termos em **negrito** neste documento são os termos canônicos definidos em `CO
 
 ### 2.1 Registro de Proveniência
 
-| Campo           | Tipo                             | Obrigatório             | Notas                                         |
-| --------------- | -------------------------------- | ----------------------- | --------------------------------------------- |
-| `id`            | UUIDv7                           | sim                     | chave primária                                |
-| `titulo`        | texto                            | sim                     |                                               |
-| `descricao`     | texto rico (TipTap)              | não                     |                                               |
-| `status`        | enum: `rascunho` \| `finalizado` | sim                     | default `rascunho`; ver ADR-0003              |
-| `criadoEm`      | datetime                         | sim                     |                                               |
-| `finalizadoEm`  | datetime                         | não                     | preenchido na 1ª exportação ou ação explícita |
-| `schemaVersion` | inteiro                          | sim (no JSON exportado) | ver §4                                        |
+| Campo           | Tipo                             | Obrigatório             | Notas                                                                                     |
+| --------------- | -------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------- |
+| `id`            | UUIDv7                           | sim                     | chave primária                                                                            |
+| `titulo`        | texto                            | sim                     |                                                                                           |
+| `descricao`     | texto rico (TipTap)              | não                     |                                                                                           |
+| `status`        | enum: `rascunho` \| `finalizado` | sim                     | default `rascunho`; ver ADR-0003                                                          |
+| `criadoEm`      | datetime                         | sim                     |                                                                                           |
+| `finalizadoEm`  | datetime                         | não                     | preenchido só por ação explícita (botão "Finalizar"); export.json não finaliza (ADR-0010) |
+| `schemaVersion` | inteiro                          | sim (no JSON exportado) | ver §4                                                                                    |
 
 Sem **Conta**: só existe em memória no navegador (sem `usuarioId`, nunca grava no servidor). Com **Conta**: coluna `usuario_id` (FK para `usuarios.id`) escopa o Registro àquele usuário — ver §2.5 e ADR-0009.
 

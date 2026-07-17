@@ -239,10 +239,6 @@
 
 	async function exportarJson() {
 		if (!registro) return;
-		if (registro.status === 'rascunho') {
-			const confirmado = confirm(t('confirm.export_finalizes'));
-			if (!confirmado) return;
-		}
 		exportandoJson = true;
 		try {
 			if (usuarioAtual.valor) {
@@ -253,7 +249,6 @@
 					return;
 				}
 				const texto = await resposta.text();
-				registro = JSON.parse(texto).registro;
 				const cabecalho = resposta.headers.get('content-disposition') ?? '';
 				const nomeArquivo = /filename="([^"]+)"/.exec(cabecalho)?.[1] ?? `${idAtual}.json`;
 				const url = URL.createObjectURL(new Blob([texto], { type: 'application/json' }));
@@ -263,7 +258,6 @@
 				ancora.click();
 				URL.revokeObjectURL(url);
 			} else {
-				if (registro.status === 'rascunho') registro = sessaoAnonima.finalizarRegistro(registro.id);
 				exportarComoArquivo(sessaoAnonima.obterRegistroDetalhado(registro.id)!);
 			}
 			toast.success(t('success.json_exported'));

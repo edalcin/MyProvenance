@@ -112,8 +112,6 @@ export const pt = {
 	// Confirmacoes (window.confirm)
 	'confirm.delete_record':
 		'Excluir o Registro "{titulo}"? Esta ação remove todas as Entidades e Atividades.',
-	'confirm.export_finalizes':
-		'Exportar o JSON finaliza o Registro — o histórico existente não poderá mais ser editado depois disso. Continuar?',
 	'confirm.delete_activity':
 		'Excluir esta Atividade? As Entidades geradas por ela também serão removidas (se não estiverem em uso por outra Atividade).',
 	'confirm.delete_agent': 'Excluir o Agente "{nome}"?',

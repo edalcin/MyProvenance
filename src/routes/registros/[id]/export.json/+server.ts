@@ -1,28 +1,15 @@
 import { error } from '@sveltejs/kit';
-import {
-	RegistroJaFinalizadoError,
-	finalizarRegistro,
-	obterRegistroDetalhado
-} from '$lib/server/db/repositories/registros';
+import { obterRegistroDetalhado } from '$lib/server/db/repositories/registros';
 import { gerarJsonExportado } from '$lib/export';
 import { slugify } from '$lib/slug';
 import type { RequestHandler } from './$types';
 
-/** Primeira exportacao do JSON finaliza o Registro (Rascunho -> Finalizado) — CONTEXT.md, ADR-0003. */
+/** Backup/arquivo portatil — nunca finaliza o Registro (ADR-0010); Finalizar e' acao explicita separada. */
 export const GET: RequestHandler = ({ params, locals }) => {
 	if (!locals.usuario) error(401, 'error.auth_required');
 	const usuarioId = locals.usuario.id;
-	let detalhe = obterRegistroDetalhado(params.id, usuarioId);
+	const detalhe = obterRegistroDetalhado(params.id, usuarioId);
 	if (!detalhe) error(404, 'error.record_not_found');
-
-	if (detalhe.registro.status === 'rascunho') {
-		try {
-			finalizarRegistro(params.id, usuarioId);
-		} catch (err) {
-			if (!(err instanceof RegistroJaFinalizadoError)) throw err;
-		}
-		detalhe = obterRegistroDetalhado(params.id, usuarioId)!;
-	}
 
 	const corpo = JSON.stringify(gerarJsonExportado(detalhe), null, 2);
 	return new Response(corpo, {

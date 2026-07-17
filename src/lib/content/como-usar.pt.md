@@ -11,3 +11,8 @@ Veja como documentar a proveniência de uma planilha de dados de biodiversidade,
 7. Acompanhe o diagrama de proveniência sendo desenhado automaticamente e, ao final, exporte o relatório .md ou o JSON completo para arquivar ou compartilhar.
 
 > Dica: use o botão TD/LR sobre o diagrama para vê-lo na vertical (de cima para baixo) ou na horizontal (da esquerda para a direita).
+
+## "Finalizar" e "Exportar JSON" são coisas diferentes
+
+- **Exportar JSON** baixa uma cópia completa do Registro a qualquer momento, em qualquer status (Rascunho ou Finalizado) — serve de backup ou arquivo temporário. Não muda nada no Registro. Sem Conta, é a sua única forma de continuar o trabalho depois: como nada é salvo no servidor, exporte o JSON antes de sair e faça upload dele na próxima visita para retomar de onde parou.
+- **Finalizar** é uma decisão deliberada e sem volta: trava as Entidades e Atividades já registradas — nenhuma delas pode mais ser editada ou excluída, mas você ainda pode adicionar novas. Use quando o Registro estiver pronto para ser tratado como documento oficial e auditável. Título e descrição continuam editáveis mesmo depois de finalizado.
