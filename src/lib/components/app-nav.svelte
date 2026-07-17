@@ -19,6 +19,10 @@
 		{ href: resolve('/sobre'), label: t('nav.about') }
 	]);
 
+	// Link publico (/compartilhar/:token): visitante sem sessao, pagina somente leitura — nao
+	// faz sentido oferecer navegacao para areas autenticadas nem convite pra Entrar/Criar conta.
+	const emVisualizacaoPublica = $derived(page.url.pathname.startsWith('/compartilhar'));
+
 	let saindo = $state(false);
 
 	async function sair() {
@@ -46,29 +50,35 @@
 			<i class="bx bx-git-branch text-primary text-xl"></i>
 			MyProvenance
 		</a>
-		<nav class="flex flex-1 items-center gap-1">
-			{#each links as link (link.href)}
-				<Button
-					href={link.href}
-					variant={page.url.pathname.startsWith(link.href) ? 'secondary' : 'ghost'}
-					size="sm"
-				>
-					{link.label}
-				</Button>
-			{/each}
-		</nav>
-		{#if usuarioAtual.valor}
-			<span class="text-muted-foreground hidden text-sm sm:inline"
-				>{usuarioAtual.valor.username}</span
-			>
-			<Button variant="ghost" size="sm" onclick={sair} disabled={saindo}>
-				<i class="bx bx-log-out"></i>
-				{t('nav.signout')}
-			</Button>
+		{#if !emVisualizacaoPublica}
+			<nav class="flex flex-1 items-center gap-1">
+				{#each links as link (link.href)}
+					<Button
+						href={link.href}
+						variant={page.url.pathname.startsWith(link.href) ? 'secondary' : 'ghost'}
+						size="sm"
+					>
+						{link.label}
+					</Button>
+				{/each}
+			</nav>
 		{:else}
-			<EntrarDialog />
-			{#if sessaoAnonima.temDadosNaoSalvos}
-				<CriarContaDialog />
+			<div class="flex-1"></div>
+		{/if}
+		{#if !emVisualizacaoPublica}
+			{#if usuarioAtual.valor}
+				<span class="text-muted-foreground hidden text-sm sm:inline"
+					>{usuarioAtual.valor.username}</span
+				>
+				<Button variant="ghost" size="sm" onclick={sair} disabled={saindo}>
+					<i class="bx bx-log-out"></i>
+					{t('nav.signout')}
+				</Button>
+			{:else}
+				<EntrarDialog />
+				{#if sessaoAnonima.temDadosNaoSalvos}
+					<CriarContaDialog />
+				{/if}
 			{/if}
 		{/if}
 		<Button variant="ghost" size="sm" onclick={alternarIdioma} aria-label={t('nav.language')}>
