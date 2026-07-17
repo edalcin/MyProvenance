@@ -24,7 +24,7 @@ Documentar proveniência não é burocracia — é o que transforma um arquivo s
 - **Registra o ciclo de vida completo** de um conjunto de dados através de três tipos de evento — Criação, Transformação e Análise — cada um com seus próprios campos (instrumento, script, parâmetros, ambiente de execução).
 - **Desenha o diagrama de linhagem automaticamente**, ao vivo, à medida que você registra as etapas — sem precisar desenhar nada à mão. Alterne a orientação horizontal/vertical com um clique.
 - **Gera um relatório `.md` portátil** com o diagrama (na orientação escolhida) e todas as tabelas, pronto para anexar a um artigo, repositório ou submissão.
-- **Compartilha um link público de leitura** de um Registro (com Conta) — quem recebe o link vê o diagrama, as tabelas e pode exportar `.md`/JSON, mas não edita nem exclui nada. Revogável a qualquer momento.
+- **Compartilha um link público de leitura** de um Registro (com Conta) — quem recebe o link vê o diagrama, as tabelas e pode exportar `.md`/JSON, mas não edita nem exclui nada; a página não mostra o menu de navegação nem opções de login, só o conteúdo do Registro. Revogável a qualquer momento.
 - **Exporta um JSON completo** do registro para backup, compartilhamento entre colegas ou migração para outra instância.
 - **Interface bilíngue** — português (padrão) ou inglês, com troca instantânea pelo seletor no cabeçalho, sem recarregar a página.
 - **Não guarda o dado em si** — só a documentação sobre ele. Seus arquivos de pesquisa continuam onde estão.
