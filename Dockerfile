@@ -32,6 +32,7 @@ COPY package.json ./
 
 # DB_PATH deve apontar para um volume montado fora do container.
 # URL_BASE deve ser a URL publica externa desta instancia (link de compartilhamento) — obrigatorio via -e.
+# ADM_PWD (opcional, via -e) habilita a area administrativa (/admin) — sem ela o link fica oculto.
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000

@@ -39,6 +39,28 @@ export const registroInputSchema = z.object({
 });
 export type RegistroInput = z.infer<typeof registroInputSchema>;
 
+// Area administrativa (senha via ADM_PWD) — docs admin-area-plan.
+export const adminSenhaSchema = z.object({
+	senha: z.string().min(1, 'validation.password.required')
+});
+export const adminUsuarioEditSchema = z.object({
+	id: z.uuid(),
+	username: usernameSchema,
+	pin: pinSchema.optional()
+});
+export const adminRegistroEditSchema = z.object({
+	id: z.uuid(),
+	titulo: z.string().trim().min(1, 'validation.title.required').max(300),
+	descricao: z.string().trim().max(20000).nullable().optional(),
+	status: z.enum(['rascunho', 'finalizado'])
+});
+export const adminAgenteEditSchema = agenteInputSchema.extend({ id: z.uuid() });
+export const adminCompartilhamentoEditSchema = z.object({
+	registroId: z.uuid(),
+	usuarioId: z.uuid(),
+	papel: papelCompartilhamentoSchema
+});
+
 export const direcaoDiagramaInputSchema = z.object({ direcao: z.enum(['LR', 'TD']) });
 export type DirecaoDiagramaInput = z.infer<typeof direcaoDiagramaInputSchema>;
 

@@ -1,8 +1,10 @@
 import type { Handle } from '@sveltejs/kit';
 import { obterUsuarioPorToken } from '$lib/server/db/repositories/sessoes';
+import { sessaoAdminValida } from '$lib/server/admin-auth';
 import { COOKIE_IDIOMA, IDIOMA_PADRAO, idiomaValido } from '$lib/i18n';
 
 export const COOKIE_SESSAO = 'sessao';
+export const COOKIE_ADMIN = 'sessao_admin';
 
 /**
  * Resolve `event.locals.usuario` a partir do cookie de sessao (ADR-0009: conta
@@ -15,6 +17,7 @@ export const COOKIE_SESSAO = 'sessao';
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get(COOKIE_SESSAO);
 	event.locals.usuario = token ? obterUsuarioPorToken(token) : null;
+	event.locals.admin = sessaoAdminValida(event.cookies.get(COOKIE_ADMIN));
 
 	const idiomaCookie = event.cookies.get(COOKIE_IDIOMA);
 	event.locals.idioma = idiomaValido(idiomaCookie) ? idiomaCookie : IDIOMA_PADRAO;

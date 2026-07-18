@@ -8,6 +8,7 @@ declare global {
 		// interface Error {}
 		interface Locals {
 			usuario: Usuario | null;
+			admin: boolean;
 			idioma: Idioma;
 		}
 		// interface PageData {}

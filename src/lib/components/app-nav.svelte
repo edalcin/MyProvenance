@@ -16,7 +16,8 @@
 		{ href: resolve('/registros'), label: t('nav.records') },
 		{ href: resolve('/agentes'), label: t('nav.agents') },
 		{ href: resolve('/como-usar'), label: t('nav.howto') },
-		{ href: resolve('/sobre'), label: t('nav.about') }
+		{ href: resolve('/sobre'), label: t('nav.about') },
+		...(page.data.adminHabilitado ? [{ href: resolve('/admin'), label: t('nav.admin') }] : [])
 	]);
 
 	// Link publico (/compartilhar/:token): visitante sem sessao, pagina somente leitura — nao
