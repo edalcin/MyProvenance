@@ -22,11 +22,15 @@ export default defineConfig({
 					'default-src': ['self'],
 					// mode-watcher injeta um script inline anti-flash de tema fora do pipeline de nonce
 					// do SvelteKit; hash fixo do conteudo (estavel enquanto themeColors nao mudar).
-					'script-src': ['self', 'sha256-VmP2arq8etV2Q1kwJrHsnROqCloQE6iCMv2do81Ns44='],
+					'script-src': [
+						'self',
+						'sha256-VmP2arq8etV2Q1kwJrHsnROqCloQE6iCMv2do81Ns44=',
+						'matomo.dalc.in'
+					],
 					'style-src': ['self', 'unsafe-inline'],
-					'img-src': ['self', 'data:'],
+					'img-src': ['self', 'data:', 'matomo.dalc.in'],
 					'font-src': ['self', 'data:'],
-					'connect-src': ['self'],
+					'connect-src': ['self', 'matomo.dalc.in'],
 					'object-src': ['none'],
 					'base-uri': ['self'],
 					'form-action': ['self'],
