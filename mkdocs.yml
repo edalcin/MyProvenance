@@ -1,0 +1,51 @@
+site_name: Manual do MyProvenance
+site_description: Guia de uso do MyProvenance — proveniência de dados de biodiversidade compatível com W3C PROV.
+site_url: https://edalcin.github.io/MyProvenance/
+site_author: edalcin
+
+repo_url: https://github.com/edalcin/MyProvenance
+repo_name: edalcin/MyProvenance
+edit_uri: edit/main/manual/
+
+docs_dir: manual
+use_directory_urls: false
+
+theme:
+  name: material
+  language: pt-BR
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Tema escuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Tema claro
+  features:
+    - navigation.top
+    - navigation.footer
+    - content.action.edit
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Início: index.md
+  - Introdução: 00-introducao.md
+  - Criar registro: 01-criar-registro.md
+  - Adicionar Atividade: 02-adicionar-atividade.md
+  - Editar Registro e Atividade: 03-editar.md
+  - Finalizar: 04-finalizar.md
+  - Exportar JSON: 05-exportar-json.md
+  - Exportar Relatório .md: 06-exportar-relatorio-md.md
+  - Compartilhar: 07-compartilhar.md
+  - Excluir registro: 08-excluir-registro.md
+  - Exemplo completo: 09-exemplo-completo.md
