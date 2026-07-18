@@ -6,6 +6,8 @@
 
 **A história por trás dos seus dados de pesquisa merece ser preservada.**
 
+**📘 [Acesse o manual completo do usuário](https://edalcin.github.io/MyProvenance/)** — guia passo a passo, do primeiro Registro ao exemplo completo de biodiversidade.
+
 Todo conjunto de dados carrega uma trajetória: de onde veio, quem coletou, quais transformações sofreu, que análises geraram cada resultado. Quando essa trajetória não é registrada, ela se perde — e com ela se perde a possibilidade de reproduzir um resultado, de auditar um erro, de dar crédito correto a quem gerou o dado original, ou de reutilizar com confiança o trabalho de outra pessoa (ou o seu próprio, meses depois).
 
 **MyProvenance** existe para que essa história nunca se perca. É uma ferramenta web simples e self-hosted para documentar a **proveniência** — origem, transformação e análise — de conjuntos de dados de pesquisa, seguindo o modelo internacional **[W3C PROV](https://www.w3.org/TR/2013/NOTE-prov-overview-20130430/)**. Ela registra os _metadados_ do processo científico (quem, quando, como, com quê), nunca o dado em si: seus arquivos continuam onde já estão, sob seu controle.
