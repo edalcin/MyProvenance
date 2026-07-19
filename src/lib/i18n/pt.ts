@@ -339,6 +339,8 @@ export const pt = {
 	'admin.backup.restore_description':
 		'Substitui TODOS os dados atuais pelo conteúdo do arquivo de backup selecionado. Esta ação não pode ser desfeita.',
 	'admin.backup.restore_button': 'Restaurar backup',
+	'admin.backup.choose_file': 'Escolher arquivo',
+	'admin.backup.no_file_chosen': 'Nenhum arquivo escolhido',
 	'admin.backup.restoring': 'Restaurando…',
 	'admin.confirm.restore_backup':
 		'Isto vai substituir TODOS os dados atuais (usuários, registros, agentes e compartilhamentos) pelo conteúdo do arquivo selecionado. Esta ação não pode ser desfeita. Continuar?',

@@ -338,6 +338,8 @@ export const en: Record<keyof typeof pt, string> = {
 	'admin.backup.restore_description':
 		'Replaces ALL current data with the contents of the selected backup file. This action cannot be undone.',
 	'admin.backup.restore_button': 'Restore backup',
+	'admin.backup.choose_file': 'Choose file',
+	'admin.backup.no_file_chosen': 'No file chosen',
 	'admin.backup.restoring': 'Restoring…',
 	'admin.confirm.restore_backup':
 		'This will replace ALL current data (users, records, agents and shares) with the contents of the selected file. This action cannot be undone. Continue?',

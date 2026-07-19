@@ -55,13 +55,22 @@
 			<Card.Description>{t('admin.backup.restore_description')}</Card.Description>
 		</Card.Header>
 		<Card.Content class="flex flex-col gap-3">
-			<input
-				bind:this={inputEl}
-				type="file"
-				accept=".sqlite,.db,application/vnd.sqlite3,application/octet-stream"
-				onchange={selecionar}
-				class="text-sm"
-			/>
+			<div class="flex flex-wrap items-center gap-3">
+				<input
+					bind:this={inputEl}
+					type="file"
+					accept=".sqlite,.db,application/vnd.sqlite3,application/octet-stream"
+					onchange={selecionar}
+					class="hidden"
+				/>
+				<Button type="button" onclick={() => inputEl?.click()}>
+					<i class="bx bx-folder-open"></i>
+					{t('admin.backup.choose_file')}
+				</Button>
+				<span class="text-muted-foreground text-sm">
+					{arquivo?.name ?? t('admin.backup.no_file_chosen')}
+				</span>
+			</div>
 			<Button variant="destructive" disabled={!arquivo || restaurando} onclick={restaurar}>
 				<i class="bx bx-upload"></i>
 				{restaurando ? t('admin.backup.restoring') : t('admin.backup.restore_button')}
