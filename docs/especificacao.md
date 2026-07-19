@@ -140,7 +140,7 @@ CREATE TABLE registros (
   status TEXT NOT NULL CHECK (status IN ('rascunho','finalizado')) DEFAULT 'rascunho',
   criado_em TEXT NOT NULL,
   finalizado_em TEXT,
-  direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'LR',
+  direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'TD',
   token_compartilhamento TEXT  -- link publico de leitura; NULL = nao compartilhado; indice unico
 );
 
@@ -251,12 +251,12 @@ Gerado a partir do grafo de Entidades/Atividades de um Registro. Regras:
 - Cada Atividade que **gera** Entidades produz uma seta de cada Entidade **usada** para cada Entidade **gerada**, rotulada `tipo: descrição curta (Agente, data)`. Quando a Atividade usa e/ou gera mais de uma Entidade, a mesma seta/rótulo se repete para cada combinação entrada×saída (fan-out completo).
 - **Criação** (sem entrada) aparece como nó sem seta de entrada — raiz da lineage.
 - **Análise sem saída** não gera nó novo; não aparece no diagrama, só na tabela de Atividades do relatório (§6).
-- Orientação (`LR`/`TD`) é uma preferência por Registro (`registros.direcao_diagrama`, padrão `LR`), alternável na tela de detalhe e respeitada tanto na renderização ao vivo quanto no relatório `.md` exportado (§6).
+- Orientação (`LR`/`TD`) é uma preferência por Registro (`registros.direcao_diagrama`, padrão `TD`), alternável na tela de detalhe e respeitada tanto na renderização ao vivo quanto no relatório `.md` exportado (§6).
 
 Exemplo:
 
 ```mermaid
-flowchart LR
+flowchart TD
   E1["campo_bruto.csv (CSV)"]
   E2["campo_limpo.csv (CSV)"]
   E1 -->|"Transformação: limpeza (Fulana da Silva, 2026-03-05)"| E2

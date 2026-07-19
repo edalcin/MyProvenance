@@ -51,7 +51,7 @@
 		}
 	});
 
-	let direcaoDiagrama = $state<'LR' | 'TD'>(detalheInicial?.registro.direcaoDiagrama ?? 'LR');
+	let direcaoDiagrama = $state<'LR' | 'TD'>(detalheInicial?.registro.direcaoDiagrama ?? 'TD');
 	const diagrama = $derived(
 		gerarDiagramaMermaid(
 			{ entidades, atividades, agentesEnvolvidos },

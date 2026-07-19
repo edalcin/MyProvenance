@@ -72,7 +72,7 @@ export const sessaoAnonima = {
 			// eslint-disable-next-line svelte/prefer-svelte-reactivity -- valor transiente (string), nunca fica em $state.
 			criadoEm: new Date().toISOString(),
 			finalizadoEm: null,
-			direcaoDiagrama: 'LR',
+			direcaoDiagrama: 'TD',
 			tokenCompartilhamento: null
 		};
 		estado.registros = [registro, ...estado.registros];
@@ -118,7 +118,7 @@ export const sessaoAnonima = {
 		const registro: RegistroProvenencia = {
 			...dados.registro,
 			descricao: dados.registro.descricao ? sanitizarHtmlRico(dados.registro.descricao) : null,
-			direcaoDiagrama: existente?.direcaoDiagrama ?? 'LR',
+			direcaoDiagrama: existente?.direcaoDiagrama ?? 'TD',
 			tokenCompartilhamento: null
 		};
 		estado.registros = estado.registros.some((r) => r.id === registro.id)

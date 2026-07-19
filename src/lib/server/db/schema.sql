@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS registros (
   criado_em TEXT NOT NULL,
   finalizado_em TEXT,
   -- Orientacao do diagrama Mermaid escolhida pelo usuario — respeitada no relatorio .md exportado.
-  direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'LR',
+  direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'TD',
   -- Token opaco do link publico de compartilhamento (somente leitura); NULL = nao compartilhado.
   token_compartilhamento TEXT
 );

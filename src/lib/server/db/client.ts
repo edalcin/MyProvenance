@@ -38,7 +38,7 @@ db.exec('CREATE INDEX IF NOT EXISTS idx_agentes_usuario ON agentes(usuario_id)')
 // compartilhamento publico nao tem essas colunas em registros.
 if (!colunaExiste('registros', 'direcao_diagrama')) {
 	db.exec(
-		`ALTER TABLE registros ADD COLUMN direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'LR'`
+		`ALTER TABLE registros ADD COLUMN direcao_diagrama TEXT NOT NULL CHECK (direcao_diagrama IN ('LR','TD')) DEFAULT 'TD'`
 	);
 }
 if (!colunaExiste('registros', 'token_compartilhamento')) {

@@ -57,13 +57,13 @@ describe('atualizarRegistro (titulo/descricao sao metadados, nao "historico" —
 describe('alterarDirecaoDiagrama', () => {
 	it('persiste a orientacao escolhida e rejeita Registro alheio/inexistente', () => {
 		const registro = criarRegistro(usuarioId, { titulo: 'Registro direcao' });
-		expect(registro.direcaoDiagrama).toBe('LR');
+		expect(registro.direcaoDiagrama).toBe('TD');
 
-		const atualizado = alterarDirecaoDiagrama(registro.id, usuarioId, 'TD');
-		expect(atualizado.direcaoDiagrama).toBe('TD');
+		const atualizado = alterarDirecaoDiagrama(registro.id, usuarioId, 'LR');
+		expect(atualizado.direcaoDiagrama).toBe('LR');
 
 		const outroUsuarioId = criarUsuario({ username: 'outro_teste_direcao', pin: '654321' }).id;
-		expect(() => alterarDirecaoDiagrama(registro.id, outroUsuarioId, 'LR')).toThrow(
+		expect(() => alterarDirecaoDiagrama(registro.id, outroUsuarioId, 'TD')).toThrow(
 			RegistroNaoEncontradoError
 		);
 	});

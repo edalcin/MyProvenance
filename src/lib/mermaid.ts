@@ -11,7 +11,7 @@ export function gerarDiagramaMermaid(
 	dados: { entidades: Entidade[]; atividades: Atividade[]; agentesEnvolvidos: Agente[] },
 	opts: { direcao?: 'LR' | 'TD'; locale?: Idioma } = {}
 ): string {
-	const { direcao = 'LR', locale = 'pt' } = opts;
+	const { direcao = 'TD', locale = 'pt' } = opts;
 	const nomeAgente = new Map(dados.agentesEnvolvidos.map((a) => [a.id, a.nome]));
 	const idDoNo = new Map(dados.entidades.map((e, i) => [e.id, `E${i + 1}`]));
 	const entidadePorId = new Map(dados.entidades.map((e) => [e.id, e]));
