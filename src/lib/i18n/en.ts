@@ -127,6 +127,7 @@ export const en: Record<keyof typeof pt, string> = {
 	'nav.agents': 'Agents',
 	'nav.howto': 'How to use',
 	'nav.about': 'About',
+	'nav.manual': 'Manual',
 	'nav.admin': 'Admin',
 	'nav.github': 'View on GitHub',
 	'nav.language': 'Language',
@@ -205,6 +206,8 @@ export const en: Record<keyof typeof pt, string> = {
 	'records.create_button': 'Create Record',
 	'records.search_placeholder': 'Search by title…',
 	'records.empty': 'No records yet. Create the first one above.',
+	'records.see_howto': 'See how to use',
+	'records.read_manual': 'Read the manual',
 	'records.singular': 'Record',
 	'records.dialog.edit_title': 'Edit Provenance Record',
 	'records.dialog.edit_description':

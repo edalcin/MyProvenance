@@ -125,6 +125,7 @@ export const pt = {
 	'nav.agents': 'Agentes',
 	'nav.howto': 'Como usar',
 	'nav.about': 'Sobre',
+	'nav.manual': 'Manual',
 	'nav.admin': 'Admin',
 	'nav.github': 'Ver no GitHub',
 	'nav.language': 'Idioma',
@@ -204,6 +205,8 @@ export const pt = {
 	'records.create_button': 'Criar Registro',
 	'records.search_placeholder': 'Buscar por título…',
 	'records.empty': 'Nenhum Registro ainda. Crie o primeiro acima.',
+	'records.see_howto': 'Veja como usar',
+	'records.read_manual': 'Leia o Manual',
 	'records.singular': 'Registro',
 	'records.dialog.edit_title': 'Editar Registro de Proveniência',
 	'records.dialog.edit_description':

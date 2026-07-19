@@ -17,6 +17,7 @@
 		{ href: resolve('/agentes'), label: t('nav.agents') },
 		{ href: resolve('/como-usar'), label: t('nav.howto') },
 		{ href: resolve('/sobre'), label: t('nav.about') },
+		{ href: 'https://edalcin.github.io/MyProvenance/', label: t('nav.manual'), external: true },
 		...(page.data.adminHabilitado ? [{ href: resolve('/admin'), label: t('nav.admin') }] : [])
 	]);
 
@@ -58,6 +59,8 @@
 						href={link.href}
 						variant={page.url.pathname.startsWith(link.href) ? 'secondary' : 'ghost'}
 						size="sm"
+						target={link.external ? '_blank' : undefined}
+						rel={link.external ? 'noopener noreferrer' : undefined}
 					>
 						{link.label}
 					</Button>

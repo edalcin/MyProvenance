@@ -175,6 +175,20 @@
 		<p class="text-muted-foreground py-12 text-center text-sm">
 			{t('records.empty')}
 		</p>
+		{#if !usuarioAtual.valor}
+			<p class="-mt-8 flex flex-wrap items-center justify-center gap-2 pb-8 text-center text-sm">
+				<a href={resolve('/como-usar')} class="text-primary underline-offset-4 hover:underline"
+					>{t('records.see_howto')}</a
+				>
+				<span class="text-muted-foreground">·</span>
+				<a
+					href="https://edalcin.github.io/MyProvenance/"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-primary underline-offset-4 hover:underline">{t('records.read_manual')}</a
+				>
+			</p>
+		{/if}
 	{/if}
 
 	<ul class="flex flex-col gap-2">
