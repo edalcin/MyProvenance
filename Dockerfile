@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---------- deps (somente producao, para a imagem final) ----------
-FROM node:22-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 # better-sqlite3 compila addon nativo no install; sem prebuild musl, precisa de toolchain.
 RUN apk add --no-cache python3 make g++
@@ -9,7 +9,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 # ---------- build ----------
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
@@ -18,7 +18,7 @@ COPY . .
 RUN npm run build
 
 # ---------- runtime ----------
-FROM node:22-alpine AS runtime
+FROM node:26-alpine AS runtime
 WORKDIR /app
 # libstdc++ — dependencia de runtime do addon nativo do better-sqlite3, sem toolchain de build.
 # uid 99 / gid 100 (grupo "users", ja existente no Alpine base) = "nobody:users" padrao do
