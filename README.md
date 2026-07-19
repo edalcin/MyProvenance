@@ -103,7 +103,7 @@ docker run -d \
 7. **Apply.** O UNRAID baixa a imagem e inicia o container.
 8. Acesse via `http://<ip-do-unraid>:<porta-escolhida-no-passo-4>` — confirme a porta real com `docker port MyProvenance` se tiver dúvida (o UNRAID não obriga a manter `3000`, e recriar o container manualmente sem repetir o mesmo mapeamento troca a porta sem avisar).
 
-Backup: basta copiar o arquivo `myprovenance.sqlite` da pasta mapeada (`/mnt/user/appdata/myprovenance`), ou usar a função **Exportar JSON** de cada Registro pela própria interface.
+Backup: pela própria interface, em **Administração → Backup** (`/admin`, com `ADM_PWD` configurada) — botão **Baixar backup** gera uma cópia consistente do SQLite pra download, e **Restaurar backup** substitui todos os dados atuais pelo conteúdo de um arquivo enviado (ação em uma única conexão, sem reiniciar o container). Alternativa manual: copiar o arquivo `myprovenance.sqlite` da pasta mapeada (`/mnt/user/appdata/myprovenance`), ou usar a função **Exportar JSON** de cada Registro pela própria interface.
 
 ### Atualizando para uma imagem nova
 

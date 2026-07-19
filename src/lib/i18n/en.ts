@@ -311,6 +311,7 @@ export const en: Record<keyof typeof pt, string> = {
 	'admin.tab.users': 'Users',
 	'admin.tab.records': 'Records',
 	'admin.tab.agents': 'Agents',
+	'admin.tab.backup': 'Backup',
 	'admin.tab.shares': 'Shares',
 	'admin.owner': 'Owner',
 	'admin.search_placeholder': 'Filter…',
@@ -330,6 +331,20 @@ export const en: Record<keyof typeof pt, string> = {
 	'admin.success.agent_deleted': 'Agent deleted.',
 	'admin.success.share_updated': 'Share updated.',
 	'admin.success.share_deleted': 'Share removed.',
+	'admin.backup.download_title': 'Download backup',
+	'admin.backup.download_description': 'Downloads a full copy of the SQLite database as of now.',
+	'admin.backup.download_button': 'Download backup',
+	'admin.backup.restore_title': 'Restore backup',
+	'admin.backup.restore_description':
+		'Replaces ALL current data with the contents of the selected backup file. This action cannot be undone.',
+	'admin.backup.restore_button': 'Restore backup',
+	'admin.backup.restoring': 'Restoring…',
+	'admin.confirm.restore_backup':
+		'This will replace ALL current data (users, records, agents and shares) with the contents of the selected file. This action cannot be undone. Continue?',
+	'admin.success.backup_restored': 'Backup restored successfully.',
+	'error.backup_invalid_file': 'The selected file is not a valid SQLite database.',
+	'error.backup_corrupted': 'The backup file is corrupted (failed integrity check).',
+	'error.backup_wrong_schema': 'The uploaded file is not a MyProvenance backup.',
 	'error.invalid_admin_password': 'Invalid password.',
 	'error.admin_required': 'Administrative access required.',
 	'validation.password.required': 'Password is required.'

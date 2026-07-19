@@ -311,6 +311,7 @@ export const pt = {
 	'admin.tab.users': 'Usuários',
 	'admin.tab.records': 'Registros',
 	'admin.tab.agents': 'Agentes',
+	'admin.tab.backup': 'Backup',
 	'admin.tab.shares': 'Compartilhamentos',
 	'admin.owner': 'Dono',
 	'admin.search_placeholder': 'Filtrar…',
@@ -330,6 +331,22 @@ export const pt = {
 	'admin.success.agent_deleted': 'Agente excluído.',
 	'admin.success.share_updated': 'Compartilhamento atualizado.',
 	'admin.success.share_deleted': 'Compartilhamento removido.',
+	'admin.backup.download_title': 'Baixar backup',
+	'admin.backup.download_description':
+		'Baixa uma cópia completa do banco de dados SQLite no momento atual.',
+	'admin.backup.download_button': 'Baixar backup',
+	'admin.backup.restore_title': 'Restaurar backup',
+	'admin.backup.restore_description':
+		'Substitui TODOS os dados atuais pelo conteúdo do arquivo de backup selecionado. Esta ação não pode ser desfeita.',
+	'admin.backup.restore_button': 'Restaurar backup',
+	'admin.backup.restoring': 'Restaurando…',
+	'admin.confirm.restore_backup':
+		'Isto vai substituir TODOS os dados atuais (usuários, registros, agentes e compartilhamentos) pelo conteúdo do arquivo selecionado. Esta ação não pode ser desfeita. Continuar?',
+	'admin.success.backup_restored': 'Backup restaurado com sucesso.',
+	'error.backup_invalid_file': 'O arquivo selecionado não é um banco de dados SQLite válido.',
+	'error.backup_corrupted':
+		'O arquivo de backup está corrompido (falhou na verificação de integridade).',
+	'error.backup_wrong_schema': 'O arquivo enviado não é um backup do MyProvenance.',
 	'error.invalid_admin_password': 'Senha inválida.',
 	'error.admin_required': 'Acesso administrativo necessário.',
 	'validation.password.required': 'Informe a senha.'

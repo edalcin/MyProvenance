@@ -6,6 +6,7 @@ import {
 	AutoCompartilhamentoError,
 	UsuarioNaoEncontradoError
 } from './db/repositories/compartilhamentos';
+import { BackupInvalidoError } from './db/backup';
 
 export async function parseBody<T>(request: Request, schema: ZodType<T>): Promise<T> {
 	let corpo: unknown;
@@ -35,6 +36,7 @@ export function parsePaginationParams(url: URL): { busca?: string; offset: numbe
 export function toApiError(err: unknown): never {
 	if (err instanceof RegraCardinalidadeError) error(400, err.message);
 	if (err instanceof AutoCompartilhamentoError) error(400, err.message);
+	if (err instanceof BackupInvalidoError) error(400, err.message);
 	if (err instanceof RegistroJaFinalizadoError) error(409, err.message);
 	if (err instanceof RegistroNaoEncontradoError) error(404, err.message);
 	if (err instanceof UsuarioNaoEncontradoError) error(404, err.message);

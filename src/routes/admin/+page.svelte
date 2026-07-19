@@ -9,6 +9,7 @@
 	import AdminRegistros from '$lib/components/admin/admin-registros.svelte';
 	import AdminAgentes from '$lib/components/admin/admin-agentes.svelte';
 	import AdminCompartilhamentos from '$lib/components/admin/admin-compartilhamentos.svelte';
+	import AdminBackup from '$lib/components/admin/admin-backup.svelte';
 	import { t } from '$lib/i18n/estado.svelte';
 	import type { PageData } from './$types';
 
@@ -83,11 +84,12 @@
 		</div>
 
 		<Tabs.Root value="usuarios">
-			<Tabs.List class="grid w-full grid-cols-4">
+			<Tabs.List class="grid w-full grid-cols-5">
 				<Tabs.Trigger value="usuarios">{t('admin.tab.users')}</Tabs.Trigger>
 				<Tabs.Trigger value="registros">{t('admin.tab.records')}</Tabs.Trigger>
 				<Tabs.Trigger value="agentes">{t('admin.tab.agents')}</Tabs.Trigger>
 				<Tabs.Trigger value="compartilhamentos">{t('admin.tab.shares')}</Tabs.Trigger>
+				<Tabs.Trigger value="backup">{t('admin.tab.backup')}</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="usuarios">
 				<AdminUsuarios usuarios={data.usuarios} />
@@ -100,6 +102,9 @@
 			</Tabs.Content>
 			<Tabs.Content value="compartilhamentos">
 				<AdminCompartilhamentos compartilhamentos={data.compartilhamentos} />
+			</Tabs.Content>
+			<Tabs.Content value="backup">
+				<AdminBackup />
 			</Tabs.Content>
 		</Tabs.Root>
 	</div>

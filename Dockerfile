@@ -35,6 +35,10 @@ COPY package.json ./
 # ADM_PWD (opcional, via -e) habilita a area administrativa (/admin) — sem ela o link fica oculto.
 ENV NODE_ENV=production
 ENV PORT=3000
+# adapter-node limita o corpo da requisicao a 512K por padrao — pequeno demais pro upload do
+# arquivo de backup em Restaurar backup (area administrativa). 20M sobra de folga pro SQLite
+# (sem BLOBs no schema, cresce so com metadados) e ainda protege contra upload gigante.
+ENV BODY_SIZE_LIMIT=20M
 EXPOSE 3000
 
 USER myprovenance
