@@ -40,3 +40,7 @@ _Avoid_: Permissão, Role, Nível de acesso
 **Rascunho / Finalizado**:
 Os dois estados de um Registro de Proveniência. Rascunho: edição livre de Entidades e Atividades. Finalizado: atingido só por ação explícita do usuário (botão "Finalizar"); a partir daí o histórico existente é imutável, só é possível adicionar novas Entidades/Atividades. Exportar o JSON não finaliza (ADR-0010) — serve de backup/arquivo portátil, inclusive para quem usa sem Conta.
 _Avoid_: Publicado, Bloqueado, Travado
+
+**Área administrativa**:
+Painel global (`/admin`, docs/especificacao.md §9), protegido por uma senha única de instância (`ADM_PWD`) — não é o mesmo conceito que o papel **Administrador** de um Registro (esse é por Conta, escopado a um único Registro compartilhado; a Área administrativa enxerga/edita todas as Contas, Registros, Agentes e compartilhamentos do servidor, mais backup/restauração do SQLite inteiro).
+_Avoid_: Admin (ambíguo com o papel de acesso — sempre escrever "Área administrativa" por extenso na documentação)
