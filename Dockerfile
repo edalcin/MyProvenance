@@ -23,8 +23,14 @@ WORKDIR /app
 # libstdc++ — dependencia de runtime do addon nativo do better-sqlite3, sem toolchain de build.
 # uid 99 / gid 100 (grupo "users", ja existente no Alpine base) = "nobody:users" padrao do
 # UNRAID — volumes criados pela interface (Storage/appsdata) usam esse dono por default.
+# npm/npx/corepack nunca rodam no runtime (CMD e' "node build/index.js" direto) mas o node:alpine
+# base vem com eles instalados; suas dependencias vendorizadas (tar, sigstore, picomatch...) sao
+# a origem de todos os alertas do code scanning (Trivy) — removidos: nao sao superficie de ataque
+# real desta imagem, so ruido no scan e peso morto.
 RUN apk add --no-cache libstdc++ && \
-    adduser -S -D -H -u 99 -G users myprovenance
+    adduser -S -D -H -u 99 -G users myprovenance && \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/build ./build
