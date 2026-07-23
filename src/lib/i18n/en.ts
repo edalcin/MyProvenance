@@ -259,6 +259,7 @@ export const en: Record<keyof typeof pt, string> = {
 	'activities.relation.revision': 'Revision',
 	'activities.revision_of_label': 'Revision of',
 	'activities.revision_source_placeholder': 'Select input entity…',
+	'activities.same_name_as_source': 'Same name as the revised Entity',
 	// Agentes
 	'agents.singular': 'Agent',
 	'agents.page_title': 'Agents — MyProvenance',

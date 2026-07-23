@@ -74,6 +74,8 @@
 		licenca: string;
 		tipoRelacaoOrigem: '' | 'derivacao' | 'revisao';
 		revisaoDeId: string;
+		/** UI apenas: trava o Nome = nome da Entidade revisada (revisaoDeId) enquanto marcado. Nao persistido. */
+		mesmoNomeQueOrigem: boolean;
 	}
 
 	function entidadeGeradaVazia(): EntidadeGeradaForm {
@@ -84,7 +86,8 @@
 			localizacao: '',
 			licenca: '',
 			tipoRelacaoOrigem: '',
-			revisaoDeId: ''
+			revisaoDeId: '',
+			mesmoNomeQueOrigem: false
 		};
 	}
 
@@ -119,7 +122,11 @@
 							localizacao: e.localizacao ?? '',
 							licenca: e.licenca ?? '',
 							tipoRelacaoOrigem: e.tipoRelacaoOrigem ?? '',
-							revisaoDeId: e.revisaoDeId ?? ''
+							revisaoDeId: e.revisaoDeId ?? '',
+							mesmoNomeQueOrigem:
+								e.tipoRelacaoOrigem === 'revisao' &&
+								!!e.revisaoDeId &&
+								e.nome === entidadesDisponiveis.find((x) => x.id === e.revisaoDeId)?.nome
 						}))
 				: entidadesGeradasIniciais()
 		};
@@ -170,7 +177,7 @@
 		entidadesUsadas = marcado ? [...entidadesUsadas, id] : entidadesUsadas.filter((e) => e !== id);
 		if (!marcado)
 			entidadesGeradas = entidadesGeradas.map((e) =>
-				e.revisaoDeId === id ? { ...e, revisaoDeId: '' } : e
+				e.revisaoDeId === id ? { ...e, revisaoDeId: '', mesmoNomeQueOrigem: false } : e
 			);
 	}
 
@@ -179,10 +186,21 @@
 		if (!fonteId) return;
 		const fonte = entidadesDisponiveis.find((e) => e.id === fonteId);
 		if (!fonte) return;
-		if (!entidadeGerada.nome.trim()) entidadeGerada.nome = fonte.nome;
+		if (entidadeGerada.mesmoNomeQueOrigem) entidadeGerada.nome = fonte.nome;
+		else if (!entidadeGerada.nome.trim()) entidadeGerada.nome = fonte.nome;
 		if (!entidadeGerada.formato.trim()) entidadeGerada.formato = fonte.formato ?? '';
 		if (!entidadeGerada.localizacao.trim()) entidadeGerada.localizacao = fonte.localizacao ?? '';
 		if (!entidadeGerada.licenca.trim()) entidadeGerada.licenca = fonte.licenca ?? '';
+	}
+
+	/** Marca/desmarca o vinculo de nome com a Entidade revisada. Ao marcar, copia o nome da fonte;
+	 * fonte inexistente nao trava (mantem desmarcado). O Input fica readonly enquanto marcado. */
+	function alternarMesmoNome(entidadeGerada: EntidadeGeradaForm, marcado: boolean) {
+		entidadeGerada.mesmoNomeQueOrigem = marcado;
+		if (!marcado) return;
+		const fonte = entidadesDisponiveis.find((e) => e.id === entidadeGerada.revisaoDeId);
+		if (fonte) entidadeGerada.nome = fonte.nome;
+		else entidadeGerada.mesmoNomeQueOrigem = false;
 	}
 
 	function adicionarEntidadeGerada() {
@@ -420,7 +438,17 @@
 						bind:value={entidadeGerada.nome}
 						required
 						maxlength={300}
+						readonly={entidadeGerada.mesmoNomeQueOrigem}
 					/>
+					{#if entidadeGerada.tipoRelacaoOrigem === 'revisao' && entidadeGerada.revisaoDeId}
+						<label class="flex items-center gap-2 text-sm">
+							<Checkbox
+								checked={entidadeGerada.mesmoNomeQueOrigem}
+								onCheckedChange={(marcado) => alternarMesmoNome(entidadeGerada, marcado === true)}
+							/>
+							{t('activities.same_name_as_source')}
+						</label>
+					{/if}
 				</div>
 				<div class="grid grid-cols-2 gap-4">
 					<div class="flex flex-col gap-1.5">
@@ -459,7 +487,16 @@
 				{#if entidadesUsadas.length > 0}
 					<div class="flex flex-col gap-1.5">
 						<Label for="relacao-{tipo}-{indice}">{t('activities.relation_label')}</Label>
-						<Select.Root type="single" bind:value={entidadeGerada.tipoRelacaoOrigem}>
+						<Select.Root
+							type="single"
+							bind:value={entidadeGerada.tipoRelacaoOrigem}
+							onValueChange={(v) => {
+								if (v !== 'revisao') {
+									entidadeGerada.revisaoDeId = '';
+									entidadeGerada.mesmoNomeQueOrigem = false;
+								}
+							}}
+						>
 							<Select.Trigger id="relacao-{tipo}-{indice}">
 								{entidadeGerada.tipoRelacaoOrigem
 									? t('activities.relation.' + entidadeGerada.tipoRelacaoOrigem)

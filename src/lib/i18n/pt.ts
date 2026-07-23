@@ -259,6 +259,7 @@ export const pt = {
 	'activities.relation.revision': 'Revisão',
 	'activities.revision_of_label': 'Revisão de',
 	'activities.revision_source_placeholder': 'Selecionar Entidade de entrada…',
+	'activities.same_name_as_source': 'Mesmo nome da Entidade revisada',
 	// Agentes
 	'agents.singular': 'Agente',
 	'agents.page_title': 'Agentes — MyProvenance',
