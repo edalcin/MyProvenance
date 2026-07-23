@@ -605,6 +605,7 @@
 									tipo="criacao"
 									registroId={registro.id}
 									entidadesDisponiveis={entidades}
+									{atividades}
 									agentesDoRegistro={agentesEnvolvidos}
 									onCriada={aoAtividadeCriada}
 								/>
@@ -614,6 +615,7 @@
 									tipo="transformacao"
 									registroId={registro.id}
 									entidadesDisponiveis={entidades}
+									{atividades}
 									agentesDoRegistro={agentesEnvolvidos}
 									onCriada={aoAtividadeCriada}
 								/>
@@ -623,6 +625,7 @@
 									tipo="analise"
 									registroId={registro.id}
 									entidadesDisponiveis={entidades}
+									{atividades}
 									agentesDoRegistro={agentesEnvolvidos}
 									onCriada={aoAtividadeCriada}
 								/>
@@ -719,6 +722,7 @@
 							tipo={atividadeEmEdicao.tipo}
 							registroId={registro.id}
 							entidadesDisponiveis={entidades}
+							{atividades}
 							agentesDoRegistro={agentesEnvolvidos}
 							atividadeParaEditar={atividadeEmEdicao}
 							agenteAtual={agentesEnvolvidos.find((a) => a.id === atividadeEmEdicao!.agenteId) ??

@@ -11,12 +11,14 @@
 	import DynamicPairList from '$lib/components/dynamic-pair-list.svelte';
 	import type { Agente, Atividade, Entidade, TipoAtividade } from '$lib/types';
 	import * as dados from '$lib/client/dados';
-	import { t, msgErro } from '$lib/i18n/estado.svelte';
+	import { t, idiomaAtual, msgErro } from '$lib/i18n/estado.svelte';
+	import { formatarDataSemHora } from '$lib/format';
 
 	let {
 		tipo,
 		registroId,
 		entidadesDisponiveis,
+		atividades = [],
 		atividadeParaEditar = null,
 		agenteAtual = null,
 		agentesDoRegistro = [],
@@ -27,6 +29,9 @@
 		tipo: TipoAtividade;
 		registroId: string;
 		entidadesDisponiveis: Entidade[];
+		/** Todas as Atividades do Registro — usado so para rotular a origem (tipo + data) de cada
+		 * Entidade nas listas de selecao, distinguindo Entidades revisadas com o mesmo nome. */
+		atividades?: Atividade[];
 		/** Presente = formulario em modo edicao (so Registro Rascunho, ADR-0003) — tipo nao muda. */
 		atividadeParaEditar?: Atividade | null;
 		agenteAtual?: Agente | null;
@@ -173,6 +178,24 @@
 			: entidadesDisponiveis
 	);
 
+	/** Rotulo "Tipo, data" da Atividade que gerou a Entidade — distingue Entidades com o mesmo nome
+	 * (ex.: revisoes sucessivas) nas listas de selecao. Vazio se a Atividade de origem nao estiver
+	 * carregada. */
+	function origemEntidade(entidade: Entidade): string {
+		const origem = atividades.find((a) => a.id === entidade.geradaPorAtividadeId);
+		if (!origem) return '';
+		return `${t('activity.type.' + origem.tipo)}, ${formatarDataSemHora(origem.dataHora, idiomaAtual.valor)}`;
+	}
+
+	/** "Nome (Tipo, data)" por id — usado no seletor `Revisao de` para distinguir Entidades
+	 * homonimas (ex.: duas revisoes com o mesmo nome de arquivo). */
+	function rotuloEntidade(id: string): string {
+		const entidade = entidadesDisponiveis.find((e) => e.id === id);
+		if (!entidade) return id;
+		const origem = origemEntidade(entidade);
+		return origem ? `${entidade.nome} (${origem})` : entidade.nome;
+	}
+
 	function alternarEntidade(id: string, marcado: boolean) {
 		entidadesUsadas = marcado ? [...entidadesUsadas, id] : entidadesUsadas.filter((e) => e !== id);
 		if (!marcado)
@@ -301,7 +324,7 @@
 			<AgentPicker
 				bind:value={agenteId}
 				inicial={agenteAtual}
-				agentesDoRegistro={agentesDoRegistro}
+				{agentesDoRegistro}
 				onAgente={(a) => (agenteSelecionado = a)}
 			/>
 		</div>
@@ -333,9 +356,7 @@
 				{t('activities.no_entities_available')}
 			</p>
 		{:else}
-			<div
-				class="border-input flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3"
-			>
+			<div class="border-input flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3">
 				{#each entidadesParaUsar as entidade (entidade.id)}
 					<label class="flex items-center gap-2 text-sm">
 						<Checkbox
@@ -344,6 +365,9 @@
 						/>
 						{entidade.nome}
 						{#if entidade.formato}<span class="text-muted-foreground">({entidade.formato})</span
+							>{/if}
+						{#if origemEntidade(entidade)}<span class="text-muted-foreground text-xs"
+								>— {origemEntidade(entidade)}</span
 							>{/if}
 					</label>
 				{/each}
@@ -521,16 +545,12 @@
 							>
 								<Select.Trigger id="revisaoDe-{tipo}-{indice}">
 									{entidadeGerada.revisaoDeId
-										? (entidadesDisponiveis.find((e) => e.id === entidadeGerada.revisaoDeId)
-												?.nome ?? entidadeGerada.revisaoDeId)
+										? rotuloEntidade(entidadeGerada.revisaoDeId)
 										: t('activities.revision_source_placeholder')}
 								</Select.Trigger>
 								<Select.Content>
 									{#each entidadesUsadas as usadaId (usadaId)}
-										<Select.Item
-											value={usadaId}
-											label={entidadesDisponiveis.find((e) => e.id === usadaId)?.nome ?? usadaId}
-										/>
+										<Select.Item value={usadaId} label={rotuloEntidade(usadaId)} />
 									{/each}
 								</Select.Content>
 							</Select.Root>

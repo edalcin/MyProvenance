@@ -16,7 +16,7 @@ Toda vez que um novo dado entra na linhagem (Criação) ou um dado existente é 
 2. Escolha o tipo na aba: `Criação`, `Transformação` ou `Análise`.
 3. Selecione o `Agente` responsável — o campo tem busca com autocomplete; se o Agente não existir ainda, digite o nome e clique em `Criar "<nome>"` para cadastrá-lo sem sair do formulário.
 4. Preencha `Data` e `Descrição`.
-5. Marque as `Entidades usadas` (Transformação/Análise: obrigatório, 1 ou mais; Criação: opcional — deixe vazio quando o dado é a origem da linhagem, ou marque Entidades existentes se a Criação também partiu de alguma).
+5. Marque as `Entidades usadas` (Transformação/Análise: obrigatório, 1 ou mais; Criação: opcional — deixe vazio quando o dado é a origem da linhagem, ou marque Entidades existentes se a Criação também partiu de alguma). Cada Entidade na lista mostra entre parênteses o tipo e a data da Atividade que a gerou — use essa informação para diferenciar Entidades com o mesmo nome (ex.: revisões sucessivas do mesmo arquivo). O seletor `Revisão de` (passo 8) mostra a mesma informação.
 6. Campos específicos por tipo:
     - **Criação**: `Local` e `Ferramenta ou Software` (de onde e com o quê o dado foi originado).
     - **Transformação/Análise**: `Processo` (o que foi feito), parâmetros (`Chave`/`Valor`) e `Ambiente de execução — sistema operacional`.
