@@ -498,9 +498,11 @@
 							}}
 						>
 							<Select.Trigger id="relacao-{tipo}-{indice}">
-								{entidadeGerada.tipoRelacaoOrigem
-									? t('activities.relation.' + entidadeGerada.tipoRelacaoOrigem)
-									: t('activities.relation.none')}
+								{entidadeGerada.tipoRelacaoOrigem === 'revisao'
+									? t('activities.relation.revision')
+									: entidadeGerada.tipoRelacaoOrigem === 'derivacao'
+										? t('activities.relation.derivation')
+										: t('activities.relation.none')}
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="" label={t('activities.relation.none')} />

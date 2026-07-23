@@ -21,7 +21,8 @@ Toda vez que um novo dado entra na linhagem (Criação) ou um dado existente é 
    - **Transformação/Análise**: marque as `Entidades usadas`; preencha `Processo` (o que foi feito), parâmetros (`Chave`/`Valor`) e `Ambiente de execução — sistema operacional`.
 6. Em `Entidades geradas`, clique em `Adicionar Entidade gerada` para cada saída, preenchendo `Nome`, `Formato`, `Licença`, `Localização` e `Descrição`.
 7. Para cada Entidade gerada por Transformação/Análise, escolha a `Relação com a origem`: `Nenhuma`, `Derivação` ou `Revisão` (esta última pede `Revisão de`, apontando para qual Entidade usada ela substitui).
-8. Clique em `Adicionar Atividade` para salvar.
+8. Quando a Relação é `Revisão` e a Entidade revisada já foi escolhida em `Revisão de`, aparece o checkbox `Mesmo nome da Entidade revisada` ao lado do campo `Nome` — marque para copiar o nome da Entidade revisada e travar o campo (somente leitura) enquanto ativo; desmarque para voltar a digitar um nome diferente.
+9. Clique em `Adicionar Atividade` para salvar.
 
 ## Cardinalidade por tipo
 
@@ -43,12 +44,17 @@ Toda vez que um novo dado entra na linhagem (Criação) ou um dado existente é 
 <!-- SCREENSHOT: adicione a imagem em manual/img/02-form-analise.png -->
 ![Formulário de Análise usando Entidades existentes](img/02-form-analise.png)
 
+<!-- SCREENSHOT: adicione a imagem em manual/img/02-checkbox-mesmo-nome.png -->
+![Checkbox "Mesmo nome da Entidade revisada" travando o campo Nome](img/02-checkbox-mesmo-nome.png)
+
 <!-- SCREENSHOT: adicione a imagem em manual/img/02-seletor-agente.png -->
 ![Seletor de Agente com autocomplete e opção de criar novo](img/02-seletor-agente.png)
 
 > 🔗 **Padrão:** a Atividade é um `prov:Activity`; usar uma Entidade existente é `prov:used`; gerar uma nova é `prov:wasGeneratedBy`; o Agente responsável é `prov:wasAssociatedWith`. `Derivação` mapeia para `prov:wasDerivedFrom`, `Revisão` para `prov:wasRevisionOf`.
 
 > 💡 **Dica:** mais de uma Entidade pode ser gerada pela mesma Atividade — útil quando um único processo produz vários arquivos de saída (ex.: uma tabela e um gráfico).
+
+> 💡 **Dica:** use `Mesmo nome da Entidade revisada` quando a Transformação altera o arquivo no lugar (mesmo nome, conteúdo novo) — evita digitar o nome de novo e mantém Nome e `Revisão de` sempre em sincronia; se depois trocar a Entidade revisada com o checkbox marcado, o Nome acompanha automaticamente.
 
 > ⚠️ **Atenção:** depois que o Registro é finalizado, Atividades existentes não podem mais ser editadas ou excluídas — só novas Atividades podem ser adicionadas. Ver [Finalizar](04-finalizar.md).
 
