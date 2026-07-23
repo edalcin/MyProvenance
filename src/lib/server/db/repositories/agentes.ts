@@ -4,19 +4,23 @@ import type { Agente, TipoAgente } from '$lib/types';
 
 interface AgenteRow {
 	id: string;
+	usuario_id: string | null;
 	nome: string;
 	tipo: TipoAgente;
 	afiliacao: string | null;
 	identificador_externo: string | null;
 }
 
-function mapRow(row: AgenteRow): Agente {
+function mapRow(row: AgenteRow, viewerUsuarioId?: string): Agente {
 	return {
 		id: row.id,
 		nome: row.nome,
 		tipo: row.tipo,
 		afiliacao: row.afiliacao,
-		identificadorExterno: row.identificador_externo
+		identificadorExterno: row.identificador_externo,
+		...(viewerUsuarioId !== undefined
+			? { deOutraConta: row.usuario_id !== viewerUsuarioId }
+			: {})
 	};
 }
 
@@ -47,7 +51,10 @@ export function listarAgentes(
 					.all({ usuarioId, limit: limit + 1, offset })
 	) as AgenteRow[];
 	const hasMore = rows.length > limit;
-	return { items: rows.slice(0, limit).map(mapRow), nextOffset: hasMore ? offset + limit : null };
+	return {
+		items: rows.slice(0, limit).map((row) => mapRow(row)),
+		nextOffset: hasMore ? offset + limit : null
+	};
 }
 
 export function obterAgente(id: string, usuarioId: string): Agente | null {
@@ -58,14 +65,15 @@ export function obterAgente(id: string, usuarioId: string): Agente | null {
 }
 
 /**
- * Sem escopo de conta — usada so por obterRegistroDetalhado ao resolver agentesEnvolvidos de um
- * Registro (o acesso ao Registro ja foi validado; num Registro compartilhado, Atividades de
- * coeditores diferentes referenciam Agentes de contas diferentes).
+ * Sem escopo de conta na busca — usada so por obterRegistroDetalhado ao resolver agentesEnvolvidos
+ * de um Registro (o acesso ao Registro ja foi validado; num Registro compartilhado, Atividades de
+ * coeditores diferentes referenciam Agentes de contas diferentes). `viewerUsuarioId`, quando
+ * informado, computa `deOutraConta` comparando com o dono real do Agente.
  */
-export function obterAgentePorId(id: string): Agente | null {
+export function obterAgentePorId(id: string, viewerUsuarioId?: string): Agente | null {
 	const row = db.prepare('SELECT * FROM agentes WHERE id = @id').get({ id }) as
 		AgenteRow | undefined;
-	return row ? mapRow(row) : null;
+	return row ? mapRow(row, viewerUsuarioId) : null;
 }
 
 export interface AgenteInput {

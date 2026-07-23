@@ -212,7 +212,7 @@ export function obterRegistroDetalhado(id: string, usuarioId: string): RegistroD
 	// Sem filtro por conta: num Registro compartilhado, Atividades de coeditores diferentes
 	// referenciam Agentes de contas diferentes — o acesso ja foi validado no nivel do Registro acima.
 	const agentesEnvolvidos = [...idsAgentes]
-		.map((agenteId) => obterAgentePorId(agenteId))
+		.map((agenteId) => obterAgentePorId(agenteId, usuarioId))
 		.filter((a): a is Agente => a !== null);
 	return { registro, entidades, atividades, agentesEnvolvidos };
 }

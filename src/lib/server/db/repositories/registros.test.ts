@@ -6,9 +6,13 @@ import {
 	criarRegistro,
 	desativarCompartilhamento,
 	finalizarRegistro,
+	obterRegistroDetalhado,
 	obterRegistroDetalhadoPorToken,
 	RegistroNaoEncontradoError
 } from './registros';
+import { compartilharComUsuario } from './compartilhamentos';
+import { criarAgente } from './agentes';
+import { criarAtividade } from './atividades';
 import { criarUsuario } from './usuarios';
 
 // ponytail: DB_PATH=':memory:' injetado por vite.config.ts (test.env) — sem framework extra.
@@ -109,5 +113,41 @@ describe('compartilhamento publico (ativar/desativar/ler por token)', () => {
 		expect(() => desativarCompartilhamento(registro.id, outroUsuarioId)).toThrow(
 			RegistroNaoEncontradoError
 		);
+	});
+});
+
+describe('deOutraConta em agentesEnvolvidos (Registro compartilhado)', () => {
+	it('sinaliza Agentes do outro coeditor, mas nao os proprios, na visao de cada usuario', () => {
+		const dono = criarUsuario({ username: 'dono_agentes_registro', pin: '123456' }).id;
+		const editor = criarUsuario({ username: 'editor_agentes_registro', pin: '654321' }).id;
+		const registro = criarRegistro(dono, { titulo: 'Registro com dois coeditores' });
+		compartilharComUsuario(registro.id, dono, { username: 'editor_agentes_registro', papel: 'editor' });
+
+		const agenteDono = criarAgente(dono, { nome: 'Agente do Dono', tipo: 'pessoa' });
+		const agenteEditor = criarAgente(editor, { nome: 'Agente do Editor', tipo: 'pessoa' });
+		criarAtividade(dono, registro.id, {
+			tipo: 'criacao',
+			agenteId: agenteDono.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'dado.csv' }]
+		});
+		criarAtividade(editor, registro.id, {
+			tipo: 'criacao',
+			agenteId: agenteEditor.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'outro.csv' }]
+		});
+
+		const visaoDono = obterRegistroDetalhado(registro.id, dono)!;
+		const porIdDono = new Map(visaoDono.agentesEnvolvidos.map((a) => [a.id, a]));
+		expect(porIdDono.get(agenteDono.id)?.deOutraConta).toBe(false);
+		expect(porIdDono.get(agenteEditor.id)?.deOutraConta).toBe(true);
+
+		const visaoEditor = obterRegistroDetalhado(registro.id, editor)!;
+		const porIdEditor = new Map(visaoEditor.agentesEnvolvidos.map((a) => [a.id, a]));
+		expect(porIdEditor.get(agenteEditor.id)?.deOutraConta).toBe(false);
+		expect(porIdEditor.get(agenteDono.id)?.deOutraConta).toBe(true);
 	});
 });

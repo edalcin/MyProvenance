@@ -4,6 +4,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
 	import { Button } from '$lib/components/ui/button';
+	import { Badge } from '$lib/components/ui/badge';
 	import * as dados from '$lib/client/dados';
 	import type { Agente } from '$lib/types';
 	import { t, msgErro } from '$lib/i18n/estado.svelte';
@@ -96,6 +97,9 @@
 				{#each resultados as agente (agente.id)}
 					<Command.Item onSelect={() => escolher(agente)}>
 						{agente.nome}
+						{#if agente.deOutraConta}
+							<Badge variant="secondary">{t('agents.shared_badge')}</Badge>
+						{/if}
 						<span class="text-muted-foreground ml-auto text-xs"
 							>{t('agent.type.' + agente.tipo)}</span
 						>

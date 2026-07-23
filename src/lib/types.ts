@@ -14,6 +14,9 @@ export interface Agente {
 	tipo: TipoAgente;
 	afiliacao: string | null;
 	identificadorExterno: string | null;
+	/** true quando este Agente pertence a outra Conta que nao a de quem esta lendo — so calculado em
+	 * agentesEnvolvidos de RegistroDetalhado (Registro compartilhado); undefined no catalogo proprio. */
+	deOutraConta?: boolean;
 }
 
 export interface Usuario {

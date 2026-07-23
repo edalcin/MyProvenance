@@ -278,6 +278,7 @@ export const en: Record<keyof typeof pt, string> = {
 	'agents.picker_search_placeholder': 'Search agent…',
 	'agents.picker_empty': 'No agent found.',
 	'agents.picker_create': 'Create "{nome}"',
+	'agents.shared_badge': 'From another account',
 	// Conta (entrar/criar conta/banner anonimo)
 	'account.create_button': 'Create account',
 	'account.create_description':

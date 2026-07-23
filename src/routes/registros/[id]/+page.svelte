@@ -782,7 +782,12 @@
 					<Table.Body>
 						{#each agentesEnvolvidos as agente (agente.id)}
 							<Table.Row>
-								<Table.Cell>{agente.nome}</Table.Cell>
+								<Table.Cell>
+									{agente.nome}
+									{#if agente.deOutraConta}
+										<Badge variant="secondary" class="ml-2">{t('agents.shared_badge')}</Badge>
+									{/if}
+								</Table.Cell>
 								<Table.Cell>{t('agent.type.' + agente.tipo)}</Table.Cell>
 								<Table.Cell>{agente.afiliacao ?? '—'}</Table.Cell>
 							</Table.Row>
