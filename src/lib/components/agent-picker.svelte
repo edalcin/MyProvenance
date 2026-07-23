@@ -98,7 +98,9 @@
 					<Command.Item onSelect={() => escolher(agente)}>
 						{agente.nome}
 						{#if agente.deOutraConta}
-							<Badge variant="secondary">{t('agents.shared_badge')}</Badge>
+							<Badge variant="secondary"
+								>{t('agents.shared_badge', { usuario: agente.donoUsername ?? '?' })}</Badge
+							>
 						{/if}
 						<span class="text-muted-foreground ml-auto text-xs"
 							>{t('agent.type.' + agente.tipo)}</span

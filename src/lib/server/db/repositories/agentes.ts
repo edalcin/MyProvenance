@@ -9,9 +9,12 @@ interface AgenteRow {
 	tipo: TipoAgente;
 	afiliacao: string | null;
 	identificador_externo: string | null;
+	/** so presente quando a query faz JOIN com usuarios (obterAgentePorId). */
+	dono_username?: string | null;
 }
 
 function mapRow(row: AgenteRow, viewerUsuarioId?: string): Agente {
+	const deOutraConta = viewerUsuarioId !== undefined && row.usuario_id !== viewerUsuarioId;
 	return {
 		id: row.id,
 		nome: row.nome,
@@ -19,7 +22,7 @@ function mapRow(row: AgenteRow, viewerUsuarioId?: string): Agente {
 		afiliacao: row.afiliacao,
 		identificadorExterno: row.identificador_externo,
 		...(viewerUsuarioId !== undefined
-			? { deOutraConta: row.usuario_id !== viewerUsuarioId }
+			? { deOutraConta, donoUsername: deOutraConta ? (row.dono_username ?? null) : null }
 			: {})
 	};
 }
@@ -71,8 +74,12 @@ export function obterAgente(id: string, usuarioId: string): Agente | null {
  * informado, computa `deOutraConta` comparando com o dono real do Agente.
  */
 export function obterAgentePorId(id: string, viewerUsuarioId?: string): Agente | null {
-	const row = db.prepare('SELECT * FROM agentes WHERE id = @id').get({ id }) as
-		AgenteRow | undefined;
+	const row = db
+		.prepare(
+			`SELECT a.*, u.username AS dono_username FROM agentes a
+			 LEFT JOIN usuarios u ON u.id = a.usuario_id WHERE a.id = @id`
+		)
+		.get({ id }) as AgenteRow | undefined;
 	return row ? mapRow(row, viewerUsuarioId) : null;
 }
 

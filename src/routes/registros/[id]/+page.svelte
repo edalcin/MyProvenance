@@ -785,7 +785,9 @@
 								<Table.Cell>
 									{agente.nome}
 									{#if agente.deOutraConta}
-										<Badge variant="secondary" class="ml-2">{t('agents.shared_badge')}</Badge>
+										<Badge variant="secondary" class="ml-2"
+											>{t('agents.shared_badge', { usuario: agente.donoUsername ?? '?' })}</Badge
+										>
 									{/if}
 								</Table.Cell>
 								<Table.Cell>{t('agent.type.' + agente.tipo)}</Table.Cell>

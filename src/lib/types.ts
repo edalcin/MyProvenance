@@ -17,6 +17,8 @@ export interface Agente {
 	/** true quando este Agente pertence a outra Conta que nao a de quem esta lendo — so calculado em
 	 * agentesEnvolvidos de RegistroDetalhado (Registro compartilhado); undefined no catalogo proprio. */
 	deOutraConta?: boolean;
+	/** username do dono real do Agente — so preenchido quando deOutraConta e' true. */
+	donoUsername?: string | null;
 }
 
 export interface Usuario {

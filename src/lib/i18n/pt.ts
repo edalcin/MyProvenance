@@ -279,7 +279,7 @@ export const pt = {
 	'agents.picker_search_placeholder': 'Buscar Agente…',
 	'agents.picker_empty': 'Nenhum Agente encontrado.',
 	'agents.picker_create': 'Criar "{nome}"',
-	'agents.shared_badge': 'De outra Conta',
+	'agents.shared_badge': 'De {usuario}',
 	// Conta (entrar/criar conta/banner anonimo)
 	'account.create_button': 'Criar conta',
 	'account.create_description':

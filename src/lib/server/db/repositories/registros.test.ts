@@ -143,11 +143,15 @@ describe('deOutraConta em agentesEnvolvidos (Registro compartilhado)', () => {
 		const visaoDono = obterRegistroDetalhado(registro.id, dono)!;
 		const porIdDono = new Map(visaoDono.agentesEnvolvidos.map((a) => [a.id, a]));
 		expect(porIdDono.get(agenteDono.id)?.deOutraConta).toBe(false);
+		expect(porIdDono.get(agenteDono.id)?.donoUsername).toBeFalsy();
 		expect(porIdDono.get(agenteEditor.id)?.deOutraConta).toBe(true);
+		expect(porIdDono.get(agenteEditor.id)?.donoUsername).toBe('editor_agentes_registro');
 
 		const visaoEditor = obterRegistroDetalhado(registro.id, editor)!;
 		const porIdEditor = new Map(visaoEditor.agentesEnvolvidos.map((a) => [a.id, a]));
 		expect(porIdEditor.get(agenteEditor.id)?.deOutraConta).toBe(false);
+		expect(porIdEditor.get(agenteEditor.id)?.donoUsername).toBeFalsy();
 		expect(porIdEditor.get(agenteDono.id)?.deOutraConta).toBe(true);
+		expect(porIdEditor.get(agenteDono.id)?.donoUsername).toBe('dono_agentes_registro');
 	});
 });
