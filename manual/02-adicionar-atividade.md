@@ -17,8 +17,8 @@ Toda vez que um novo dado entra na linhagem (Criação) ou um dado existente é 
 3. Selecione o `Agente` responsável — o campo tem busca com autocomplete; se o Agente não existir ainda, digite o nome e clique em `Criar "<nome>"` para cadastrá-lo sem sair do formulário.
 4. Preencha `Data` e `Descrição`.
 5. Campos específicos por tipo:
-   - **Criação**: `Local` e `Ferramenta ou Software` (de onde e com o quê o dado foi originado).
-   - **Transformação/Análise**: marque as `Entidades usadas`; preencha `Processo` (o que foi feito), parâmetros (`Chave`/`Valor`) e `Ambiente de execução — sistema operacional`.
+    - **Criação**: `Local` e `Ferramenta ou Software` (de onde e com o quê o dado foi originado).
+    - **Transformação/Análise**: marque as `Entidades usadas`; preencha `Processo` (o que foi feito), parâmetros (`Chave`/`Valor`) e `Ambiente de execução — sistema operacional`.
 6. Em `Entidades geradas`, clique em `Adicionar Entidade gerada` para cada saída, preenchendo `Nome`, `Formato`, `Licença`, `Localização` e `Descrição`.
 7. Para cada Entidade gerada por Transformação/Análise, escolha a `Relação com a origem`: `Nenhuma`, `Derivação` ou `Revisão` (esta última pede `Revisão de`, apontando para qual Entidade usada ela substitui).
 8. Quando a Relação é `Revisão` e a Entidade revisada já foi escolhida em `Revisão de`, aparece o checkbox `Mesmo nome da Entidade revisada` ao lado do campo `Nome` — marque para copiar o nome da Entidade revisada e travar o campo (somente leitura) enquanto ativo; desmarque para voltar a digitar um nome diferente.
