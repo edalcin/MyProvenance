@@ -51,7 +51,7 @@ Campos comuns a todos os tipos:
 | `agenteId`         | UUIDv7                                          | sim         | FK para **Agente**                            |
 | `dataHora`         | datetime                                        | sim         |                                               |
 | `descricao`        | texto                                           | não         | descrição livre do que aconteceu              |
-| `entidadesUsadas`  | lista de UUIDv7                                 | condicional | vazio em Criação; 1+ em Transformação/Análise |
+| `entidadesUsadas`  | lista de UUIDv7                                 | condicional | 0+ em Criação (opcional); 1+ em Transformação/Análise |
 | `entidadesGeradas` | lista de UUIDv7                                 | condicional | 1+ em Criação/Transformação; 0+ em Análise    |
 
 Campos por tipo:
