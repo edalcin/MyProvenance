@@ -260,6 +260,43 @@ export const en: Record<keyof typeof pt, string> = {
 	'activities.revision_of_label': 'Revision of',
 	'activities.revision_source_placeholder': 'Select input entity…',
 	'activities.same_name_as_source': 'Same name as the revised Entity',
+	// Field hints (tooltip "?")
+	'activities.hint.agent':
+		'Who or what carried out this Activity — Person, Institution or Software. E.g., "Camila Dantas" or "OpenRefine 3.7".',
+	'activities.hint.date':
+		"When the Activity actually happened, not when you're filling out the form. E.g., the date of the field collection.",
+	'activities.hint.description_activity':
+		'The process itself — what was done in this Activity. Different from the generated Entity\'s Description, which describes the result. E.g., "Standardized common names and removed duplicates in the raw spreadsheet".',
+	'activities.hint.entities_used':
+		'Which existing Entities served as input for this Activity. E.g., the original raw spreadsheet, when recording the Transformation that cleans it.',
+	'activities.hint.location':
+		'Where the data originated — coordinates, physical location, or platform. E.g., "-22.9068,-43.1729" or "Golden Trail, Tijuca National Park".',
+	'activities.hint.tool':
+		'Instrument, sensor, or software used to capture the data. E.g., "Garmin 64s GPS" or "ODK Collect form".',
+	'activities.hint.process':
+		'The steps, script, or algorithm applied, described reproducibly. E.g., "R script clean_data.R: removes duplicates and converts dates to ISO 8601".',
+	'activities.hint.params':
+		'Settings used in the process, as key/value pairs. E.g., key "threshold", value "0.05".',
+	'activities.hint.os':
+		'Operating system the process ran on. E.g., "Ubuntu 22.04" or "Windows 11".',
+	'activities.hint.packages':
+		'Software libraries or packages used in the process, with version. E.g., name "pandas", version "2.2.0".',
+	'activities.hint.entities_generated':
+		'The Entities — files, tables, or results — produced by this Activity.',
+	'activities.hint.entity_name':
+		'Name of the generated file or artifact. E.g., "darwincore_occurrences.csv".',
+	'activities.hint.format': 'Format of the generated file. E.g., CSV, XLSX, GeoTIFF, Shapefile.',
+	'activities.hint.license': 'Usage license for the data, if any. E.g., "CC-BY 4.0".',
+	'activities.hint.entity_location':
+		'Where the actual file is stored, outside this tool — URL or path. E.g., "https://drive.google.com/..." or "/data/field/2026/occurrences.csv".',
+	'activities.hint.description_entity':
+		'What this specific artifact is or contains — metadata about the data, not about the process that generated it. Different from the Activity\'s Description. E.g., "Table with 1,240 records, columns: species, date, coordinates".',
+	'activities.hint.relation':
+		'How this Entity relates to the used Entities: Derivation (born from the inputs, new identity, e.g., a filtered subset) or Revision (new version of the same input Entity, e.g., fixing an error).',
+	'activities.hint.revision_of':
+		'Which used Entity this is a new version of. E.g., the original raw spreadsheet, when recording its correction.',
+	'activities.hint.same_name':
+		"Keeps the Name identical to the revised Entity's, to represent the same file updated in place (same name, new content).",
 	// Agentes
 	'agents.singular': 'Agent',
 	'agents.page_title': 'Agents — MyProvenance',

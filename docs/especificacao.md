@@ -33,7 +33,7 @@ Sem **Conta**: só existe em memória no navegador (sem `usuarioId`, nunca grava
 | `id`                   | UUIDv7                 | sim         |                                                                                              |
 | `registroId`           | UUIDv7                 | sim         | FK                                                                                           |
 | `nome`                 | texto                  | sim         |                                                                                              |
-| `descricao`            | texto                  | não         |                                                                                              |
+| `descricao`            | texto                  | não         | sobre o artefato (o que ele é/contém) — distinta de `Atividade.descricao` (§2.3), que é sobre o processo |
 | `formato`              | texto                  | não         | livre, com sugestões: CSV, TSV, XLSX, ODS, JSON, Parquet, GeoTIFF, Shapefile, GeoJSON        |
 | `localizacao`          | texto (URL ou caminho) | não         | onde o dado real está guardado, fora da ferramenta                                           |
 | `licenca`              | texto                  | não         | ex.: CC-BY 4.0, ou URL da licença                                                            |

@@ -7,6 +7,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import AgentPicker from '$lib/components/agent-picker.svelte';
+	import FieldHint from '$lib/components/field-hint.svelte';
 	import * as Select from '$lib/components/ui/select';
 	import DynamicPairList from '$lib/components/dynamic-pair-list.svelte';
 	import type { Agente, Atividade, Entidade, TipoAtividade } from '$lib/types';
@@ -320,7 +321,10 @@
 <form class="flex flex-col gap-4" onsubmit={enviar}>
 	<div class="grid grid-cols-2 gap-4">
 		<div class="flex flex-col gap-1.5">
-			<Label>{t('common.agent_label')}</Label>
+			<div class="flex items-center gap-1.5">
+				<Label>{t('common.agent_label')}</Label>
+				<FieldHint texto={t('activities.hint.agent')} />
+			</div>
 			<AgentPicker
 				bind:value={agenteId}
 				inicial={agenteAtual}
@@ -329,13 +333,19 @@
 			/>
 		</div>
 		<div class="flex flex-col gap-1.5">
-			<Label for="dataHora-{tipo}">{t('report.th.date')}</Label>
+			<div class="flex items-center gap-1.5">
+				<Label for="dataHora-{tipo}">{t('report.th.date')}</Label>
+				<FieldHint texto={t('activities.hint.date')} />
+			</div>
 			<Input id="dataHora-{tipo}" type="date" bind:value={dataHora} required />
 		</div>
 	</div>
 
 	<div class="flex flex-col gap-1.5">
-		<Label for="descricao-{tipo}">{t('common.description_label')}</Label>
+		<div class="flex items-center gap-1.5">
+			<Label for="descricao-{tipo}">{t('common.description_label')}</Label>
+			<FieldHint texto={t('activities.hint.description_activity')} />
+		</div>
 		<Textarea
 			id="descricao-{tipo}"
 			bind:value={descricao}
@@ -345,12 +355,15 @@
 	</div>
 
 	<div class="flex flex-col gap-1.5">
-		<Label>
-			{t('activities.entities_used_label')}
-			{#if tipo === 'criacao'}
-				<span class="text-muted-foreground font-normal">{t('common.optional')}</span>
-			{/if}
-		</Label>
+		<div class="flex items-center gap-1.5">
+			<Label>
+				{t('activities.entities_used_label')}
+				{#if tipo === 'criacao'}
+					<span class="text-muted-foreground font-normal">{t('common.optional')}</span>
+				{/if}
+			</Label>
+			<FieldHint texto={t('activities.hint.entities_used')} />
+		</div>
 		{#if entidadesParaUsar.length === 0}
 			<p class="text-muted-foreground text-xs">
 				{t('activities.no_entities_available')}
@@ -378,7 +391,10 @@
 	{#if tipo === 'criacao'}
 		<div class="grid grid-cols-2 gap-4">
 			<div class="flex flex-col gap-1.5">
-				<Label for="local-{tipo}">{t('report.detail.location')}</Label>
+				<div class="flex items-center gap-1.5">
+					<Label for="local-{tipo}">{t('report.detail.location')}</Label>
+					<FieldHint texto={t('activities.hint.location')} />
+				</div>
 				<Input
 					id="local-{tipo}"
 					bind:value={local}
@@ -386,7 +402,10 @@
 				/>
 			</div>
 			<div class="flex flex-col gap-1.5">
-				<Label for="instrumento-{tipo}">{t('report.detail.tool')}</Label>
+				<div class="flex items-center gap-1.5">
+					<Label for="instrumento-{tipo}">{t('report.detail.tool')}</Label>
+					<FieldHint texto={t('activities.hint.tool')} />
+				</div>
 				<Input
 					id="instrumento-{tipo}"
 					bind:value={instrumento}
@@ -396,7 +415,10 @@
 		</div>
 	{:else}
 		<div class="flex flex-col gap-1.5">
-			<Label for="processo-{tipo}">{t('report.detail.process')}</Label>
+			<div class="flex items-center gap-1.5">
+				<Label for="processo-{tipo}">{t('report.detail.process')}</Label>
+				<FieldHint texto={t('activities.hint.process')} />
+			</div>
 			<Textarea
 				id="processo-{tipo}"
 				bind:value={processo}
@@ -406,7 +428,10 @@
 		</div>
 
 		<div class="flex flex-col gap-1.5">
-			<Label>{t('report.detail.params')}</Label>
+			<div class="flex items-center gap-1.5">
+				<Label>{t('report.detail.params')}</Label>
+				<FieldHint texto={t('activities.hint.params')} />
+			</div>
 			<DynamicPairList
 				bind:itens={parametros}
 				rotuloA={t('activities.param_key')}
@@ -416,7 +441,10 @@
 		</div>
 
 		<div class="flex flex-col gap-1.5">
-			<Label for="sistemaOperacional-{tipo}">{t('activities.os_label')}</Label>
+			<div class="flex items-center gap-1.5">
+				<Label for="sistemaOperacional-{tipo}">{t('activities.os_label')}</Label>
+				<FieldHint texto={t('activities.hint.os')} />
+			</div>
 			<Input
 				id="sistemaOperacional-{tipo}"
 				bind:value={sistemaOperacional}
@@ -424,7 +452,10 @@
 			/>
 		</div>
 		<div class="flex flex-col gap-1.5">
-			<Label>{t('report.detail.packages')}</Label>
+			<div class="flex items-center gap-1.5">
+				<Label>{t('report.detail.packages')}</Label>
+				<FieldHint texto={t('activities.hint.packages')} />
+			</div>
 			<DynamicPairList
 				bind:itens={pacotes}
 				rotuloA={t('common.name_label')}
@@ -435,12 +466,15 @@
 	{/if}
 
 	<div class="flex flex-col gap-2">
-		<Label>
-			{t('activities.entities_generated_label')}
-			{#if tipo === 'analise'}
-				<span class="text-muted-foreground font-normal">{t('common.optional')}</span>
-			{/if}
-		</Label>
+		<div class="flex items-center gap-1.5">
+			<Label>
+				{t('activities.entities_generated_label')}
+				{#if tipo === 'analise'}
+					<span class="text-muted-foreground font-normal">{t('common.optional')}</span>
+				{/if}
+			</Label>
+			<FieldHint texto={t('activities.hint.entities_generated')} />
+		</div>
 		{#each entidadesGeradas as entidadeGerada, indice (indice)}
 			<div class="border-input flex flex-col gap-4 rounded-md border p-3">
 				<div class="flex items-center justify-between">
@@ -456,7 +490,10 @@
 					</Button>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="nomeGerada-{tipo}-{indice}">{t('common.name_label')}</Label>
+					<div class="flex items-center gap-1.5">
+						<Label for="nomeGerada-{tipo}-{indice}">{t('common.name_label')}</Label>
+						<FieldHint texto={t('activities.hint.entity_name')} />
+					</div>
 					<Input
 						id="nomeGerada-{tipo}-{indice}"
 						bind:value={entidadeGerada.nome}
@@ -465,18 +502,24 @@
 						readonly={entidadeGerada.mesmoNomeQueOrigem}
 					/>
 					{#if entidadeGerada.tipoRelacaoOrigem === 'revisao' && entidadeGerada.revisaoDeId}
-						<label class="flex items-center gap-2 text-sm">
-							<Checkbox
-								checked={entidadeGerada.mesmoNomeQueOrigem}
-								onCheckedChange={(marcado) => alternarMesmoNome(entidadeGerada, marcado === true)}
-							/>
-							{t('activities.same_name_as_source')}
-						</label>
+						<div class="flex items-center gap-1.5">
+							<label class="flex items-center gap-2 text-sm">
+								<Checkbox
+									checked={entidadeGerada.mesmoNomeQueOrigem}
+									onCheckedChange={(marcado) => alternarMesmoNome(entidadeGerada, marcado === true)}
+								/>
+								{t('activities.same_name_as_source')}
+							</label>
+							<FieldHint texto={t('activities.hint.same_name')} />
+						</div>
 					{/if}
 				</div>
 				<div class="grid grid-cols-2 gap-4">
 					<div class="flex flex-col gap-1.5">
-						<Label for="formatoGerada-{tipo}-{indice}">{t('report.th.format')}</Label>
+						<div class="flex items-center gap-1.5">
+							<Label for="formatoGerada-{tipo}-{indice}">{t('report.th.format')}</Label>
+							<FieldHint texto={t('activities.hint.format')} />
+						</div>
 						<Input
 							id="formatoGerada-{tipo}-{indice}"
 							bind:value={entidadeGerada.formato}
@@ -484,7 +527,10 @@
 						/>
 					</div>
 					<div class="flex flex-col gap-1.5">
-						<Label for="licencaGerada-{tipo}-{indice}">{t('report.th.license')}</Label>
+						<div class="flex items-center gap-1.5">
+							<Label for="licencaGerada-{tipo}-{indice}">{t('report.th.license')}</Label>
+							<FieldHint texto={t('activities.hint.license')} />
+						</div>
 						<Input
 							id="licencaGerada-{tipo}-{indice}"
 							bind:value={entidadeGerada.licenca}
@@ -493,7 +539,10 @@
 					</div>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="localizacaoGerada-{tipo}-{indice}">{t('report.th.location')}</Label>
+					<div class="flex items-center gap-1.5">
+						<Label for="localizacaoGerada-{tipo}-{indice}">{t('report.th.location')}</Label>
+						<FieldHint texto={t('activities.hint.entity_location')} />
+					</div>
 					<Input
 						id="localizacaoGerada-{tipo}-{indice}"
 						bind:value={entidadeGerada.localizacao}
@@ -501,7 +550,10 @@
 					/>
 				</div>
 				<div class="flex flex-col gap-1.5">
-					<Label for="descricaoGerada-{tipo}-{indice}">{t('common.description_label')}</Label>
+					<div class="flex items-center gap-1.5">
+						<Label for="descricaoGerada-{tipo}-{indice}">{t('common.description_label')}</Label>
+						<FieldHint texto={t('activities.hint.description_entity')} />
+					</div>
 					<Textarea
 						id="descricaoGerada-{tipo}-{indice}"
 						bind:value={entidadeGerada.descricao}
@@ -510,7 +562,10 @@
 				</div>
 				{#if entidadesUsadas.length > 0}
 					<div class="flex flex-col gap-1.5">
-						<Label for="relacao-{tipo}-{indice}">{t('activities.relation_label')}</Label>
+						<div class="flex items-center gap-1.5">
+							<Label for="relacao-{tipo}-{indice}">{t('activities.relation_label')}</Label>
+							<FieldHint texto={t('activities.hint.relation')} />
+						</div>
 						<Select.Root
 							type="single"
 							bind:value={entidadeGerada.tipoRelacaoOrigem}
@@ -537,7 +592,10 @@
 					</div>
 					{#if entidadeGerada.tipoRelacaoOrigem === 'revisao'}
 						<div class="flex flex-col gap-1.5">
-							<Label for="revisaoDe-{tipo}-{indice}">{t('activities.revision_of_label')}</Label>
+							<div class="flex items-center gap-1.5">
+								<Label for="revisaoDe-{tipo}-{indice}">{t('activities.revision_of_label')}</Label>
+								<FieldHint texto={t('activities.hint.revision_of')} />
+							</div>
 							<Select.Root
 								type="single"
 								bind:value={entidadeGerada.revisaoDeId}

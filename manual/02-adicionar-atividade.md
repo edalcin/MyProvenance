@@ -12,15 +12,17 @@ Toda vez que um novo dado entra na linhagem (Criação) ou um dado existente é 
 
 ## Passo a passo
 
+Todo campo do formulário tem um ícone `?` ao lado do rótulo — passe o mouse (ou toque nele, no celular) para ver a explicação e um exemplo.
+
 1. No Registro, clique em `Adicionar Atividade`.
 2. Escolha o tipo na aba: `Criação`, `Transformação` ou `Análise`.
 3. Selecione o `Agente` responsável — o campo tem busca com autocomplete; se o Agente não existir ainda, digite o nome e clique em `Criar "<nome>"` para cadastrá-lo sem sair do formulário.
-4. Preencha `Data` e `Descrição`.
+4. Preencha `Data` e `Descrição` — aqui, `Descrição` é sobre o processo desta Atividade (o que foi feito), não sobre o resultado; veja a diferença com a `Descrição` da Entidade gerada na Dica abaixo.
 5. Marque as `Entidades usadas` (Transformação/Análise: obrigatório, 1 ou mais; Criação: opcional — deixe vazio quando o dado é a origem da linhagem, ou marque Entidades existentes se a Criação também partiu de alguma). Cada Entidade na lista mostra entre parênteses o tipo e a data da Atividade que a gerou — use essa informação para diferenciar Entidades com o mesmo nome (ex.: revisões sucessivas do mesmo arquivo). O seletor `Revisão de` (passo 8) mostra a mesma informação.
 6. Campos específicos por tipo:
     - **Criação**: `Local` e `Ferramenta ou Software` (de onde e com o quê o dado foi originado).
     - **Transformação/Análise**: `Processo` (o que foi feito), parâmetros (`Chave`/`Valor`) e `Ambiente de execução — sistema operacional`.
-7. Em `Entidades geradas`, clique em `Adicionar Entidade gerada` para cada saída, preenchendo `Nome`, `Formato`, `Licença`, `Localização` e `Descrição`.
+7. Em `Entidades geradas`, clique em `Adicionar Entidade gerada` para cada saída, preenchendo `Nome`, `Formato`, `Licença`, `Localização` e `Descrição` — aqui, `Descrição` é sobre o artefato em si (o que ele é/contém), não sobre o processo que o gerou.
 8. Se houver `Entidades usadas` marcadas (em qualquer tipo, inclusive Criação com entrada opcional), cada Entidade gerada ganha o seletor `Relação com a origem`: `Nenhuma`, `Derivação` ou `Revisão` (esta última pede `Revisão de`, apontando para qual Entidade usada ela substitui). `Derivação` sempre representa uma Entidade com identidade nova — para manter o mesmo nome do arquivo transformado, use `Revisão`.
 9. Quando a Relação é `Revisão` e a Entidade revisada já foi escolhida em `Revisão de`, aparece o checkbox `Mesmo nome da Entidade revisada` ao lado do campo `Nome` — marque para copiar o nome da Entidade revisada e travar o campo (somente leitura) enquanto ativo; desmarque para voltar a digitar um nome diferente.
 10. Clique em `Adicionar Atividade` para salvar.
@@ -56,6 +58,8 @@ Toda vez que um novo dado entra na linhagem (Criação) ou um dado existente é 
 > 💡 **Dica:** mais de uma Entidade pode ser gerada pela mesma Atividade — útil quando um único processo produz vários arquivos de saída (ex.: uma tabela e um gráfico).
 
 > 💡 **Dica:** use `Mesmo nome da Entidade revisada` quando a Transformação altera o arquivo no lugar (mesmo nome, conteúdo novo) — evita digitar o nome de novo e mantém Nome e `Revisão de` sempre em sincronia; se depois trocar a Entidade revisada com o checkbox marcado, o Nome acompanha automaticamente. Esse checkbox só existe para `Revisão`: `Derivação` sempre gera um nome de Entidade novo/diferente, por representar uma identidade distinta da origem (ex.: um subconjunto filtrado).
+
+> 💡 **Dica:** `Descrição` aparece duas vezes no formulário e não é o mesmo campo. A `Descrição` da Atividade (passo 4) é sobre o **processo** — o que foi feito, ex.: "Padronização de nomes comuns e remoção de duplicatas na planilha bruta". A `Descrição` de cada Entidade gerada (passo 7) é sobre o **resultado** — o que aquele artefato específico contém, ex.: "Tabela com 1.240 registros, colunas: espécie, data, coordenadas". São independentes: editar uma não muda a outra.
 
 > ⚠️ **Atenção:** depois que o Registro é finalizado, Atividades existentes não podem mais ser editadas ou excluídas — só novas Atividades podem ser adicionadas. Ver [Finalizar](04-finalizar.md).
 

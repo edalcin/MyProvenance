@@ -5,6 +5,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher } from 'mode-watcher';
 	import { Toaster } from '$lib/components/ui/sonner';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import AppNav from '$lib/components/app-nav.svelte';
 	import AnonimoBanner from '$lib/components/anonimo-banner.svelte';
 	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
@@ -41,11 +42,13 @@
 <ModeWatcher themeColors={{ light: '#ffffff', dark: '#0a0a0a' }} />
 <Toaster richColors position="bottom-right" />
 <div class="bg-background text-foreground flex min-h-svh flex-col">
-	<AppNav />
-	{#if !usuarioAtual.valor && sessaoAnonima.temDadosNaoSalvos}
-		<AnonimoBanner />
-	{/if}
-	<main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-		{@render children()}
-	</main>
+	<Tooltip.Provider>
+		<AppNav />
+		{#if !usuarioAtual.valor && sessaoAnonima.temDadosNaoSalvos}
+			<AnonimoBanner />
+		{/if}
+		<main class="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+			{@render children()}
+		</main>
+	</Tooltip.Provider>
 </div>

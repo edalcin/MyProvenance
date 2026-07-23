@@ -260,6 +260,43 @@ export const pt = {
 	'activities.revision_of_label': 'Revisão de',
 	'activities.revision_source_placeholder': 'Selecionar Entidade de entrada…',
 	'activities.same_name_as_source': 'Mesmo nome da Entidade revisada',
+	// Dicas de campo (tooltip "?")
+	'activities.hint.agent':
+		'Quem ou o que realizou esta Atividade — Pessoa, Instituição ou Software. Ex.: "Camila Dantas" ou "OpenRefine 3.7".',
+	'activities.hint.date':
+		'Quando a Atividade aconteceu de fato, não quando você está preenchendo o formulário. Ex.: a data da coleta em campo.',
+	'activities.hint.description_activity':
+		'O processo em si — o que foi feito nesta Atividade. Diferente da Descrição da Entidade gerada, que descreve o resultado. Ex.: "Padronização de nomes comuns e remoção de duplicatas na planilha bruta".',
+	'activities.hint.entities_used':
+		'Quais Entidades já existentes serviram de entrada para esta Atividade. Ex.: a planilha bruta original, ao registrar a Transformação que a limpa.',
+	'activities.hint.location':
+		'Onde o dado foi originado — coordenadas, local físico ou plataforma. Ex.: "-22.9068,-43.1729" ou "Trilha do Ouro, Parque Nacional da Tijuca".',
+	'activities.hint.tool':
+		'Instrumento, sensor ou programa usado para capturar o dado. Ex.: "GPS Garmin 64s" ou "formulário ODK Collect".',
+	'activities.hint.process':
+		'Os passos, script ou algoritmo aplicado, descritos de forma reproduzível. Ex.: "Script R limpar_dados.R: remove duplicatas e converte datas para ISO 8601".',
+	'activities.hint.params':
+		'Configurações usadas no processo, como pares chave/valor. Ex.: chave "threshold", valor "0.05".',
+	'activities.hint.os':
+		'Sistema operacional onde o processo rodou. Ex.: "Ubuntu 22.04" ou "Windows 11".',
+	'activities.hint.packages':
+		'Bibliotecas ou pacotes de software usados no processo, com a versão. Ex.: nome "pandas", versão "2.2.0".',
+	'activities.hint.entities_generated':
+		'As Entidades — arquivos, tabelas ou resultados — produzidas por esta Atividade.',
+	'activities.hint.entity_name':
+		'Nome do arquivo ou artefato gerado. Ex.: "ocorrencias_darwincore.csv".',
+	'activities.hint.format': 'Formato do arquivo gerado. Ex.: CSV, XLSX, GeoTIFF, Shapefile.',
+	'activities.hint.license': 'Licença de uso do dado, se houver. Ex.: "CC-BY 4.0".',
+	'activities.hint.entity_location':
+		'Onde o arquivo real está guardado, fora desta ferramenta — URL ou caminho. Ex.: "https://drive.google.com/..." ou "/dados/campo/2026/ocorrencias.csv".',
+	'activities.hint.description_entity':
+		'O que este artefato específico é ou contém — metadados sobre o dado, não sobre o processo que o gerou. Diferente da Descrição da Atividade. Ex.: "Tabela com 1.240 registros, colunas: espécie, data, coordenadas".',
+	'activities.hint.relation':
+		'Como esta Entidade se relaciona com as Entidades usadas: Derivação (nasce das entradas, identidade nova, ex.: um subconjunto filtrado) ou Revisão (nova versão da mesma Entidade de entrada, ex.: corrigindo um erro).',
+	'activities.hint.revision_of':
+		'Qual Entidade usada esta é uma nova versão de. Ex.: a planilha bruta original, ao registrar sua correção.',
+	'activities.hint.same_name':
+		'Mantém o Nome idêntico ao da Entidade revisada, para representar o mesmo arquivo atualizado no lugar (mesmo nome, conteúdo novo).',
 	// Agentes
 	'agents.singular': 'Agente',
 	'agents.page_title': 'Agentes — MyProvenance',
