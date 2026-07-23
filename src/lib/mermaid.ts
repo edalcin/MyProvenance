@@ -57,5 +57,14 @@ export function gerarDiagramaMermaid(
 		}
 	}
 
+	const revisadas = dados.entidades
+		.filter((e) => e.tipoRelacaoOrigem === 'revisao')
+		.map((e) => idDoNo.get(e.id))
+		.filter((id): id is string => Boolean(id));
+	if (revisadas.length > 0) {
+		linhas.push('  classDef revisada stroke-dasharray:5 5,stroke-width:2px');
+		linhas.push(`  class ${revisadas.join(',')} revisada`);
+	}
+
 	return linhas.join('\n');
 }

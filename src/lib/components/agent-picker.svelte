@@ -12,8 +12,14 @@
 		// eslint-disable-next-line no-useless-assignment -- prop $bindable: lido pelo pai via bind:value, nao localmente.
 		value = $bindable(''),
 		inicial = null,
+		agentesDoRegistro = [],
 		onAgente
-	}: { value?: string; inicial?: Agente | null; onAgente?: (agente: Agente) => void } = $props();
+	}: {
+		value?: string;
+		inicial?: Agente | null;
+		agentesDoRegistro?: Agente[];
+		onAgente?: (agente: Agente) => void;
+	} = $props();
 
 	let aberto = $state(false);
 	let busca = $state('');
@@ -25,7 +31,14 @@
 	async function pesquisar(texto: string) {
 		carregando = true;
 		const pagina = await dados.listarAgentes({ limit: 10, busca: texto || undefined });
-		resultados = pagina.items;
+		const termo = texto.trim().toLowerCase();
+		const doRegistro = termo
+			? agentesDoRegistro.filter((a) => a.nome.toLowerCase().includes(termo))
+			: agentesDoRegistro;
+		const mesclados = new Map<string, Agente>();
+		for (const a of doRegistro) mesclados.set(a.id, a);
+		for (const a of pagina.items) if (!mesclados.has(a.id)) mesclados.set(a.id, a);
+		resultados = [...mesclados.values()];
 		carregando = false;
 	}
 

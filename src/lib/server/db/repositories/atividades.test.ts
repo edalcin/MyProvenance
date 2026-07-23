@@ -58,7 +58,7 @@ describe('regra de cardinalidade de Atividade', () => {
 		).toThrow(RegraCardinalidadeError);
 	});
 
-	it('Criacao com Entidade de entrada e rejeitada', () => {
+	it('Criacao usando Entidade fora do Registro e rejeitada', () => {
 		const registro = criarRegistro(usuarioId, { titulo: 'Registro invalido' });
 		expect(() =>
 			criarAtividade(usuarioId, registro.id, {
@@ -69,6 +69,25 @@ describe('regra de cardinalidade de Atividade', () => {
 				entidadesGeradas: [{ nome: 'x' }]
 			})
 		).toThrow(RegraCardinalidadeError);
+	});
+
+	it('Criacao usando Entidade do proprio Registro e gerando 1+ e valida', () => {
+		const registro = criarRegistro(usuarioId, { titulo: 'Registro criacao com entrada' });
+		const { entidadesGeradas: brutas } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [],
+			entidadesGeradas: [{ nome: 'campo_bruto.csv' }]
+		});
+		const { atividade } = criarAtividade(usuarioId, registro.id, {
+			tipo: 'criacao',
+			agenteId: agente.id,
+			dataHora: new Date().toISOString(),
+			entidadesUsadas: [brutas[0].id],
+			entidadesGeradas: [{ nome: 'derivado.csv' }]
+		});
+		expect(atividade.entidadesUsadas).toEqual([brutas[0].id]);
 	});
 
 	it('Transformacao usa 1+ Entidades do mesmo Registro e gera 1', () => {

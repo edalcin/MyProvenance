@@ -61,7 +61,6 @@ export const pt = {
 	'error.resource_in_use': 'Recurso em uso por outro dado e não pode ser excluído.',
 	'error.invalid_json_file': 'Arquivo não é um JSON válido.',
 	'error.invalid_file_format': 'Formato de arquivo inválido.',
-	'error.cardinality.creation_uses_entities': 'Criação não usa Entidades existentes.',
 	'error.cardinality.creation_needs_output': 'Criação deve gerar 1 ou mais Entidades.',
 	'error.cardinality.transformation_needs_input': 'Transformação usa 1 ou mais Entidades.',
 	'error.cardinality.transformation_needs_output': 'Transformação deve gerar 1 ou mais Entidades.',

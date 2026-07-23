@@ -62,7 +62,6 @@ export const en: Record<keyof typeof pt, string> = {
 	'error.resource_in_use': 'Resource is in use by other data and cannot be deleted.',
 	'error.invalid_json_file': 'File is not valid JSON.',
 	'error.invalid_file_format': 'Invalid file format.',
-	'error.cardinality.creation_uses_entities': 'Creation does not use existing Entities.',
 	'error.cardinality.creation_needs_output': 'Creation must generate 1 or more Entities.',
 	'error.cardinality.transformation_needs_input': 'Transformation uses 1 or more Entities.',
 	'error.cardinality.transformation_needs_output':

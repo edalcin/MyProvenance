@@ -19,6 +19,7 @@
 		entidadesDisponiveis,
 		atividadeParaEditar = null,
 		agenteAtual = null,
+		agentesDoRegistro = [],
 		onCriada,
 		onAtualizada,
 		onCancelar
@@ -29,6 +30,8 @@
 		/** Presente = formulario em modo edicao (so Registro Rascunho, ADR-0003) — tipo nao muda. */
 		atividadeParaEditar?: Atividade | null;
 		agenteAtual?: Agente | null;
+		/** Agentes ja relacionados a este Registro (obterRegistroDetalhado), oferecidos no seletor mesmo se nao forem do catalogo do usuario. */
+		agentesDoRegistro?: Agente[];
 		onCriada?: (resultado: {
 			atividade: Atividade;
 			entidadesGeradas: Entidade[];
@@ -171,6 +174,17 @@
 			);
 	}
 
+	/** Pre-preenche a Entidade gerada com os dados da fonte ao marcar Revisao — so campos vazios, nao pisa no que o usuario ja digitou. */
+	function prefillRevisao(entidadeGerada: EntidadeGeradaForm, fonteId: string | undefined) {
+		if (!fonteId) return;
+		const fonte = entidadesDisponiveis.find((e) => e.id === fonteId);
+		if (!fonte) return;
+		if (!entidadeGerada.nome.trim()) entidadeGerada.nome = fonte.nome;
+		if (!entidadeGerada.formato.trim()) entidadeGerada.formato = fonte.formato ?? '';
+		if (!entidadeGerada.localizacao.trim()) entidadeGerada.localizacao = fonte.localizacao ?? '';
+		if (!entidadeGerada.licenca.trim()) entidadeGerada.licenca = fonte.licenca ?? '';
+	}
+
 	function adicionarEntidadeGerada() {
 		entidadesGeradas = [...entidadesGeradas, entidadeGeradaVazia()];
 	}
@@ -211,7 +225,7 @@
 				// meio-dia local evita a data exibida "voltar" um dia ao formatar de volta em fuso negativo.
 				dataHora: dataParaIso(dataHora),
 				descricao: descricao || null,
-				entidadesUsadas: tipo === 'criacao' ? [] : entidadesUsadas,
+				entidadesUsadas,
 				local: tipo === 'criacao' ? local || null : null,
 				instrumento: tipo === 'criacao' ? instrumento || null : null,
 				processo: tipo !== 'criacao' ? processo || null : null,
@@ -269,6 +283,7 @@
 			<AgentPicker
 				bind:value={agenteId}
 				inicial={agenteAtual}
+				agentesDoRegistro={agentesDoRegistro}
 				onAgente={(a) => (agenteSelecionado = a)}
 			/>
 		</div>
@@ -286,6 +301,36 @@
 			placeholder={t('activities.description_placeholder')}
 			rows={2}
 		/>
+	</div>
+
+	<div class="flex flex-col gap-1.5">
+		<Label>
+			{t('activities.entities_used_label')}
+			{#if tipo === 'criacao'}
+				<span class="text-muted-foreground font-normal">{t('common.optional')}</span>
+			{/if}
+		</Label>
+		{#if entidadesParaUsar.length === 0}
+			<p class="text-muted-foreground text-xs">
+				{t('activities.no_entities_available')}
+			</p>
+		{:else}
+			<div
+				class="border-input flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3"
+			>
+				{#each entidadesParaUsar as entidade (entidade.id)}
+					<label class="flex items-center gap-2 text-sm">
+						<Checkbox
+							checked={entidadesUsadas.includes(entidade.id)}
+							onCheckedChange={(marcado) => alternarEntidade(entidade.id, marcado === true)}
+						/>
+						{entidade.nome}
+						{#if entidade.formato}<span class="text-muted-foreground">({entidade.formato})</span
+							>{/if}
+					</label>
+				{/each}
+			</div>
+		{/if}
 	</div>
 
 	{#if tipo === 'criacao'}
@@ -308,31 +353,6 @@
 			</div>
 		</div>
 	{:else}
-		<div class="flex flex-col gap-1.5">
-			<Label>{t('activities.entities_used_label')}</Label>
-			{#if entidadesParaUsar.length === 0}
-				<p class="text-muted-foreground text-xs">
-					{t('activities.no_entities_available')}
-				</p>
-			{:else}
-				<div
-					class="border-input flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3"
-				>
-					{#each entidadesParaUsar as entidade (entidade.id)}
-						<label class="flex items-center gap-2 text-sm">
-							<Checkbox
-								checked={entidadesUsadas.includes(entidade.id)}
-								onCheckedChange={(marcado) => alternarEntidade(entidade.id, marcado === true)}
-							/>
-							{entidade.nome}
-							{#if entidade.formato}<span class="text-muted-foreground">({entidade.formato})</span
-								>{/if}
-						</label>
-					{/each}
-				</div>
-			{/if}
-		</div>
-
 		<div class="flex flex-col gap-1.5">
 			<Label for="processo-{tipo}">{t('report.detail.process')}</Label>
 			<Textarea
@@ -436,7 +456,7 @@
 						rows={2}
 					/>
 				</div>
-				{#if tipo !== 'criacao'}
+				{#if entidadesUsadas.length > 0}
 					<div class="flex flex-col gap-1.5">
 						<Label for="relacao-{tipo}-{indice}">{t('activities.relation_label')}</Label>
 						<Select.Root type="single" bind:value={entidadeGerada.tipoRelacaoOrigem}>
@@ -455,7 +475,11 @@
 					{#if entidadeGerada.tipoRelacaoOrigem === 'revisao'}
 						<div class="flex flex-col gap-1.5">
 							<Label for="revisaoDe-{tipo}-{indice}">{t('activities.revision_of_label')}</Label>
-							<Select.Root type="single" bind:value={entidadeGerada.revisaoDeId}>
+							<Select.Root
+								type="single"
+								bind:value={entidadeGerada.revisaoDeId}
+								onValueChange={(v) => prefillRevisao(entidadeGerada, v)}
+							>
 								<Select.Trigger id="revisaoDe-{tipo}-{indice}">
 									{entidadeGerada.revisaoDeId
 										? (entidadesDisponiveis.find((e) => e.id === entidadeGerada.revisaoDeId)

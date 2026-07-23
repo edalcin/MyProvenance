@@ -115,6 +115,51 @@ describe('gerarDiagramaMermaid', () => {
 		);
 	});
 
+	it('Entidade gerada em revisao ganha classDef/class de destaque no no', () => {
+		const e1 = entidade('e1', 'bruto.csv', 'a1');
+		const e2 = {
+			...entidade('e2', 'bruto_v2.csv', 'a2'),
+			tipoRelacaoOrigem: 'revisao' as const,
+			revisaoDeId: 'e1'
+		};
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1']
+		});
+		const a2 = atividade({
+			id: 'a2',
+			tipo: 'transformacao',
+			entidadesUsadas: ['e1'],
+			entidadesGeradas: ['e2'],
+			descricao: 'nova versao'
+		});
+		const saida = gerarDiagramaMermaid({
+			entidades: [e1, e2],
+			atividades: [a1, a2],
+			agentesEnvolvidos: [agente]
+		});
+		expect(saida).toContain('classDef revisada stroke-dasharray:5 5,stroke-width:2px');
+		expect(saida).toContain('class E2 revisada');
+	});
+
+	it('grafo sem revisao nao emite classDef revisada', () => {
+		const e1 = entidade('e1', 'campo_bruto.csv', 'a1');
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1']
+		});
+		const saida = gerarDiagramaMermaid({
+			entidades: [e1],
+			atividades: [a1],
+			agentesEnvolvidos: [agente]
+		});
+		expect(saida).not.toContain('classDef revisada');
+	});
+
 	it('Entidade gerada em derivacao desenha seta solida rotulada "derivação"', () => {
 		const e1 = entidade('e1', 'bruto.csv', 'a1');
 		const e2 = { ...entidade('e2', 'derivado.csv', 'a2'), tipoRelacaoOrigem: 'derivacao' as const };

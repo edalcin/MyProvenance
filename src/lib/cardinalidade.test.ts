@@ -14,10 +14,10 @@ describe('validarCardinalidade', () => {
 		).not.toThrow();
 	});
 
-	it('Criacao usando alguma Entidade e rejeitada', () => {
+	it('Criacao usando Entidades e gerando 1+ e valida', () => {
 		expect(() =>
 			validarCardinalidade({ tipo: 'criacao', entidadesUsadas: ['e1'], entidadesGeradas: [{}] })
-		).toThrow(RegraCardinalidadeError);
+		).not.toThrow();
 	});
 
 	it('Criacao sem gerar nenhuma Entidade e rejeitada', () => {

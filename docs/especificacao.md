@@ -60,7 +60,7 @@ Campos por tipo:
 - **Transformação** — `processo` (texto: script/código/passos), `parametros` (lista chave-valor livre), `ambienteExecucao` (`{ sistemaOperacional, pacotes: [{ nome, versao }] }`).
 - **Análise** — `processo`, `ambienteExecucao` — mesmos campos de Transformação, ambos opcionais.
 
-Regra de cardinalidade (ver `CONTEXT.md`): Criação gera 1+, usa 0. Transformação usa 1+, gera 1+. Análise usa 1+, gera 0+.
+Regra de cardinalidade (ver `CONTEXT.md`): Criação gera 1+, usa 0+. Transformação usa 1+, gera 1+. Análise usa 1+, gera 0+.
 
 ### 2.4 Agente
 

@@ -139,5 +139,6 @@ describe('gerarRelatorioMarkdown', () => {
 		};
 		const md = gerarRelatorioMarkdown(detalhe, '2026-03-15T18:00:00.000Z');
 		expect(md).toContain('bruto_v2.csv (revisão de bruto.csv)');
+		expect(md).toContain('| bruto_v2.csv (revisão de bruto.csv) | — |');
 	});
 });

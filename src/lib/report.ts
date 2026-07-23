@@ -45,8 +45,9 @@ export function gerarRelatorioMarkdown(
 	} else {
 		linhas.push(`| ${t('report.th.name')} | ${t('common.description_label')} |`, '|---|---|');
 		for (const e of entidades) {
+			const sufixo = sufixoRelacaoOrigem(e, (id) => nomeEntidade.get(id), locale);
 			linhas.push(
-				`| ${escaparCelula(e.nome)} | ${e.descricao ? escaparCelula(e.descricao) : '—'} |`
+				`| ${escaparCelula(e.nome + sufixo)} | ${e.descricao ? escaparCelula(e.descricao) : '—'} |`
 			);
 		}
 		linhas.push('');

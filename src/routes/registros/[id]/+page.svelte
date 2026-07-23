@@ -605,6 +605,7 @@
 									tipo="criacao"
 									registroId={registro.id}
 									entidadesDisponiveis={entidades}
+									agentesDoRegistro={agentesEnvolvidos}
 									onCriada={aoAtividadeCriada}
 								/>
 							</Tabs.Content>
@@ -613,6 +614,7 @@
 									tipo="transformacao"
 									registroId={registro.id}
 									entidadesDisponiveis={entidades}
+									agentesDoRegistro={agentesEnvolvidos}
 									onCriada={aoAtividadeCriada}
 								/>
 							</Tabs.Content>
@@ -621,6 +623,7 @@
 									tipo="analise"
 									registroId={registro.id}
 									entidadesDisponiveis={entidades}
+									agentesDoRegistro={agentesEnvolvidos}
 									onCriada={aoAtividadeCriada}
 								/>
 							</Tabs.Content>
@@ -716,6 +719,7 @@
 							tipo={atividadeEmEdicao.tipo}
 							registroId={registro.id}
 							entidadesDisponiveis={entidades}
+							agentesDoRegistro={agentesEnvolvidos}
 							atividadeParaEditar={atividadeEmEdicao}
 							agenteAtual={agentesEnvolvidos.find((a) => a.id === atividadeEmEdicao!.agenteId) ??
 								null}
@@ -742,7 +746,18 @@
 					<Table.Body>
 						{#each entidades as entidade (entidade.id)}
 							<Table.Row>
-								<Table.Cell>{entidade.nome}</Table.Cell>
+								<Table.Cell>
+									{entidade.nome}
+									{#if entidade.tipoRelacaoOrigem === 'revisao'}
+										<Badge variant="secondary" class="ml-2">
+											{t('relation.revision_of', {
+												nome: nomeEntidade.get(entidade.revisaoDeId ?? '') ?? ''
+											})}
+										</Badge>
+									{:else if entidade.tipoRelacaoOrigem === 'derivacao'}
+										<Badge variant="secondary" class="ml-2">{t('relation.derivation')}</Badge>
+									{/if}
+								</Table.Cell>
 								<Table.Cell>{entidade.descricao ?? '—'}</Table.Cell>
 							</Table.Row>
 						{/each}

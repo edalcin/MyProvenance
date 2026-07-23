@@ -13,7 +13,7 @@ Registro manual, preenchido pelo usuário via formulário, de um processo que us
 _Avoid_: Evento
 
 **Criação**:
-Atividade que gera 1 ou mais Entidades novas, sem usar nenhuma Entidade de entrada. É a origem de uma linhagem.
+Atividade que gera 1 ou mais Entidades novas; pode opcionalmente usar Entidades de entrada (0+). Sem entradas, é a origem de uma linhagem.
 
 **Transformação**:
 Atividade que usa 1 ou mais Entidades existentes e gera 1 ou mais Entidades novas.
