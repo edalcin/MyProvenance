@@ -10,6 +10,7 @@
 	import FieldHint from '$lib/components/field-hint.svelte';
 	import * as Select from '$lib/components/ui/select';
 	import DynamicPairList from '$lib/components/dynamic-pair-list.svelte';
+	import { LICENCAS_CC, ehLicencaPersonalizada } from '$lib/licencas-cc';
 	import type { Agente, Atividade, Entidade, TipoAtividade } from '$lib/types';
 	import * as dados from '$lib/client/dados';
 	import { t, idiomaAtual, msgErro } from '$lib/i18n/estado.svelte';
@@ -82,6 +83,8 @@
 		revisaoDeId: string;
 		/** UI apenas: trava o Nome = nome da Entidade revisada (revisaoDeId) enquanto marcado. Nao persistido. */
 		mesmoNomeQueOrigem: boolean;
+		/** UI apenas: pulldown de Licenca em modo "outra" (texto livre/URL fora da lista CC pre-definida). Nao persistido. */
+		licencaPersonalizada: boolean;
 	}
 
 	function entidadeGeradaVazia(): EntidadeGeradaForm {
@@ -93,7 +96,8 @@
 			licenca: '',
 			tipoRelacaoOrigem: '',
 			revisaoDeId: '',
-			mesmoNomeQueOrigem: false
+			mesmoNomeQueOrigem: false,
+			licencaPersonalizada: false
 		};
 	}
 
@@ -132,7 +136,8 @@
 							mesmoNomeQueOrigem:
 								e.tipoRelacaoOrigem === 'revisao' &&
 								!!e.revisaoDeId &&
-								e.nome === entidadesDisponiveis.find((x) => x.id === e.revisaoDeId)?.nome
+								e.nome === entidadesDisponiveis.find((x) => x.id === e.revisaoDeId)?.nome,
+							licencaPersonalizada: ehLicencaPersonalizada(e.licenca ?? '')
 						}))
 				: entidadesGeradasIniciais()
 		};
@@ -214,7 +219,10 @@
 		else if (!entidadeGerada.nome.trim()) entidadeGerada.nome = fonte.nome;
 		if (!entidadeGerada.formato.trim()) entidadeGerada.formato = fonte.formato ?? '';
 		if (!entidadeGerada.localizacao.trim()) entidadeGerada.localizacao = fonte.localizacao ?? '';
-		if (!entidadeGerada.licenca.trim()) entidadeGerada.licenca = fonte.licenca ?? '';
+		if (!entidadeGerada.licenca.trim()) {
+			entidadeGerada.licenca = fonte.licenca ?? '';
+			entidadeGerada.licencaPersonalizada = ehLicencaPersonalizada(entidadeGerada.licenca);
+		}
 	}
 
 	/** Marca/desmarca o vinculo de nome com a Entidade revisada. Ao marcar, copia o nome da fonte;
@@ -531,11 +539,38 @@
 							<Label for="licencaGerada-{tipo}-{indice}">{t('report.th.license')}</Label>
 							<FieldHint texto={t('activities.hint.license')} />
 						</div>
-						<Input
-							id="licencaGerada-{tipo}-{indice}"
-							bind:value={entidadeGerada.licenca}
-							placeholder={t('activities.license_placeholder')}
-						/>
+						<Select.Root
+							type="single"
+							value={entidadeGerada.licencaPersonalizada ? 'outro' : entidadeGerada.licenca}
+							onValueChange={(v) => {
+								if (v === 'outro') {
+									entidadeGerada.licencaPersonalizada = true;
+								} else {
+									entidadeGerada.licencaPersonalizada = false;
+									entidadeGerada.licenca = v;
+								}
+							}}
+						>
+							<Select.Trigger id="licencaGerada-{tipo}-{indice}">
+								{entidadeGerada.licencaPersonalizada
+									? t('activities.license_other')
+									: entidadeGerada.licenca || t('activities.license_none')}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="" label={t('activities.license_none')} />
+								{#each LICENCAS_CC as lic (lic.valor)}
+									<Select.Item value={lic.valor} label={lic.valor} title={t(lic.chaveDescricao)} />
+								{/each}
+								<Select.Item value="outro" label={t('activities.license_other')} />
+							</Select.Content>
+						</Select.Root>
+						{#if entidadeGerada.licencaPersonalizada}
+							<Input
+								bind:value={entidadeGerada.licenca}
+								placeholder={t('activities.license_placeholder')}
+								aria-label={t('activities.license_other')}
+							/>
+						{/if}
 					</div>
 				</div>
 				<div class="flex flex-col gap-1.5">

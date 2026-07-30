@@ -249,7 +249,7 @@ export const pt = {
 	'activities.generated_entity_n': 'Entidade gerada {n}',
 	'activities.remove_generated_entity_aria': 'Remover Entidade gerada',
 	'activities.format_placeholder': 'CSV, JSON…',
-	'activities.license_placeholder': 'CC-BY 4.0…',
+	'activities.license_placeholder': 'URL ou texto da licença…',
 	'activities.location_url_placeholder': 'URL ou caminho',
 	'activities.add_generated_entity': 'Adicionar Entidade gerada',
 	'activities.rich_text_placeholder': 'Descrição (opcional)…',
@@ -297,6 +297,22 @@ export const pt = {
 		'Qual Entidade usada esta é uma nova versão de. Ex.: a planilha bruta original, ao registrar sua correção.',
 	'activities.hint.same_name':
 		'Mantém o Nome idêntico ao da Entidade revisada, para representar o mesmo arquivo atualizado no lugar (mesmo nome, conteúdo novo).',
+	// Pulldown de licenca (Entidade gerada)
+	'activities.license_none': 'Nenhuma',
+	'activities.license_other': 'Outra / personalizada',
+	'license.cc0': 'CC0 1.0 — Domínio Público: sem direitos reservados, uso livre irrestrito.',
+	'license.cc_by':
+		'CC BY 4.0 — Atribuição: permite uso comercial e modificações, exigindo crédito ao autor.',
+	'license.cc_by_sa':
+		'CC BY-SA 4.0 — Atribuição-CompartilhaIgual: como CC BY, mas obras derivadas devem manter a mesma licença.',
+	'license.cc_by_nd':
+		'CC BY-ND 4.0 — Atribuição-SemDerivações: permite redistribuição, sem modificações, com crédito.',
+	'license.cc_by_nc':
+		'CC BY-NC 4.0 — Atribuição-NãoComercial: uso e modificação não comerciais, com crédito ao autor.',
+	'license.cc_by_nc_sa':
+		'CC BY-NC-SA 4.0 — Atribuição-NãoComercial-CompartilhaIgual: uso não comercial com crédito, derivações mantêm a mesma licença.',
+	'license.cc_by_nc_nd':
+		'CC BY-NC-ND 4.0 — Atribuição-NãoComercial-SemDerivações: a mais restritiva — só redistribuição não comercial, sem alterações, com crédito.',
 	// Agentes
 	'agents.singular': 'Agente',
 	'agents.page_title': 'Agentes — MyProvenance',

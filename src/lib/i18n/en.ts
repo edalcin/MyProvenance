@@ -249,7 +249,7 @@ export const en: Record<keyof typeof pt, string> = {
 	'activities.generated_entity_n': 'Generated entity {n}',
 	'activities.remove_generated_entity_aria': 'Remove generated entity',
 	'activities.format_placeholder': 'CSV, JSON…',
-	'activities.license_placeholder': 'CC-BY 4.0…',
+	'activities.license_placeholder': 'License URL or text…',
 	'activities.location_url_placeholder': 'URL or path',
 	'activities.add_generated_entity': 'Add generated entity',
 	'activities.rich_text_placeholder': 'Description (optional)…',
@@ -297,6 +297,22 @@ export const en: Record<keyof typeof pt, string> = {
 		'Which used Entity this is a new version of. E.g., the original raw spreadsheet, when recording its correction.',
 	'activities.hint.same_name':
 		"Keeps the Name identical to the revised Entity's, to represent the same file updated in place (same name, new content).",
+	// License pulldown (generated Entity)
+	'activities.license_none': 'None',
+	'activities.license_other': 'Other / custom',
+	'license.cc0': 'CC0 1.0 — Public Domain: no rights reserved, unrestricted free use.',
+	'license.cc_by':
+		'CC BY 4.0 — Attribution: allows commercial use and adaptations, requires credit to the author.',
+	'license.cc_by_sa':
+		'CC BY-SA 4.0 — Attribution-ShareAlike: like CC BY, but derivative works must use the same license.',
+	'license.cc_by_nd':
+		'CC BY-ND 4.0 — Attribution-NoDerivs: allows redistribution, unmodified, with credit.',
+	'license.cc_by_nc':
+		'CC BY-NC 4.0 — Attribution-NonCommercial: non-commercial use and adaptation, with credit to the author.',
+	'license.cc_by_nc_sa':
+		'CC BY-NC-SA 4.0 — Attribution-NonCommercial-ShareAlike: non-commercial use with credit, derivatives must share alike.',
+	'license.cc_by_nc_nd':
+		'CC BY-NC-ND 4.0 — Attribution-NonCommercial-NoDerivs: the most restrictive — non-commercial redistribution only, unmodified, with credit.',
 	// Agentes
 	'agents.singular': 'Agent',
 	'agents.page_title': 'Agents — MyProvenance',
