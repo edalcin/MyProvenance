@@ -22,6 +22,7 @@ export interface RegistroAdmin {
 	status: StatusRegistro;
 	criadoEm: string;
 	finalizadoEm: string | null;
+	donoId: string | null;
 	donoUsername: string | null;
 }
 
@@ -86,7 +87,7 @@ export const excluirUsuario = db.transaction((id: string): void => {
 
 const SELECT_TODOS_REGISTROS = `
 	SELECT r.id, r.titulo, r.descricao, r.status, r.criado_em AS criadoEm,
-	       r.finalizado_em AS finalizadoEm, u.username AS donoUsername
+	       r.finalizado_em AS finalizadoEm, r.usuario_id AS donoId, u.username AS donoUsername
 	FROM registros r LEFT JOIN usuarios u ON u.id = r.usuario_id
 `;
 const listarTodosRegistrosStmt = db.prepare(`${SELECT_TODOS_REGISTROS} ORDER BY r.criado_em DESC`);
@@ -99,11 +100,11 @@ export function listarTodosRegistros(): RegistroAdmin[] {
 
 export function atualizarRegistroAdmin(
 	id: string,
-	input: { titulo: string; descricao: string | null; status: StatusRegistro }
+	input: { titulo: string; descricao: string | null; status: StatusRegistro; donoId: string | null }
 ): RegistroAdmin {
 	db.prepare(
 		`UPDATE registros
-		 SET titulo = @titulo, descricao = @descricao, status = @status,
+		 SET titulo = @titulo, descricao = @descricao, status = @status, usuario_id = @donoId,
 		     finalizado_em = CASE WHEN @status = 'finalizado' THEN COALESCE(finalizado_em, @agora) ELSE NULL END
 		 WHERE id = @id`
 	).run({ ...input, id, agora: new Date().toISOString() });

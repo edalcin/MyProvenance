@@ -116,5 +116,7 @@ export function gerarRelatorioMarkdown(
 		linhas.push('');
 	}
 
+	linhas.push('---', '', t('report.footer'), 'https://github.com/edalcin/MyProvenance');
+
 	return linhas.join('\n');
 }

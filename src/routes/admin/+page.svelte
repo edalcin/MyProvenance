@@ -95,7 +95,7 @@
 				<AdminUsuarios usuarios={data.usuarios} />
 			</Tabs.Content>
 			<Tabs.Content value="registros">
-				<AdminRegistros registros={data.registros} />
+				<AdminRegistros registros={data.registros} usuarios={data.usuarios} />
 			</Tabs.Content>
 			<Tabs.Content value="agentes">
 				<AdminAgentes agentes={data.agentes} />

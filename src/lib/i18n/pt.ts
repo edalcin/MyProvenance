@@ -39,6 +39,7 @@ export const pt = {
 	'report.detail.params': 'Parâmetros',
 	'report.detail.os': 'SO',
 	'report.detail.packages': 'Pacotes',
+	'report.footer': 'Relatório de proveniência gerado pelo MyProvenance',
 	// Erros de dominio/API/validacao (contrato — servidor+cliente)
 	'error.auth_required': 'Autenticação necessária.',
 	'error.record_not_found': 'Registro não encontrado.',
@@ -371,6 +372,7 @@ export const pt = {
 	'admin.tab.backup': 'Backup',
 	'admin.tab.shares': 'Compartilhamentos',
 	'admin.owner': 'Dono',
+	'admin.owner_none': 'Nenhum (Registro anônimo)',
 	'admin.search_placeholder': 'Filtrar…',
 	'admin.reset_pin_label': 'Novo PIN (deixe em branco para manter)',
 	'admin.empty.users': 'Nenhum usuário.',

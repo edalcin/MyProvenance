@@ -37,7 +37,8 @@ describe('atualizarRegistroAdmin', () => {
 		const finalizado = atualizarRegistroAdmin(registro.id, {
 			titulo: registro.titulo,
 			descricao: null,
-			status: 'finalizado'
+			status: 'finalizado',
+			donoId: dono.id
 		});
 		expect(finalizado.status).toBe('finalizado');
 		expect(finalizado.finalizadoEm).not.toBeNull();
@@ -45,9 +46,34 @@ describe('atualizarRegistroAdmin', () => {
 		const voltouRascunho = atualizarRegistroAdmin(registro.id, {
 			titulo: registro.titulo,
 			descricao: null,
-			status: 'rascunho'
+			status: 'rascunho',
+			donoId: dono.id
 		});
 		expect(voltouRascunho.status).toBe('rascunho');
 		expect(voltouRascunho.finalizadoEm).toBeNull();
+	});
+
+	it('reatribui o dono (donoId) e permite tornar o registro anonimo (null)', () => {
+		const donoOriginal = criarUsuario({ username: 'teste_admin_dono_a', pin: '123456' });
+		const novoDono = criarUsuario({ username: 'teste_admin_dono_b', pin: '123456' });
+		const registro = criarRegistro(donoOriginal.id, { titulo: 'Registro para reatribuir' });
+
+		const reatribuido = atualizarRegistroAdmin(registro.id, {
+			titulo: registro.titulo,
+			descricao: null,
+			status: 'rascunho',
+			donoId: novoDono.id
+		});
+		expect(reatribuido.donoId).toBe(novoDono.id);
+		expect(reatribuido.donoUsername).toBe('teste_admin_dono_b');
+
+		const anonimizado = atualizarRegistroAdmin(registro.id, {
+			titulo: registro.titulo,
+			descricao: null,
+			status: 'rascunho',
+			donoId: null
+		});
+		expect(anonimizado.donoId).toBeNull();
+		expect(anonimizado.donoUsername).toBeNull();
 	});
 });

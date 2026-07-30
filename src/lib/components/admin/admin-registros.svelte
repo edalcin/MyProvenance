@@ -10,9 +10,9 @@
 	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
 	import { t } from '$lib/i18n/estado.svelte';
 	import type { StatusRegistro } from '$lib/types';
-	import type { RegistroAdmin } from '$lib/server/db/repositories/admin';
+	import type { RegistroAdmin, UsuarioAdmin } from '$lib/server/db/repositories/admin';
 
-	let { registros }: { registros: RegistroAdmin[] } = $props();
+	let { registros, usuarios }: { registros: RegistroAdmin[]; usuarios: UsuarioAdmin[] } = $props();
 
 	let itens = $state(untrack(() => registros));
 	let busca = $state('');
@@ -30,6 +30,7 @@
 	let formTitulo = $state('');
 	let formDescricao = $state('');
 	let formStatus: StatusRegistro = $state('rascunho');
+	let formDonoId = $state('');
 	let salvando = $state(false);
 
 	function abrirEdicao(registro: RegistroAdmin) {
@@ -37,6 +38,7 @@
 		formTitulo = registro.titulo;
 		formDescricao = registro.descricao ?? '';
 		formStatus = registro.status;
+		formDonoId = registro.donoId ?? '';
 		dialogAberto = true;
 	}
 
@@ -52,7 +54,8 @@
 					id: editando.id,
 					titulo: formTitulo.trim(),
 					descricao: formDescricao || null,
-					status: formStatus
+					status: formStatus,
+					donoId: formDonoId || null
 				})
 			});
 			if (!resposta.ok) {
@@ -139,6 +142,22 @@
 					<Select.Content>
 						{#each statusOpcoes as { valor, rotulo } (valor)}
 							<Select.Item value={valor} label={rotulo} />
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</div>
+			<div class="flex flex-col gap-1.5">
+				<Label for="admin-registro-dono">{t('admin.owner')}</Label>
+				<Select.Root type="single" bind:value={formDonoId}>
+					<Select.Trigger id="admin-registro-dono">
+						{formDonoId
+							? (usuarios.find((u) => u.id === formDonoId)?.username ?? formDonoId)
+							: t('admin.owner_none')}
+					</Select.Trigger>
+					<Select.Content>
+						<Select.Item value="" label={t('admin.owner_none')} />
+						{#each usuarios as usuario (usuario.id)}
+							<Select.Item value={usuario.id} label={usuario.username} />
 						{/each}
 					</Select.Content>
 				</Select.Root>

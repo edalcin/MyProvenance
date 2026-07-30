@@ -52,7 +52,8 @@ export const adminRegistroEditSchema = z.object({
 	id: z.uuid(),
 	titulo: z.string().trim().min(1, 'validation.title.required').max(300),
 	descricao: z.string().trim().max(20000).nullable().optional(),
-	status: z.enum(['rascunho', 'finalizado'])
+	status: z.enum(['rascunho', 'finalizado']),
+	donoId: z.uuid().nullable()
 });
 export const adminAgenteEditSchema = agenteInputSchema.extend({ id: z.uuid() });
 export const adminCompartilhamentoEditSchema = z.object({

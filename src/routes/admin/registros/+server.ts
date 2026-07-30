@@ -12,7 +12,8 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		atualizarRegistroAdmin(input.id, {
 			titulo: input.titulo,
 			descricao: input.descricao ? sanitizarHtmlRico(input.descricao) : null,
-			status: input.status
+			status: input.status,
+			donoId: input.donoId
 		})
 	);
 };
