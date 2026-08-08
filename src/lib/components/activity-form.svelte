@@ -239,6 +239,33 @@
 		entidadesGeradas = [...entidadesGeradas, entidadeGeradaVazia()];
 	}
 
+	/** Entidades usadas que ainda nao tem uma Entidade gerada marcada como Revisao delas. */
+	const usadasSemRevisao = $derived.by(() => {
+		const revisadas = new Set(
+			entidadesGeradas.filter((e) => e.tipoRelacaoOrigem === 'revisao').map((e) => e.revisaoDeId)
+		);
+		return entidadesUsadas.filter((id) => !revisadas.has(id));
+	});
+
+	/** Uma Revisao e' 1:1 com sua fonte (prov:wasRevisionOf), entao N entradas revisadas = N Entidades
+	 * geradas. Cria/completa um bloco de Revisao por Entidade usada ainda sem revisao, reaproveitando
+	 * blocos ainda em branco. */
+	function revisarTodasUsadas() {
+		const blocos = [...entidadesGeradas];
+		for (const fonteId of usadasSemRevisao) {
+			let bloco = blocos.find((b) => !b.nome.trim() && !b.tipoRelacaoOrigem);
+			if (!bloco) {
+				bloco = entidadeGeradaVazia();
+				blocos.push(bloco);
+			}
+			bloco.tipoRelacaoOrigem = 'revisao';
+			bloco.revisaoDeId = fonteId;
+			bloco.mesmoNomeQueOrigem = true;
+			prefillRevisao(bloco, fonteId);
+		}
+		entidadesGeradas = blocos;
+	}
+
 	function removerEntidadeGerada(indice: number) {
 		entidadesGeradas = entidadesGeradas.filter((_, i) => i !== indice);
 	}
@@ -652,10 +679,18 @@
 				{/if}
 			</div>
 		{/each}
-		<Button type="button" variant="outline" size="sm" onclick={adicionarEntidadeGerada}>
-			<i class="bx bx-plus"></i>
-			{t('activities.add_generated_entity')}
-		</Button>
+		<div class="flex flex-wrap gap-2">
+			<Button type="button" variant="outline" size="sm" onclick={adicionarEntidadeGerada}>
+				<i class="bx bx-plus"></i>
+				{t('activities.add_generated_entity')}
+			</Button>
+			{#if usadasSemRevisao.length > 0}
+				<Button type="button" variant="outline" size="sm" onclick={revisarTodasUsadas}>
+					<i class="bx bx-git-compare"></i>
+					{t('activities.revise_all_used', { n: usadasSemRevisao.length })}
+				</Button>
+			{/if}
+		</div>
 	</div>
 
 	<div class="flex gap-2">

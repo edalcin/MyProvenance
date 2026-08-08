@@ -261,6 +261,7 @@ export const pt = {
 	'activities.revision_of_label': 'Revisão de',
 	'activities.revision_source_placeholder': 'Selecionar Entidade de entrada…',
 	'activities.same_name_as_source': 'Mesmo nome da Entidade revisada',
+	'activities.revise_all_used': 'Revisar Entidades usadas ({n})',
 	// Dicas de campo (tooltip "?")
 	'activities.hint.agent':
 		'Quem ou o que realizou esta Atividade — Pessoa, Instituição ou Software. Ex.: "Camila Dantas" ou "OpenRefine 3.7".',
@@ -295,7 +296,7 @@ export const pt = {
 	'activities.hint.relation':
 		'Como esta Entidade se relaciona com as Entidades usadas: Derivação (nasce das entradas, identidade nova, ex.: um subconjunto filtrado) ou Revisão (nova versão da mesma Entidade de entrada, ex.: corrigindo um erro).',
 	'activities.hint.revision_of':
-		'Qual Entidade usada esta é uma nova versão de. Ex.: a planilha bruta original, ao registrar sua correção.',
+		'Qual Entidade usada esta é uma nova versão de. Cada Revisão corresponde a uma única Entidade de entrada — para revisar várias na mesma Atividade, registre uma Entidade gerada para cada uma (botão "Revisar Entidades usadas"). Ex.: a planilha bruta original, ao registrar sua correção.',
 	'activities.hint.same_name':
 		'Mantém o Nome idêntico ao da Entidade revisada, para representar o mesmo arquivo atualizado no lugar (mesmo nome, conteúdo novo).',
 	// Pulldown de licenca (Entidade gerada)

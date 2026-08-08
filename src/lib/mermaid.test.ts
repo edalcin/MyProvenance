@@ -115,6 +115,45 @@ describe('gerarDiagramaMermaid', () => {
 		);
 	});
 
+	it('Atividade que revisa duas Entidades liga cada revisao so a sua fonte', () => {
+		const e1 = entidade('e1', 'vernacularMartius', 'a1');
+		const e2 = entidade('e2', 'dicVernacularMartius', 'a1');
+		const r1 = {
+			...entidade('r1e', 'vernacularMartius', 'a2'),
+			tipoRelacaoOrigem: 'revisao' as const,
+			revisaoDeId: 'e1'
+		};
+		const r2 = {
+			...entidade('r2e', 'dicVernacularMartius', 'a2'),
+			tipoRelacaoOrigem: 'revisao' as const,
+			revisaoDeId: 'e2'
+		};
+		const a1 = atividade({
+			id: 'a1',
+			tipo: 'criacao',
+			entidadesUsadas: [],
+			entidadesGeradas: ['e1', 'e2']
+		});
+		const a2 = atividade({
+			id: 'a2',
+			tipo: 'transformacao',
+			entidadesUsadas: ['e1', 'e2'],
+			entidadesGeradas: ['r1e', 'r2e'],
+			descricao: 'revisao'
+		});
+		const saida = gerarDiagramaMermaid({
+			entidades: [e1, e2, r1, r2],
+			atividades: [a1, a2],
+			agentesEnvolvidos: [agente]
+		});
+		const setas = saida.split('\n').filter((l) => l.includes('->'));
+		expect(setas).toHaveLength(2);
+		expect(setas[0]).toContain('E1 -.->');
+		expect(setas[0]).toContain('E3');
+		expect(setas[1]).toContain('E2 -.->');
+		expect(setas[1]).toContain('E4');
+	});
+
 	it('Entidade gerada em revisao ganha classDef/class de destaque no no', () => {
 		const e1 = entidade('e1', 'bruto.csv', 'a1');
 		const e2 = {

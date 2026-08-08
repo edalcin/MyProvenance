@@ -42,7 +42,9 @@ export function gerarDiagramaMermaid(
 			for (const usadaId of atividade.entidadesUsadas) {
 				const origem = idDoNo.get(usadaId);
 				if (!origem) continue;
-				if (gerada?.tipoRelacaoOrigem === 'revisao' && gerada.revisaoDeId === usadaId) {
+				if (gerada?.tipoRelacaoOrigem === 'revisao') {
+					// Revisao e' 1:1 com a fonte: as outras Entidades usadas nao geraram esta.
+					if (gerada.revisaoDeId !== usadaId) continue;
 					linhas.push(
 						`  ${origem} -.->|"${rotulo} (${traduzir(locale, 'relation.revision')})"| ${destino}`
 					);

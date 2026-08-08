@@ -261,6 +261,7 @@ export const en: Record<keyof typeof pt, string> = {
 	'activities.revision_of_label': 'Revision of',
 	'activities.revision_source_placeholder': 'Select input entity…',
 	'activities.same_name_as_source': 'Same name as the revised Entity',
+	'activities.revise_all_used': 'Revise used Entities ({n})',
 	// Field hints (tooltip "?")
 	'activities.hint.agent':
 		'Who or what carried out this Activity — Person, Institution or Software. E.g., "Camila Dantas" or "OpenRefine 3.7".',
@@ -295,7 +296,7 @@ export const en: Record<keyof typeof pt, string> = {
 	'activities.hint.relation':
 		'How this Entity relates to the used Entities: Derivation (born from the inputs, new identity, e.g., a filtered subset) or Revision (new version of the same input Entity, e.g., fixing an error).',
 	'activities.hint.revision_of':
-		'Which used Entity this is a new version of. E.g., the original raw spreadsheet, when recording its correction.',
+		'Which used Entity this is a new version of. Each Revision maps to exactly one input Entity — to revise several in the same Activity, record one generated Entity for each ("Revise used Entities" button). E.g., the original raw spreadsheet, when recording its correction.',
 	'activities.hint.same_name':
 		"Keeps the Name identical to the revised Entity's, to represent the same file updated in place (same name, new content).",
 	// License pulldown (generated Entity)
