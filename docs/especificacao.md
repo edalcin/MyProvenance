@@ -36,7 +36,7 @@ Sem **Conta**: só existe em memória no navegador (sem `usuarioId`, nunca grava
 | `descricao`            | texto                  | não         | sobre o artefato (o que ele é/contém) — distinta de `Atividade.descricao` (§2.3), que é sobre o processo |
 | `formato`              | texto                  | não         | livre, com sugestões: CSV, TSV, XLSX, ODS, JSON, Parquet, GeoTIFF, Shapefile, GeoJSON        |
 | `localizacao`          | texto (URL ou caminho) | não         | onde o dado real está guardado, fora da ferramenta                                           |
-| `licenca`              | texto                  | não         | ex.: CC-BY 4.0, ou URL da licença                                                            |
+| `licenca`              | texto                  | não         | ex.: CC-BY 4.0, ou URL da licença — UI oferece pulldown com as 7 licenças CC mais comuns + "Outra/personalizada" para texto livre |
 | `geradaPorAtividadeId` | UUIDv7                 | sim         | toda Entidade nasce de exatamente 1 Atividade (Criação, Transformação, ou Análise com saída) |
 
 ### 2.3 Atividade
@@ -331,7 +331,7 @@ Gestão global (todas as Contas, todos os Registros/Agentes/compartilhamentos, s
 | `/admin/entrar`            | POST         | valida `ADM_PWD` (rate limited), seta cookie de sessão admin                                   |
 | `/admin/sair`              | POST         | encerra a sessão admin                                                                         |
 | `/admin/usuarios`          | PATCH/DELETE | edita username/PIN de uma Conta / exclui em cascata (Registros, Agentes, compartilhamentos)    |
-| `/admin/registros`         | PATCH/DELETE | edita título/status ou exclui qualquer Registro, de qualquer Conta                             |
+| `/admin/registros`         | PATCH/DELETE | edita título/status/dono (reatribui `usuario_id`, ou `null` para tornar anônimo) ou exclui qualquer Registro, de qualquer Conta |
 | `/admin/agentes`           | PATCH/DELETE | edita ou exclui qualquer Agente, de qualquer Conta                                             |
 | `/admin/compartilhamentos` | PATCH/DELETE | altera o papel ou remove um compartilhamento entre Contas                                      |
 | `/admin/backup`            | GET          | baixa uma cópia (`db.serialize()`) do SQLite inteiro, consistente, sem bloquear a conexão viva |

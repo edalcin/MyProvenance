@@ -22,10 +22,11 @@ Todo campo do formulário tem um ícone `?` ao lado do rótulo — passe o mouse
 6. Campos específicos por tipo:
     - **Criação**: `Local` e `Ferramenta ou Software` (de onde e com o quê o dado foi originado).
     - **Transformação/Análise**: `Processo` (o que foi feito), parâmetros (`Chave`/`Valor`) e `Ambiente de execução — sistema operacional`.
-7. Em `Entidades geradas`, clique em `Adicionar Entidade gerada` para cada saída, preenchendo `Nome`, `Formato`, `Licença`, `Localização` e `Descrição` — aqui, `Descrição` é sobre o artefato em si (o que ele é/contém), não sobre o processo que o gerou.
+7. Em `Entidades geradas`, clique em `Adicionar Entidade gerada` para cada saída, preenchendo `Nome`, `Formato`, `Licença` — pulldown com as 7 licenças Creative Commons mais usadas (CC0, BY, BY-SA, BY-ND, BY-NC, BY-NC-SA, BY-NC-ND; passe o mouse sobre uma opção para ver a explicação breve), ou `Outra / personalizada` para digitar uma URL ou outro texto livre —, `Localização` e `Descrição` — aqui, `Descrição` é sobre o artefato em si (o que ele é/contém), não sobre o processo que o gerou.
 8. Se houver `Entidades usadas` marcadas (em qualquer tipo, inclusive Criação com entrada opcional), cada Entidade gerada ganha o seletor `Relação com a origem`: `Nenhuma`, `Derivação` ou `Revisão` (esta última pede `Revisão de`, apontando para qual Entidade usada ela substitui). `Derivação` sempre representa uma Entidade com identidade nova — para manter o mesmo nome do arquivo transformado, use `Revisão`.
 9. Quando a Relação é `Revisão` e a Entidade revisada já foi escolhida em `Revisão de`, aparece o checkbox `Mesmo nome da Entidade revisada` ao lado do campo `Nome` — marque para copiar o nome da Entidade revisada e travar o campo (somente leitura) enquanto ativo; desmarque para voltar a digitar um nome diferente.
-10. Clique em `Adicionar Atividade` para salvar.
+10. Se houver mais de uma `Entidade usada` ainda sem uma Revisão registrada, o botão `Revisar Entidades usadas (N)` (ao lado de `Adicionar Entidade gerada`) cria de uma vez uma Entidade gerada por Entidade usada pendente — cada uma já como `Revisão` da respectiva origem e com o mesmo nome — sem precisar repetir os passos 7-9 para cada arquivo.
+11. Clique em `Adicionar Atividade` para salvar.
 
 ## Cardinalidade por tipo
 
@@ -56,6 +57,8 @@ Todo campo do formulário tem um ícone `?` ao lado do rótulo — passe o mouse
 > 🔗 **Padrão:** a Atividade é um `prov:Activity`; usar uma Entidade existente é `prov:used`; gerar uma nova é `prov:wasGeneratedBy`; o Agente responsável é `prov:wasAssociatedWith`. `Derivação` mapeia para `prov:wasDerivedFrom`, `Revisão` para `prov:wasRevisionOf`.
 
 > 💡 **Dica:** mais de uma Entidade pode ser gerada pela mesma Atividade — útil quando um único processo produz vários arquivos de saída (ex.: uma tabela e um gráfico).
+
+> 💡 **Dica:** com várias `Entidades usadas` na mesma Atividade, o botão `Revisar Entidades usadas (N)` cria uma Entidade gerada por Entidade usada pendente de uma vez, cada uma já marcada como `Revisão` da correspondente e com o mesmo nome — útil quando a mesma Atividade revisa vários arquivos de entrada (ex.: duas tabelas corrigidas juntas). `prov:wasRevisionOf` é 1:1 com a fonte, então cada Entidade usada pendente ganha sua própria Entidade gerada.
 
 > 💡 **Dica:** use `Mesmo nome da Entidade revisada` quando a Transformação altera o arquivo no lugar (mesmo nome, conteúdo novo) — evita digitar o nome de novo e mantém Nome e `Revisão de` sempre em sincronia; se depois trocar a Entidade revisada com o checkbox marcado, o Nome acompanha automaticamente. Esse checkbox só existe para `Revisão`: `Derivação` sempre gera um nome de Entidade novo/diferente, por representar uma identidade distinta da origem (ex.: um subconjunto filtrado).
 
