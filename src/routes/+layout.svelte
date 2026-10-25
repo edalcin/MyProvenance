@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import './layout.css';
 	import 'boxicons/css/boxicons.min.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '#lib/assets/favicon.svg';
 	import { ModeWatcher } from 'mode-watcher';
-	import { Toaster } from '$lib/components/ui/sonner';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import AppNav from '$lib/components/app-nav.svelte';
-	import AnonimoBanner from '$lib/components/anonimo-banner.svelte';
-	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
-	import { idiomaAtual } from '$lib/i18n/estado.svelte';
-	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
+	import { Toaster } from '#lib/components/ui/sonner/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import AppNav from '#lib/components/app-nav.svelte';
+	import AnonimoBanner from '#lib/components/anonimo-banner.svelte';
+	import { usuarioAtual } from '#lib/client/usuario-atual.svelte.js';
+	import { idiomaAtual } from '#lib/i18n/estado.svelte.js';
+	import { sessaoAnonima } from '#lib/client/sessao-anonima.svelte.js';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: import('svelte').Snippet } = $props();
@@ -19,14 +19,6 @@
 	untrack(() => {
 		usuarioAtual.definir(data.usuario);
 		idiomaAtual.definir(data.idioma);
-	});
-
-	// PWA offline-leitura (ADR-0006): adapter-node nao tem HTML unico para o plugin injetar
-	// registro automatico, entao registra manualmente. manifest.webmanifest ja linkado no app.html.
-	onMount(() => {
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('/sw.js').catch(() => {});
-		}
 	});
 
 	// Aviso nativo se tentar fechar/recarregar anonimo com dado nao exportado (ADR-0009).

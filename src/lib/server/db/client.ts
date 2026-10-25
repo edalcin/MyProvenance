@@ -1,10 +1,8 @@
 import Database from 'better-sqlite3';
-import { env } from '$env/dynamic/private';
+import { DB_PATH } from '$app/env/private';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import schema from './schema.sql?raw';
-
-export const DB_PATH = env.DB_PATH || './data/myprovenance.sqlite';
 
 if (DB_PATH !== ':memory:') {
 	mkdirSync(dirname(resolve(DB_PATH)), { recursive: true });

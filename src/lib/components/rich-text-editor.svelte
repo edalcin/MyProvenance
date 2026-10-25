@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Editor as EditorInstance } from '@tiptap/core';
-	import { Button } from '$lib/components/ui/button';
-	import { t } from '$lib/i18n/estado.svelte';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { t } from '#lib/i18n/estado.svelte.js';
 
 	/**
 	 * Niveis de heading e marcas aqui DEVEM bater com o allowlist de

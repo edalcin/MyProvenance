@@ -3,22 +3,27 @@
 	import { page } from '$app/state';
 	import { mode, toggleMode } from 'mode-watcher';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
-	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
-	import { COOKIE_IDIOMA } from '$lib/i18n';
-	import { idiomaAtual, t, msgErro } from '$lib/i18n/estado.svelte';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { usuarioAtual } from '#lib/client/usuario-atual.svelte.js';
+	import { sessaoAnonima } from '#lib/client/sessao-anonima.svelte.js';
+	import { COOKIE_IDIOMA } from '#lib/i18n/index.js';
+	import { idiomaAtual, t, msgErro } from '#lib/i18n/estado.svelte.js';
 	import EntrarDialog from './entrar-dialog.svelte';
 	import CriarContaDialog from './criar-conta-dialog.svelte';
 
 	// ponytail: nav sem menu hambúrguer; se lotar no mobile vira ajuste visual à parte.
 	const links = $derived([
-		{ href: resolve('/registros'), label: t('nav.records') },
-		{ href: resolve('/agentes'), label: t('nav.agents') },
-		{ href: resolve('/como-usar'), label: t('nav.howto') },
-		{ href: resolve('/sobre'), label: t('nav.about') },
-		{ href: 'https://edalcin.github.io/MyProvenance/', label: t('nav.manual'), external: true },
-		...(page.data.adminHabilitado ? [{ href: resolve('/admin'), label: t('nav.admin') }] : [])
+		{ href: resolve('registros'), label: t('nav.records') },
+		{ href: resolve('agentes'), label: t('nav.agents') },
+		{ href: resolve('como-usar'), label: t('nav.howto') },
+		{ href: resolve('sobre'), label: t('nav.about') },
+		{
+			href: 'https://edalcin.github.io/MyProvenance/',
+			label: t('nav.manual'),
+			external: true
+		},
+
+		...(page.data.adminHabilitado ? [{ href: resolve('admin'), label: t('nav.admin') }] : [])
 	]);
 
 	// Link publico (/compartilhar/:token): visitante sem sessao, pagina somente leitura — nao
@@ -30,7 +35,11 @@
 	async function sair() {
 		saindo = true;
 		try {
-			await fetch('/auth/sair', { method: 'POST' });
+			// content-type: ver SEM_CORPO em #lib/client/dados.ts (CSRF do SvelteKit 3).
+			await fetch('/auth/sair', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' }
+			});
 			window.location.reload();
 		} catch (err) {
 			toast.error(msgErro(err, 'error.sign_out_failed'));
@@ -48,7 +57,7 @@
 
 <header class="border-border bg-background/95 sticky top-0 z-40 border-b backdrop-blur">
 	<div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4">
-		<a href={resolve('/registros')} class="flex items-center gap-2 font-semibold tracking-tight">
+		<a href={resolve('registros')} class="flex items-center gap-2 font-semibold tracking-tight">
 			<i class="bx bx-git-branch text-primary text-xl"></i>
 			MyProvenance
 		</a>
@@ -95,10 +104,9 @@
 			href="https://github.com/edalcin/MyProvenance"
 			target="_blank"
 			rel="noopener noreferrer"
-			aria-label={t('nav.github')}
+			aria-label={t('nav.github')}><i class="bx bxl-github"></i></Button
 		>
-			<i class="bx bxl-github"></i>
-		</Button>
+
 		<Button variant="ghost" size="icon-sm" onclick={toggleMode} aria-label={t('nav.theme')}>
 			<i class="bx {mode.current === 'dark' ? 'bx-moon' : 'bx-sun'}"></i>
 		</Button>

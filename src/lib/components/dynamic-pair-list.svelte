@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Input } from '$lib/components/ui/input';
-	import { Button } from '$lib/components/ui/button';
-	import { t } from '$lib/i18n/estado.svelte';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { t } from '#lib/i18n/estado.svelte.js';
 
 	interface Par {
 		a: string;

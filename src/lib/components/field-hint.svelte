@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
 
 	/** Icone "?" com tooltip explicando e exemplificando um campo de formulario. */
 	let { texto }: { texto: string } = $props();

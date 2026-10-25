@@ -1,9 +1,9 @@
-import { error, json } from '@sveltejs/kit';
-import { dev } from '$app/environment';
-import { registrarUsuarioSchema } from '$lib/schemas';
-import { parseBody } from '$lib/server/api-utils';
-import { criarUsuario, obterUsuarioPorUsername } from '$lib/server/db/repositories/usuarios';
-import { criarSessao } from '$lib/server/db/repositories/sessoes';
+import { error } from '@sveltejs/kit';
+import { dev } from '$app/env';
+import { registrarUsuarioSchema } from '#lib/schemas.js';
+import { parseBody } from '#lib/server/api-utils.js';
+import { criarUsuario, obterUsuarioPorUsername } from '#lib/server/db/repositories/usuarios.js';
+import { criarSessao } from '#lib/server/db/repositories/sessoes.js';
 import { COOKIE_SESSAO } from '../../../hooks.server';
 import type { RequestHandler } from './$types';
 
@@ -21,5 +21,5 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		sameSite: 'lax',
 		expires: new Date(expiraEm)
 	});
-	return json(usuario, { status: 201 });
+	return Response.json(usuario, { status: 201 });
 };

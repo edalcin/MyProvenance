@@ -121,7 +121,10 @@ describe('deOutraConta em agentesEnvolvidos (Registro compartilhado)', () => {
 		const dono = criarUsuario({ username: 'dono_agentes_registro', pin: '123456' }).id;
 		const editor = criarUsuario({ username: 'editor_agentes_registro', pin: '654321' }).id;
 		const registro = criarRegistro(dono, { titulo: 'Registro com dois coeditores' });
-		compartilharComUsuario(registro.id, dono, { username: 'editor_agentes_registro', papel: 'editor' });
+		compartilharComUsuario(registro.id, dono, {
+			username: 'editor_agentes_registro',
+			papel: 'editor'
+		});
 
 		const agenteDono = criarAgente(dono, { nome: 'Agente do Dono', tipo: 'pessoa' });
 		const agenteEditor = criarAgente(editor, { nome: 'Agente do Editor', tipo: 'pessoa' });

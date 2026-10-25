@@ -14,13 +14,13 @@ import type {
 	RegistroDetalhado,
 	RegistroProvenencia,
 	TipoAgente
-} from '$lib/types';
+} from '#lib/types.js';
 import type {
 	AtualizarAtividadeInput,
 	CompartilharUsuarioInput,
 	CriarAtividadeInput,
 	RegistroExportadoValidado
-} from '$lib/schemas';
+} from '#lib/schemas.js';
 
 interface Pagina<T> {
 	items: T[];
@@ -99,15 +99,26 @@ export async function alterarDirecaoDiagrama(
 	return resposta.json();
 }
 
+// SvelteKit 3 trata POST/DELETE sem Content-Type como form e aplica o check de CSRF por origem —
+// que falha em acesso http direto (adapter-node assume https sem PROTOCOL_HEADER). Content-Type
+// JSON tira a requisicao desse check (cross-origin real exige preflight CORS de qualquer forma).
+const SEM_CORPO = { 'content-type': 'application/json' };
+
 /** Compartilhamento so existe para Conta (link publico exige Registro persistido no servidor). */
 export async function ativarCompartilhamento(id: string): Promise<RegistroProvenencia> {
-	const resposta = await fetch(`/registros/${id}/compartilhar`, { method: 'POST' });
+	const resposta = await fetch(`/registros/${id}/compartilhar`, {
+		method: 'POST',
+		headers: SEM_CORPO
+	});
 	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_record_failed');
 	return resposta.json();
 }
 
 export async function desativarCompartilhamento(id: string): Promise<RegistroProvenencia> {
-	const resposta = await fetch(`/registros/${id}/compartilhar`, { method: 'DELETE' });
+	const resposta = await fetch(`/registros/${id}/compartilhar`, {
+		method: 'DELETE',
+		headers: SEM_CORPO
+	});
 	if (!resposta.ok) throw await extrairErro(resposta, 'error.update_record_failed');
 	return resposta.json();
 }
@@ -148,13 +159,16 @@ export async function removerCompartilhamento(
 
 export async function excluirRegistro(id: string): Promise<void> {
 	if (!autenticado()) return sessaoAnonima.excluirRegistro(id);
-	const resposta = await fetch(`/registros/${id}`, { method: 'DELETE' });
+	const resposta = await fetch(`/registros/${id}`, { method: 'DELETE', headers: SEM_CORPO });
 	if (!resposta.ok) throw await extrairErro(resposta, 'error.delete_record_failed');
 }
 
 export async function finalizarRegistro(id: string): Promise<RegistroProvenencia> {
 	if (!autenticado()) return sessaoAnonima.finalizarRegistro(id);
-	const resposta = await fetch(`/registros/${id}/finalizar`, { method: 'POST' });
+	const resposta = await fetch(`/registros/${id}/finalizar`, {
+		method: 'POST',
+		headers: SEM_CORPO
+	});
 	if (!resposta.ok) throw await extrairErro(resposta, 'error.finalize_record_failed');
 	return resposta.json();
 }
@@ -216,7 +230,8 @@ export async function atualizarAtividade(
 export async function excluirAtividade(registroId: string, atividadeId: string): Promise<void> {
 	if (!autenticado()) return sessaoAnonima.excluirAtividade(registroId, atividadeId);
 	const resposta = await fetch(`/registros/${registroId}/atividades/${atividadeId}`, {
-		method: 'DELETE'
+		method: 'DELETE',
+		headers: SEM_CORPO
 	});
 	if (!resposta.ok) throw await extrairErro(resposta, 'error.delete_activity_failed');
 }
@@ -283,6 +298,6 @@ export async function atualizarAgente(
 
 export async function excluirAgente(id: string): Promise<void> {
 	if (!autenticado()) return sessaoAnonima.excluirAgente(id);
-	const resposta = await fetch(`/agentes/${id}`, { method: 'DELETE' });
+	const resposta = await fetch(`/agentes/${id}`, { method: 'DELETE', headers: SEM_CORPO });
 	if (!resposta.ok) throw await extrairErro(resposta, 'error.delete_agent_failed');
 }

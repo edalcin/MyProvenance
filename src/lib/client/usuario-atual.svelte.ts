@@ -2,7 +2,7 @@
  * Usuario autenticado da sessao atual — hidratado por +layout.server.ts (ADR-0009).
  * `dados.ts` consulta isto para decidir fetch (autenticado) vs sessao anonima local.
  */
-import type { Usuario } from '$lib/types';
+import type { Usuario } from '#lib/types.js';
 
 let usuario = $state<Usuario | null>(null);
 

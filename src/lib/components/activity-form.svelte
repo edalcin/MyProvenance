@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Textarea } from '$lib/components/ui/textarea';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-	import AgentPicker from '$lib/components/agent-picker.svelte';
-	import FieldHint from '$lib/components/field-hint.svelte';
-	import * as Select from '$lib/components/ui/select';
-	import DynamicPairList from '$lib/components/dynamic-pair-list.svelte';
-	import { LICENCAS_CC, ehLicencaPersonalizada } from '$lib/licencas-cc';
-	import type { Agente, Atividade, Entidade, TipoAtividade } from '$lib/types';
-	import * as dados from '$lib/client/dados';
-	import { t, idiomaAtual, msgErro } from '$lib/i18n/estado.svelte';
-	import { formatarDataSemHora } from '$lib/format';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Textarea } from '#lib/components/ui/textarea/index.js';
+	import { Checkbox } from '#lib/components/ui/checkbox/index.js';
+	import AgentPicker from '#lib/components/agent-picker.svelte';
+	import FieldHint from '#lib/components/field-hint.svelte';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import DynamicPairList from '#lib/components/dynamic-pair-list.svelte';
+	import { LICENCAS_CC, ehLicencaPersonalizada } from '#lib/licencas-cc.js';
+	import type { Agente, Atividade, Entidade, TipoAtividade } from '#lib/types.js';
+	import * as dados from '#lib/client/dados.js';
+	import { t, idiomaAtual, msgErro } from '#lib/i18n/estado.svelte.js';
+	import { formatarDataSemHora } from '#lib/format.js';
 
 	let {
 		tipo,

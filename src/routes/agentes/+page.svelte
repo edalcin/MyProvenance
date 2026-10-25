@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { onVisible } from '$lib/actions/on-visible';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Select from '$lib/components/ui/select';
-	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
-	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
-	import * as dados from '$lib/client/dados';
-	import type { Agente, TipoAgente } from '$lib/types';
+	import { onVisible } from '#lib/actions/on-visible.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import { usuarioAtual } from '#lib/client/usuario-atual.svelte.js';
+	import { sessaoAnonima } from '#lib/client/sessao-anonima.svelte.js';
+	import * as dados from '#lib/client/dados.js';
+	import type { Agente, TipoAgente } from '#lib/types.js';
 	import type { PageData } from './$types';
-	import { t, msgErro } from '$lib/i18n/estado.svelte';
+	import { t, msgErro } from '#lib/i18n/estado.svelte.js';
 
 	let { data }: { data: PageData } = $props();
 

@@ -1,4 +1,4 @@
-import { SCHEMA_VERSION, type RegistroDetalhado, type RegistroExportado } from '$lib/types';
+import { SCHEMA_VERSION, type RegistroDetalhado, type RegistroExportado } from '#lib/types.js';
 
 /** Formato do JSON exportado/importado — docs/especificacao.md §4. */
 export function gerarJsonExportado(detalhe: RegistroDetalhado): RegistroExportado {

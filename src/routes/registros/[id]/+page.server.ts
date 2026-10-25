@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { obterRegistroDetalhado } from '$lib/server/db/repositories/registros';
-import { traduzir } from '$lib/i18n';
+import { obterRegistroDetalhado } from '#lib/server/db/repositories/registros.js';
+import { traduzir } from '#lib/i18n/index.js';
 import type { PageServerLoad } from './$types';
 
 /** Anonimo (sem conta): o detalhe vem da sessao local do cliente ($lib/client/dados) — null aqui. */

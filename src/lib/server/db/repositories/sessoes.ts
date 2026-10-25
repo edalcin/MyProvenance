@@ -1,6 +1,6 @@
 import { db } from '../client';
-import type { Usuario } from '$lib/types';
-import { gerarTokenSessao, hashToken } from '$lib/server/auth';
+import type { Usuario } from '#lib/types.js';
+import { gerarTokenSessao, hashToken } from '#lib/server/auth.js';
 
 const DURACAO_SESSAO_MS = 30 * 24 * 60 * 60 * 1000; // 30 dias, renovada a cada uso (sliding)
 

@@ -8,9 +8,9 @@ import {
 	RegraCardinalidadeError,
 	validarCardinalidade,
 	validarRelacoesGeradas
-} from '$lib/cardinalidade';
-import { sanitizarHtmlRico } from '$lib/sanitize';
-import type { RegistroExportadoValidado } from '$lib/schemas';
+} from '#lib/cardinalidade.js';
+import { sanitizarHtmlRico } from '#lib/sanitize.js';
+import type { RegistroExportadoValidado } from '#lib/schemas.js';
 import type {
 	Agente,
 	AmbienteExecucao,
@@ -21,7 +21,7 @@ import type {
 	RegistroProvenencia,
 	TipoAgente,
 	TipoAtividade
-} from '$lib/types';
+} from '#lib/types.js';
 
 export class RegistroJaFinalizadoError extends Error {}
 export class RegistroNaoEncontradoError extends Error {}

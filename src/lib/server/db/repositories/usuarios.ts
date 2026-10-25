@@ -1,7 +1,7 @@
 import { uuidv7 } from 'uuidv7';
 import { db } from '../client';
-import type { Usuario } from '$lib/types';
-import { gerarSaltHex, hashPin, verificarPin } from '$lib/server/auth';
+import type { Usuario } from '#lib/types.js';
+import { gerarSaltHex, hashPin, verificarPin } from '#lib/server/auth.js';
 
 interface UsuarioRow {
 	id: string;

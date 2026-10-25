@@ -3,7 +3,7 @@ import {
 	listarTodosRegistros,
 	listarTodosAgentes,
 	listarTodosCompartilhamentos
-} from '$lib/server/db/repositories/admin';
+} from '#lib/server/db/repositories/admin.js';
 import type { PageServerLoad } from './$types';
 
 // ponytail: sem paginacao — carrega todas as linhas e filtra no cliente (volume de instancia

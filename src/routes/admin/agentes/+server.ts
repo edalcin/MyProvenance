@@ -1,13 +1,13 @@
-import { error, json } from '@sveltejs/kit';
-import { adminAgenteEditSchema } from '$lib/schemas';
-import { parseBody, toApiError } from '$lib/server/api-utils';
-import { atualizarAgenteAdmin, excluirAgenteAdmin } from '$lib/server/db/repositories/admin';
+import { error } from '@sveltejs/kit';
+import { adminAgenteEditSchema } from '#lib/schemas.js';
+import { parseBody, toApiError } from '#lib/server/api-utils.js';
+import { atualizarAgenteAdmin, excluirAgenteAdmin } from '#lib/server/db/repositories/admin.js';
 import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ request, locals }) => {
 	if (!locals.admin) error(401, 'error.admin_required');
 	const input = await parseBody(request, adminAgenteEditSchema);
-	return json(atualizarAgenteAdmin(input.id, input));
+	return Response.json(atualizarAgenteAdmin(input.id, input));
 };
 
 /** 409 se o Agente estiver em uso por alguma Atividade (FK). */

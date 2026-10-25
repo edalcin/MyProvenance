@@ -7,9 +7,9 @@ import type {
 	RegistroDetalhado,
 	RegistroProvenencia,
 	StatusRegistro
-} from '$lib/types';
-import { papelAtendeMinimo } from '$lib/types';
-import { gerarTokenCompartilhamento } from '$lib/server/auth';
+} from '#lib/types.js';
+import { papelAtendeMinimo } from '#lib/types.js';
+import { gerarTokenCompartilhamento } from '#lib/server/auth.js';
 import { obterAgentePorId } from './agentes';
 import { listarEntidadesPorRegistro } from './entidades';
 import { listarAtividadesPorRegistro } from './atividades';

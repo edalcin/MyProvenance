@@ -1,7 +1,7 @@
-import { error, json } from '@sveltejs/kit';
-import { criarAtividade } from '$lib/server/db/repositories/atividades';
-import { criarAtividadeInputSchema } from '$lib/schemas';
-import { parseBody, toApiError } from '$lib/server/api-utils';
+import { error } from '@sveltejs/kit';
+import { criarAtividade } from '#lib/server/db/repositories/atividades.js';
+import { criarAtividadeInputSchema } from '#lib/schemas.js';
+import { parseBody, toApiError } from '#lib/server/api-utils.js';
 import type { RequestHandler } from './$types';
 
 /** Sempre permitido, mesmo com Registro finalizado — finalizado so bloqueia editar/excluir historico (ADR-0003). */
@@ -10,7 +10,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const input = await parseBody(request, criarAtividadeInputSchema);
 	try {
 		const resultado = criarAtividade(locals.usuario.id, params.id, input);
-		return json(resultado, { status: 201 });
+		return Response.json(resultado, { status: 201 });
 	} catch (err) {
 		toApiError(err);
 	}

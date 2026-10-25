@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
-import { obterRegistroDetalhado } from '$lib/server/db/repositories/registros';
-import { gerarJsonExportado } from '$lib/export';
-import { slugify } from '$lib/slug';
+import { obterRegistroDetalhado } from '#lib/server/db/repositories/registros.js';
+import { gerarJsonExportado } from '#lib/export.js';
+import { slugify } from '#lib/slug.js';
 import type { RequestHandler } from './$types';
 
 /** Backup/arquivo portatil — nunca finaliza o Registro (ADR-0010); Finalizar e' acao explicita separada. */

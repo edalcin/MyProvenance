@@ -2,20 +2,20 @@
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
-	import { onVisible } from '$lib/actions/on-visible';
-	import { formatarData } from '$lib/format';
-	import { idiomaAtual, t, msgErro } from '$lib/i18n/estado.svelte';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
-	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
-	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
-	import { importarDeArquivo } from '$lib/client/exportar-importar';
-	import * as dados from '$lib/client/dados';
-	import type { RegistroProvenencia } from '$lib/types';
+	import { onVisible } from '#lib/actions/on-visible.js';
+	import { formatarData } from '#lib/format.js';
+	import { idiomaAtual, t, msgErro } from '#lib/i18n/estado.svelte.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import RichTextEditor from '#lib/components/rich-text-editor.svelte';
+	import { usuarioAtual } from '#lib/client/usuario-atual.svelte.js';
+	import { sessaoAnonima } from '#lib/client/sessao-anonima.svelte.js';
+	import { importarDeArquivo } from '#lib/client/exportar-importar.js';
+	import * as dados from '#lib/client/dados.js';
+	import type { RegistroProvenencia } from '#lib/types.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -25,6 +25,7 @@
 	let itens = $state(
 		untrack(() => (usuarioAtual.valor ? data.pagina.items : sessaoAnonima.registros))
 	);
+
 	let proximoOffset = $state(untrack(() => data.pagina.nextOffset));
 	let busca = $state('');
 	let carregandoMais = $state(false);
@@ -50,6 +51,7 @@
 	function aoDigitarBusca() {
 		clearTimeout(timerBusca);
 		carregandoBusca = true;
+
 		timerBusca = setTimeout(() => {
 			buscarPagina(true).finally(() => (carregandoBusca = false));
 		}, 300);
@@ -177,9 +179,10 @@
 		</p>
 		{#if !usuarioAtual.valor}
 			<p class="-mt-8 flex flex-wrap items-center justify-center gap-2 pb-8 text-center text-sm">
-				<a href={resolve('/como-usar')} class="text-primary underline-offset-4 hover:underline"
+				<a href={resolve('como-usar')} class="text-primary underline-offset-4 hover:underline"
 					>{t('records.see_howto')}</a
 				>
+
 				<span class="text-muted-foreground">·</span>
 				<a
 					href="https://edalcin.github.io/MyProvenance/"

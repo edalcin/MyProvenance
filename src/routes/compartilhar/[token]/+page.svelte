@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { formatarData } from '$lib/format';
-	import { gerarDiagramaMermaid } from '$lib/mermaid';
-	import { sufixoRelacaoOrigem } from '$lib/relacao';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
-	import * as Table from '$lib/components/ui/table';
-	import MermaidDiagram from '$lib/components/mermaid-diagram.svelte';
-	import { idiomaAtual, t } from '$lib/i18n/estado.svelte';
+	import { formatarData } from '#lib/format.js';
+	import { gerarDiagramaMermaid } from '#lib/mermaid.js';
+	import { sufixoRelacaoOrigem } from '#lib/relacao.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as Table from '#lib/components/ui/table/index.js';
+	import MermaidDiagram from '#lib/components/mermaid-diagram.svelte';
+	import { idiomaAtual, t } from '#lib/i18n/estado.svelte.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

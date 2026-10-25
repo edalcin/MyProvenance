@@ -1,6 +1,6 @@
 import { uuidv7 } from 'uuidv7';
 import { db } from '../client';
-import type { Agente, TipoAgente } from '$lib/types';
+import type { Agente, TipoAgente } from '#lib/types.js';
 
 interface AgenteRow {
 	id: string;

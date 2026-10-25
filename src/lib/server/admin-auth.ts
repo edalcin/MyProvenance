@@ -4,8 +4,8 @@
  * process de rate-limit.ts.
  */
 import { timingSafeEqual } from 'node:crypto';
-import { env } from '$env/dynamic/private';
-import { gerarTokenSessao } from '$lib/server/auth';
+import { ADM_PWD } from '$app/env/private';
+import { gerarTokenSessao } from '#lib/server/auth.js';
 
 /** Funcao pura testavel — comparacao em tempo constante, sem tocar `env` (facilita teste). */
 export function senhasConferem(fornecida: string, esperada: string | undefined): boolean {
@@ -17,12 +17,12 @@ export function senhasConferem(fornecida: string, esperada: string | undefined):
 }
 
 export function verificarSenhaAdmin(fornecida: string): boolean {
-	return senhasConferem(fornecida, env.ADM_PWD);
+	return senhasConferem(fornecida, ADM_PWD);
 }
 
 /** Link "Admin" no cabecalho so aparece quando a instancia tem `ADM_PWD` configurada. */
 export function adminHabilitado(): boolean {
-	return !!(env.ADM_PWD ?? '').trim();
+	return !!(ADM_PWD ?? '').trim();
 }
 
 // ponytail: sessao admin em memoria, processo unico (mesmo modelo de rate-limit.ts); tokens

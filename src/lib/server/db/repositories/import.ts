@@ -1,6 +1,6 @@
 import { db } from '../client';
-import { sanitizarHtmlRico } from '$lib/sanitize';
-import type { RegistroExportadoValidado } from '$lib/schemas';
+import { sanitizarHtmlRico } from '#lib/sanitize.js';
+import type { RegistroExportadoValidado } from '#lib/schemas.js';
 
 /**
  * Upload de JSON faz upsert por id (ADR-0004) — sem resolucao de conflito, o upload

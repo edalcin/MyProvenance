@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { t, idiomaAtual } from '$lib/i18n/estado.svelte';
-	import { formatarData } from '$lib/format';
-	import type { UsuarioAdmin } from '$lib/server/db/repositories/admin';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import { t, idiomaAtual } from '#lib/i18n/estado.svelte.js';
+	import { formatarData } from '#lib/format.js';
+	import type { UsuarioAdmin } from '#lib/server/db/repositories/admin.js';
 
 	let { usuarios }: { usuarios: UsuarioAdmin[] } = $props();
 

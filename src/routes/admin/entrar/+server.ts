@@ -1,9 +1,9 @@
-import { error, json } from '@sveltejs/kit';
-import { dev } from '$app/environment';
-import { adminSenhaSchema } from '$lib/schemas';
-import { parseBody } from '$lib/server/api-utils';
-import { verificarSenhaAdmin, criarSessaoAdmin } from '$lib/server/admin-auth';
-import { estaBloqueado, registrarFalha, limparTentativas } from '$lib/server/rate-limit';
+import { error } from '@sveltejs/kit';
+import { dev } from '$app/env';
+import { adminSenhaSchema } from '#lib/schemas.js';
+import { parseBody } from '#lib/server/api-utils.js';
+import { verificarSenhaAdmin, criarSessaoAdmin } from '#lib/server/admin-auth.js';
+import { estaBloqueado, registrarFalha, limparTentativas } from '#lib/server/rate-limit.js';
 import { COOKIE_ADMIN } from '../../../hooks.server';
 import type { RequestHandler } from './$types';
 
@@ -24,5 +24,5 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 	const token = criarSessaoAdmin();
 	cookies.set(COOKIE_ADMIN, token, { path: '/', httpOnly: true, secure: !dev, sameSite: 'lax' });
-	return json({ ok: true });
+	return Response.json({ ok: true });
 };

@@ -1,5 +1,4 @@
-import { json } from '@sveltejs/kit';
-import { encerrarSessao } from '$lib/server/db/repositories/sessoes';
+import { encerrarSessao } from '#lib/server/db/repositories/sessoes.js';
 import { COOKIE_SESSAO } from '../../../hooks.server';
 import type { RequestHandler } from './$types';
 
@@ -9,5 +8,5 @@ export const POST: RequestHandler = ({ cookies }) => {
 		encerrarSessao(token);
 		cookies.delete(COOKIE_SESSAO, { path: '/' });
 	}
-	return json({ ok: true });
+	return Response.json({ ok: true });
 };

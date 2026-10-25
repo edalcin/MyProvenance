@@ -1,8 +1,8 @@
-import { error, json } from '@sveltejs/kit';
-import { adminUsuarioEditSchema } from '$lib/schemas';
-import { parseBody, toApiError } from '$lib/server/api-utils';
-import { atualizarUsuario, excluirUsuario } from '$lib/server/db/repositories/admin';
-import { obterUsuarioPorUsername } from '$lib/server/db/repositories/usuarios';
+import { error } from '@sveltejs/kit';
+import { adminUsuarioEditSchema } from '#lib/schemas.js';
+import { parseBody, toApiError } from '#lib/server/api-utils.js';
+import { atualizarUsuario, excluirUsuario } from '#lib/server/db/repositories/admin.js';
+import { obterUsuarioPorUsername } from '#lib/server/db/repositories/usuarios.js';
 import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ request, locals }) => {
@@ -10,7 +10,7 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 	const input = await parseBody(request, adminUsuarioEditSchema);
 	const existente = obterUsuarioPorUsername(input.username);
 	if (existente && existente.id !== input.id) error(409, 'error.username_taken');
-	return json(atualizarUsuario(input.id, { username: input.username, pin: input.pin }));
+	return Response.json(atualizarUsuario(input.id, { username: input.username, pin: input.pin }));
 };
 
 /** Cascata (Registros/Agentes/compartilhamentos da Conta) — ver admin.ts:excluirUsuario. */

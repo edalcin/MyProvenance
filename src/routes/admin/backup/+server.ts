@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { criarBackup } from '$lib/server/db/backup';
+import { criarBackup } from '#lib/server/db/backup.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = ({ locals }) => {

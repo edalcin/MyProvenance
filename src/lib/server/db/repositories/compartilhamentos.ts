@@ -4,8 +4,8 @@
  * paridade com o dono (exceto ser removido); editor fica restrito a conteudo.
  */
 import { db } from '../client';
-import type { AcessoRegistro, PapelAcesso } from '$lib/types';
-import { papelAtendeMinimo } from '$lib/types';
+import type { AcessoRegistro, PapelAcesso } from '#lib/types.js';
+import { papelAtendeMinimo } from '#lib/types.js';
 import { obterRegistro, RegistroNaoEncontradoError } from './registros';
 import { obterUsuarioPorUsername } from './usuarios';
 

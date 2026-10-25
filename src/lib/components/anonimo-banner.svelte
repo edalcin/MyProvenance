@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
-	import { exportarComoArquivo } from '$lib/client/exportar-importar';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { sessaoAnonima } from '#lib/client/sessao-anonima.svelte.js';
+	import { exportarComoArquivo } from '#lib/client/exportar-importar.js';
 	import CriarContaDialog from './criar-conta-dialog.svelte';
-	import { t } from '$lib/i18n/estado.svelte';
+	import { t } from '#lib/i18n/estado.svelte.js';
 
 	function exportarTudo() {
 		if (sessaoAnonima.registros.length === 0) {

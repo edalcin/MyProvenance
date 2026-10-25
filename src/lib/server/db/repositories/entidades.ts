@@ -1,5 +1,5 @@
 import { db } from '../client';
-import type { Entidade } from '$lib/types';
+import type { Entidade } from '#lib/types.js';
 
 interface EntidadeRow {
 	id: string;

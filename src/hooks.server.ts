@@ -1,7 +1,7 @@
-import type { Handle } from '@sveltejs/kit';
-import { obterUsuarioPorToken } from '$lib/server/db/repositories/sessoes';
-import { sessaoAdminValida } from '$lib/server/admin-auth';
-import { COOKIE_IDIOMA, IDIOMA_PADRAO, idiomaValido } from '$lib/i18n';
+import type { Handle } from '@sveltejs/kit/hooks';
+import { obterUsuarioPorToken } from '#lib/server/db/repositories/sessoes.js';
+import { sessaoAdminValida } from '#lib/server/admin-auth.js';
+import { COOKIE_IDIOMA, IDIOMA_PADRAO, idiomaValido } from '#lib/i18n/index.js';
 
 export const COOKIE_SESSAO = 'sessao';
 export const COOKIE_ADMIN = 'sessao_admin';

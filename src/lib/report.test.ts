@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gerarRelatorioMarkdown } from './report';
-import { slugify } from '$lib/slug';
+import { slugify } from '#lib/slug.js';
 import type { RegistroDetalhado } from './types';
 
 describe('slugify', () => {

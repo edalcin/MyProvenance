@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Card from '$lib/components/ui/card';
-	import * as Tabs from '$lib/components/ui/tabs';
-	import AdminUsuarios from '$lib/components/admin/admin-usuarios.svelte';
-	import AdminRegistros from '$lib/components/admin/admin-registros.svelte';
-	import AdminAgentes from '$lib/components/admin/admin-agentes.svelte';
-	import AdminCompartilhamentos from '$lib/components/admin/admin-compartilhamentos.svelte';
-	import AdminBackup from '$lib/components/admin/admin-backup.svelte';
-	import { t } from '$lib/i18n/estado.svelte';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import * as Tabs from '#lib/components/ui/tabs/index.js';
+	import AdminUsuarios from '#lib/components/admin/admin-usuarios.svelte';
+	import AdminRegistros from '#lib/components/admin/admin-registros.svelte';
+	import AdminAgentes from '#lib/components/admin/admin-agentes.svelte';
+	import AdminCompartilhamentos from '#lib/components/admin/admin-compartilhamentos.svelte';
+	import AdminBackup from '#lib/components/admin/admin-backup.svelte';
+	import { t } from '#lib/i18n/estado.svelte.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -43,7 +43,11 @@
 	async function sair() {
 		saindo = true;
 		try {
-			await fetch('/admin/sair', { method: 'POST' });
+			// content-type: ver SEM_CORPO em #lib/client/dados.ts (CSRF do SvelteKit 3).
+			await fetch('/admin/sair', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' }
+			});
 			window.location.reload();
 		} finally {
 			saindo = false;

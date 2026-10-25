@@ -1,6 +1,6 @@
-import { error, json } from '@sveltejs/kit';
-import { restaurarBackup } from '$lib/server/db/backup';
-import { toApiError } from '$lib/server/api-utils';
+import { error } from '@sveltejs/kit';
+import { restaurarBackup } from '#lib/server/db/backup.js';
+import { toApiError } from '#lib/server/api-utils.js';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -14,5 +14,5 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	} catch (err) {
 		toApiError(err);
 	}
-	return json({ ok: true });
+	return Response.json({ ok: true });
 };

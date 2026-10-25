@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
-	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
-	import { gerarJsonExportado } from '$lib/export';
-	import * as dadosApi from '$lib/client/dados';
-	import { t } from '$lib/i18n/estado.svelte';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import { sessaoAnonima } from '#lib/client/sessao-anonima.svelte.js';
+	import { usuarioAtual } from '#lib/client/usuario-atual.svelte.js';
+	import { gerarJsonExportado } from '#lib/export.js';
+	import * as dadosApi from '#lib/client/dados.js';
+	import { t } from '#lib/i18n/estado.svelte.js';
 
 	let aberto = $state(false);
 	let username = $state('');

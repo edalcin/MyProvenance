@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import * as Popover from '$lib/components/ui/popover';
-	import * as Command from '$lib/components/ui/command';
-	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as dados from '$lib/client/dados';
-	import type { Agente } from '$lib/types';
-	import { t, msgErro } from '$lib/i18n/estado.svelte';
+	import * as Popover from '#lib/components/ui/popover/index.js';
+	import * as Command from '#lib/components/ui/command/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import * as dados from '#lib/client/dados.js';
+	import type { Agente } from '#lib/types.js';
+	import { t, msgErro } from '#lib/i18n/estado.svelte.js';
 
 	let {
 		// eslint-disable-next-line no-useless-assignment -- prop $bindable: lido pelo pai via bind:value, nao localmente.

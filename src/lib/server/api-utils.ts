@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { ZodType } from 'zod';
-import { RegraCardinalidadeError } from '$lib/cardinalidade';
+import { RegraCardinalidadeError } from '#lib/cardinalidade.js';
 import { RegistroJaFinalizadoError, RegistroNaoEncontradoError } from './db/repositories/registros';
 import {
 	AutoCompartilhamentoError,

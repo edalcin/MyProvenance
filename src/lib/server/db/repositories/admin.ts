@@ -5,8 +5,8 @@
  * snake→camel no mesmo padrao de compartilhamentos.ts.
  */
 import { db } from '../client';
-import { gerarSaltHex, hashPin } from '$lib/server/auth';
-import type { Agente, StatusRegistro } from '$lib/types';
+import { gerarSaltHex, hashPin } from '#lib/server/auth.js';
+import type { Agente, StatusRegistro } from '#lib/types.js';
 import type { AgenteInput } from './agentes';
 
 export interface UsuarioAdmin {

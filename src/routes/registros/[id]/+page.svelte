@@ -4,27 +4,30 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
-	import { formatarData } from '$lib/format';
-	import { gerarDiagramaMermaid } from '$lib/mermaid';
-	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Tabs from '$lib/components/ui/tabs';
-	import * as Table from '$lib/components/ui/table';
-	import * as Select from '$lib/components/ui/select';
-	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
-	import MermaidDiagram from '$lib/components/mermaid-diagram.svelte';
-	import ActivityForm from '$lib/components/activity-form.svelte';
-	import { usuarioAtual } from '$lib/client/usuario-atual.svelte';
-	import { sessaoAnonima } from '$lib/client/sessao-anonima.svelte';
-	import { exportarComoArquivo, exportarRelatorioComoArquivo } from '$lib/client/exportar-importar';
-	import * as dados from '$lib/client/dados';
-	import { sufixoRelacaoOrigem } from '$lib/relacao';
-	import type { Agente, AcessoRegistro, Atividade, Entidade } from '$lib/types';
-	import { papelAtendeMinimo } from '$lib/types';
-	import { idiomaAtual, t, msgErro } from '$lib/i18n/estado.svelte';
+	import { formatarData } from '#lib/format.js';
+	import { gerarDiagramaMermaid } from '#lib/mermaid.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import * as Tabs from '#lib/components/ui/tabs/index.js';
+	import * as Table from '#lib/components/ui/table/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import RichTextEditor from '#lib/components/rich-text-editor.svelte';
+	import MermaidDiagram from '#lib/components/mermaid-diagram.svelte';
+	import ActivityForm from '#lib/components/activity-form.svelte';
+	import { usuarioAtual } from '#lib/client/usuario-atual.svelte.js';
+	import { sessaoAnonima } from '#lib/client/sessao-anonima.svelte.js';
+	import {
+		exportarComoArquivo,
+		exportarRelatorioComoArquivo
+	} from '#lib/client/exportar-importar.js';
+	import * as dados from '#lib/client/dados.js';
+	import { sufixoRelacaoOrigem } from '#lib/relacao.js';
+	import type { Agente, AcessoRegistro, Atividade, Entidade } from '#lib/types.js';
+	import { papelAtendeMinimo } from '#lib/types.js';
+	import { idiomaAtual, t, msgErro } from '#lib/i18n/estado.svelte.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -47,7 +50,7 @@
 	onMount(() => {
 		if (!detalheInicial) {
 			toast.error(t('error.record_not_found'));
-			goto(resolve('/registros'));
+			goto(resolve('registros'));
 		}
 	});
 
@@ -166,7 +169,7 @@
 			if (souEu) {
 				toast.success(t('share.left_share'));
 				dialogCompartilharAberto = false;
-				goto(resolve('/registros'));
+				goto(resolve('registros'));
 				return;
 			}
 			toast.success(t('share.access_removed'));
@@ -220,8 +223,10 @@
 		atividades = [...atividades, resultado.atividade].sort((a, b) =>
 			a.dataHora.localeCompare(b.dataHora)
 		);
+
 		if (resultado.entidadesGeradas.length)
 			entidades = [...entidades, ...resultado.entidadesGeradas];
+
 		if (resultado.agente && !agentesEnvolvidos.some((a) => a.id === resultado.agente!.id)) {
 			agentesEnvolvidos = [...agentesEnvolvidos, resultado.agente];
 		}
@@ -294,7 +299,7 @@
 		try {
 			await dados.excluirRegistro(registro.id);
 			toast.success(t('success.record_deleted'));
-			goto(resolve('/registros'));
+			goto(resolve('registros'));
 		} catch {
 			toast.error(t('error.delete_record_failed'));
 		}

@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
-import { obterRegistroDetalhadoPorToken } from '$lib/server/db/repositories/registros';
-import { gerarRelatorioMarkdown } from '$lib/report';
-import { slugify } from '$lib/slug';
+import { obterRegistroDetalhadoPorToken } from '#lib/server/db/repositories/registros.js';
+import { gerarRelatorioMarkdown } from '#lib/report.js';
+import { slugify } from '#lib/slug.js';
 import type { RequestHandler } from './$types';
 
 /** Publico (sem sessao) — nunca finaliza o Registro (rota so-leitura, sem direito de mutacao). */

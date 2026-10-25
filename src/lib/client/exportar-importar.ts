@@ -3,12 +3,12 @@
  * (docs/especificacao.md §4) e relatorio .md usados pela conta autenticada, gerados/
  * validados pelos mesmos modulos puros ($lib/export, $lib/report, Zod).
  */
-import { SCHEMA_VERSION, type RegistroDetalhado } from '$lib/types';
-import { gerarJsonExportado } from '$lib/export';
-import { gerarRelatorioMarkdown } from '$lib/report';
-import type { Idioma } from '$lib/i18n';
-import { registroExportadoSchema, type RegistroExportadoValidado } from '$lib/schemas';
-import { slugify } from '$lib/slug';
+import { SCHEMA_VERSION, type RegistroDetalhado } from '#lib/types.js';
+import { gerarJsonExportado } from '#lib/export.js';
+import { gerarRelatorioMarkdown } from '#lib/report.js';
+import type { Idioma } from '#lib/i18n/index.js';
+import { registroExportadoSchema, type RegistroExportadoValidado } from '#lib/schemas.js';
+import { slugify } from '#lib/slug.js';
 
 function baixarArquivo(conteudo: string, tipo: string, nomeArquivo: string): void {
 	const blob = new Blob([conteudo], { type: tipo });

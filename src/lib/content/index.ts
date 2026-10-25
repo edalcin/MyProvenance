@@ -2,7 +2,7 @@ import sobrePt from './sobre.pt.md?raw';
 import sobreEn from './sobre.en.md?raw';
 import comoUsarPt from './como-usar.pt.md?raw';
 import comoUsarEn from './como-usar.en.md?raw';
-import type { Idioma } from '$lib/i18n';
+import type { Idioma } from '#lib/i18n/index.js';
 
 const paginas = {
 	sobre: { pt: sobrePt, en: sobreEn },

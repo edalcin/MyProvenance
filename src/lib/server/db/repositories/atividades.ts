@@ -6,13 +6,13 @@ import type {
 	Entidade,
 	ParametroAtividade,
 	TipoAtividade
-} from '$lib/types';
+} from '#lib/types.js';
 import { RegistroNaoEncontradoError, RegistroJaFinalizadoError, obterRegistro } from './registros';
 import {
 	RegraCardinalidadeError,
 	validarCardinalidade,
 	validarRelacoesGeradas
-} from '$lib/cardinalidade';
+} from '#lib/cardinalidade.js';
 import {
 	inserirEntidade,
 	listarEntidadesPorRegistro,

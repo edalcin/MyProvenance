@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Badge } from '$lib/components/ui/badge';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Select from '$lib/components/ui/select';
-	import RichTextEditor from '$lib/components/rich-text-editor.svelte';
-	import { t } from '$lib/i18n/estado.svelte';
-	import type { StatusRegistro } from '$lib/types';
-	import type { RegistroAdmin, UsuarioAdmin } from '$lib/server/db/repositories/admin';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import RichTextEditor from '#lib/components/rich-text-editor.svelte';
+	import { t } from '#lib/i18n/estado.svelte.js';
+	import type { StatusRegistro } from '#lib/types.js';
+	import type { RegistroAdmin, UsuarioAdmin } from '#lib/server/db/repositories/admin.js';
 
 	let { registros, usuarios }: { registros: RegistroAdmin[]; usuarios: UsuarioAdmin[] } = $props();
 

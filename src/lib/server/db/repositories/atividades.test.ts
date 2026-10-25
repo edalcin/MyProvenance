@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { criarAgente } from './agentes';
 import { criarAtividade, atualizarAtividade, excluirAtividade } from './atividades';
-import { RegraCardinalidadeError } from '$lib/cardinalidade';
+import { RegraCardinalidadeError } from '#lib/cardinalidade.js';
 import { obterEntidade } from './entidades';
 import {
 	criarRegistro,

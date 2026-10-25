@@ -1,7 +1,7 @@
-import { gerarDiagramaMermaid } from '$lib/mermaid';
-import { formatarData, formatarDataSemHora } from '$lib/format';
-import { traduzir, type Idioma } from '$lib/i18n';
-import { sufixoRelacaoOrigem } from '$lib/relacao';
+import { gerarDiagramaMermaid } from '#lib/mermaid.js';
+import { formatarData, formatarDataSemHora } from '#lib/format.js';
+import { traduzir, type Idioma } from '#lib/i18n/index.js';
+import { sufixoRelacaoOrigem } from '#lib/relacao.js';
 import type { RegistroDetalhado } from './types';
 
 function escaparCelula(texto: string): string {

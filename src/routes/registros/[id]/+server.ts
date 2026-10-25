@@ -1,19 +1,19 @@
-import { error, json } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import {
 	atualizarRegistro,
 	excluirRegistro,
 	obterRegistroDetalhado
-} from '$lib/server/db/repositories/registros';
-import { sanitizarHtmlRico } from '$lib/sanitize';
-import { registroInputSchema } from '$lib/schemas';
-import { parseBody, toApiError } from '$lib/server/api-utils';
+} from '#lib/server/db/repositories/registros.js';
+import { sanitizarHtmlRico } from '#lib/sanitize.js';
+import { registroInputSchema } from '#lib/schemas.js';
+import { parseBody, toApiError } from '#lib/server/api-utils.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = ({ params, locals }) => {
 	if (!locals.usuario) error(401, 'error.auth_required');
 	const detalhe = obterRegistroDetalhado(params.id, locals.usuario.id);
 	if (!detalhe) error(404, 'error.record_not_found');
-	return json(detalhe);
+	return Response.json(detalhe);
 };
 
 export const PATCH: RequestHandler = async ({ params, request, locals }) => {
@@ -24,7 +24,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 			titulo: input.titulo,
 			descricao: input.descricao ? sanitizarHtmlRico(input.descricao) : input.descricao
 		});
-		return json(registro);
+		return Response.json(registro);
 	} catch (err) {
 		toApiError(err);
 	}

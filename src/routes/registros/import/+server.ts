@@ -1,9 +1,9 @@
-import { error, json } from '@sveltejs/kit';
-import { registroExportadoSchema } from '$lib/schemas';
-import { SCHEMA_VERSION } from '$lib/types';
-import { parseBody } from '$lib/server/api-utils';
-import { importarRegistro } from '$lib/server/db/repositories/import';
-import { obterRegistroDetalhado } from '$lib/server/db/repositories/registros';
+import { error } from '@sveltejs/kit';
+import { registroExportadoSchema } from '#lib/schemas.js';
+import { SCHEMA_VERSION } from '#lib/types.js';
+import { parseBody } from '#lib/server/api-utils.js';
+import { importarRegistro } from '#lib/server/db/repositories/import.js';
+import { obterRegistroDetalhado } from '#lib/server/db/repositories/registros.js';
 import type { RequestHandler } from './$types';
 
 /**
@@ -19,5 +19,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		error(400, 'error.schema_version_unsupported');
 	}
 	importarRegistro(locals.usuario.id, dados);
-	return json(obterRegistroDetalhado(dados.registro.id, locals.usuario.id), { status: 200 });
+	return Response.json(obterRegistroDetalhado(dados.registro.id, locals.usuario.id), {
+		status: 200
+	});
 };

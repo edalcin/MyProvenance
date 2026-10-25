@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { t } from '$lib/i18n/estado.svelte';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as Card from '#lib/components/ui/card/index.js';
+	import { t } from '#lib/i18n/estado.svelte.js';
 
 	let arquivo: File | null = $state(null);
 	let inputEl: HTMLInputElement | undefined = $state();
