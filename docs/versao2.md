@@ -32,6 +32,9 @@ Transformar o MyProvenance em app **desktop stand-alone**, **monousuário**, par
 4. **Mermaid renderizado → grafo nativo** na tela; Mermaid continua só como **texto no export** (perda aceita).
 5. Removidos: `usuarios`, `sessoes`, `registro_compartilhamentos`, auth, admin, rate-limit, compartilhamento.
 6. Toolkit de UI: **egui** (`eframe`).
+7. Alvo: **só Windows x64** (`.msi`). macOS/Linux e assinatura fora do escopo por ora.
+8. **Sem i18n**: UI só pt-BR (ADR-0007 mantida).
+9. **v1 web congelada** após a v2; v2 importa JSON da v1 em sentido único.
 
 ## Armazenamento JSON
 
@@ -39,7 +42,7 @@ Transformar o MyProvenance em app **desktop stand-alone**, **monousuário**, par
 - Campo `"versao": 1` em todo arquivo, para migrações futuras.
 - **Escrita atômica obrigatória**: grava `.tmp` → `rename` (`tempfile::persist`).
 - Validação na leitura (substitui FKs do SQLite): `serde` + `garde`.
-- Local: pasta de dados do SO (`directories`) — `%APPDATA%`, `~/Library/Application Support`, `~/.local/share`.
+- Local: pasta de dados do Windows (`%APPDATA%`, via `directories`) — ou pasta escolhida pelo usuário ([ticket #24](https://github.com/edalcin/MyProvenance/issues/24)).
 - Listagem/busca: carregar todos os arquivos em memória na inicialização (ok até alguns milhares de registros).
 
 | Aspecto | 1 arquivo por registro | JSON único |
@@ -55,14 +58,16 @@ Futuro opcional: PROV-JSON (W3C) como formato nativo — mais interoperável, ma
 
 | Função | Crate |
 |---|---|
-| App/UI | `eframe` + `egui` |
-| Markdown | `egui_commonmark` (render), `pulldown-cmark` |
-| Grafo | `egui_graphs` ou `egui::Painter` |
+| App/UI | `eframe` + `egui` 0.37, `default-features = false`, backend `glow` (~5,6 MB vs ~11 MB `wgpu`) |
+| Markdown | `TextEdit` multilinha (editor), `egui_commonmark` 0.26 (preview) |
+| Grafo | `egui::Painter` + `egui::Scene` + `rust-sugiyama` 0.4 + `petgraph` 0.8 (não `egui_graphs`: preso a egui 0.36, layout sem camadas de DAG) |
 | Modelo/JSON | `serde`, `serde_json` |
 | Validação | `garde` |
 | IDs | `uuid` (feature `v7`) |
 | Arquivos | `directories`, `tempfile`, `rfd` |
-| Empacotamento | `cargo-packager` (.msi) |
+| Empacotamento | `cargo-packager` 0.11 (.msi, WiX baixado automaticamente) |
+
+Release profile: `lto = "fat"`, `codegen-units = 1`, `strip = true`. Detalhes e riscos para o protótipo: `docs/research/egui-viabilidade.md`.
 
 Toolkits considerados: egui (escolhido — simples, ecossistema), Iced (API instável), Slint (licença GPLv3/royalty-free/comercial), Dioxus/Tauri (WebView, não é Rust puro).
 

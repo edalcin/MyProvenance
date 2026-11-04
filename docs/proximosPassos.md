@@ -1,5 +1,16 @@
 # Próximos Passos
 
+## v2 desktop (Rust/egui, só Windows) — em andamento
+
+Plano: `docs/versao2.md`. Mapa canônico: [Wayfinder #20](https://github.com/edalcin/MyProvenance/issues/20) (o mapa inclui execução até o `.msi` no Release). Estado em 2026-11-04:
+
+- [x] Mapa criado: destino, escopo (só Windows, sem i18n, sem assinatura, v1 congelada).
+- [x] [Viabilidade egui (#25)](https://github.com/edalcin/MyProvenance/issues/25): viável; achados em `docs/research/egui-viabilidade.md`.
+- [ ] Fronteira (grilling, sem bloqueio): [Agentes (#21)](https://github.com/edalcin/MyProvenance/issues/21), [Repositório (#22)](https://github.com/edalcin/MyProvenance/issues/22), [Rascunho/Finalizado (#23)](https://github.com/edalcin/MyProvenance/issues/23), [Pasta de dados (#24)](https://github.com/edalcin/MyProvenance/issues/24).
+- [ ] Bloqueados: [Formato JSON v2 (#26)](https://github.com/edalcin/MyProvenance/issues/26) ← #21, #23; [Protótipo Etapa 1 (#27)](https://github.com/edalcin/MyProvenance/issues/27) ← #26.
+
+**Como continuar numa sessão nova:** rodar `/wayfinder https://github.com/edalcin/MyProvenance/issues/20`. O skill carrega o mapa, pega o primeiro ticket da fronteira (hoje: Agentes #21), atribui a você e conduz o grilling — uma pergunta por vez. Para escolher outro ticket: `/wayfinder https://github.com/edalcin/MyProvenance/issues/20 #22`. Um ticket por sessão.
+
 ## Pendências de segurança (dependências)
 
 Estado em 2026-10-25: `npm audit` → 0 vulnerabilidades.
