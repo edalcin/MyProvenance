@@ -10,7 +10,6 @@
 	import { t, msgErro } from '#lib/i18n/estado.svelte.js';
 
 	let {
-		// eslint-disable-next-line no-useless-assignment -- prop $bindable: lido pelo pai via bind:value, nao localmente.
 		value = $bindable(''),
 		inicial = null,
 		agentesDoRegistro = [],
@@ -36,6 +35,7 @@
 		const doRegistro = termo
 			? agentesDoRegistro.filter((a) => a.nome.toLowerCase().includes(termo))
 			: agentesDoRegistro;
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Map local temporário, não é estado.
 		const mesclados = new Map<string, Agente>();
 		for (const a of doRegistro) mesclados.set(a.id, a);
 		for (const a of pagina.items) if (!mesclados.has(a.id)) mesclados.set(a.id, a);
