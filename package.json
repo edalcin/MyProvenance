@@ -28,7 +28,7 @@
 		"@tiptap/core": "^3.31.1",
 		"@tiptap/extensions": "^3.31.1",
 		"@tiptap/pm": "^3.31.1",
-		"@tiptap/starter-kit": "^3.31.1",
+		"@tiptap/starter-kit": "^3.33.0",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^22",
 		"@types/sanitize-html": "^2.16.1",
